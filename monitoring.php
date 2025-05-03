@@ -382,6 +382,9 @@
       const $resultsContainer = $("#resultsContainer");
       const $spinner       = $("#spinner");
 
+      // Global API cache untuk mengurangi redundant request
+      const globalApiCache = {};
+
       // --- Helper Functions ---
 
       const extractJson = response => {
@@ -403,6 +406,15 @@
       };
 
       const makeAjaxRequest = (url, data) => {
+        // Buat key untuk caching
+        const cacheKey = JSON.stringify(data);
+        
+        // Cek apakah request dengan parameter yang sama sudah pernah dilakukan
+        if (globalApiCache[cacheKey]) {
+          console.log('Using cached data for:', data.action);
+          return Promise.resolve(globalApiCache[cacheKey]);
+        }
+        
         return new Promise((resolve, reject) => {
           $.ajax({
             url,
@@ -413,6 +425,8 @@
             success: response => {
               try {
                 const jsonData = JSON.parse(extractJson(response));
+                // Simpan ke cache
+                globalApiCache[cacheKey] = jsonData;
                 resolve(jsonData);
               } catch(e) {
                 reject("Terjadi kesalahan saat memproses data");
@@ -468,16 +482,16 @@
       };
 
       // --- Fungsi untuk menentukan status suatu aktivitas ---
-      const determineActivityStatus = async (gate, measurement, year, activityName, prov, kab, apiCache, getDataFromCacheOrApi) => {
-        // Dapatkan data actions yang sudah di-cache
-        const actionsKey = JSON.stringify({ 
+      const determineActivityStatus = async (gate, measurement, year, activityName, prov, kab) => {
+        // Data actions diambil sekali di awal dan disimpan di cache
+        const allActionsParams = { 
           action: 'fetchAllActions', 
           id_project: selectedProject, 
           id_gate: gate.id, 
           prov, kab 
-        });
+        };
         
-        const actionsResponse = apiCache.allActions[actionsKey] || { status: false };
+        const actionsResponse = await makeAjaxRequest(API_URL, allActionsParams);
         
         // Jika tidak ada data actions, semua status "Belum"
         if (!actionsResponse.status || !actionsResponse.data || actionsResponse.data.length === 0) {
@@ -491,14 +505,13 @@
         
         // Jika ini tentang preventif
         if (activityName === "Pengisian nama pelaksana aksi preventif") {
-          const prevMeasureResponse = await getDataFromCacheOrApi(
-            'preventives',
-            'fetchPreventivesByMeasurement',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
+          const prevMeasureParams = {
+            action: 'fetchPreventivesByMeasurement',
+            year, id_project: selectedProject, id_gate: gate.id,
+            id_measurement: measurement.id, prov, kab
+          };
+          
+          const prevMeasureResponse = await makeAjaxRequest(API_URL, prevMeasureParams);
           
           return (prevMeasureResponse.status && prevMeasureResponse.data.length > 0) 
             ? "Sudah ditentukan" : "Belum ditentukan";
@@ -506,14 +519,13 @@
         
         if (activityName === "Upload bukti pelaksanaan aksi preventif") {
           // Cek dulu apakah nama pelaksana sudah diisi
-          const prevMeasureResponse = await getDataFromCacheOrApi(
-            'preventives',
-            'fetchPreventivesByMeasurement',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
+          const prevMeasureParams = {
+            action: 'fetchPreventivesByMeasurement',
+            year, id_project: selectedProject, id_gate: gate.id,
+            id_measurement: measurement.id, prov, kab
+          };
+          
+          const prevMeasureResponse = await makeAjaxRequest(API_URL, prevMeasureParams);
           
           const isPrevNameFilled = prevMeasureResponse.status && prevMeasureResponse.data.length > 0;
           
@@ -521,28 +533,27 @@
             return "Belum ditentukan";
           }
           
-          const prevKabResponse = await getDataFromCacheOrApi(
-            'preventivesKab',
-            'fetchPreventivesByKab',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
+          const prevKabParams = {
+            action: 'fetchPreventivesByKab',
+            year, id_project: selectedProject, id_gate: gate.id,
+            id_measurement: measurement.id, prov, kab
+          };
+          
+          const prevKabResponse = await makeAjaxRequest(API_URL, prevKabParams);
           
           return (prevKabResponse.status && prevKabResponse.data.length > 0 && prevKabResponse.data[0].filename)
             ? "Sudah diunggah" : "Belum diunggah";
         }
         
-        // Dapatkan data assessments dari cache
-        const assessmentsKey = JSON.stringify({ 
+        // Dapatkan data assessments (cukup sekali request per gate/region)
+        const assessmentsParams = { 
           action: 'fetchAssessments', 
           id_project: selectedProject, 
           id_gate: gate.id, 
           prov, kab 
-        });
+        };
         
-        const assessmentsResponse = apiCache.assessments[assessmentsKey] || { status: false };
+        const assessmentsResponse = await makeAjaxRequest(API_URL, assessmentsParams);
         
         // Cek apakah measurement sudah dinilai
         const measurementAssessment = assessmentsResponse.status
@@ -584,43 +595,40 @@
           
           // Untuk aksi korektif, lanjutkan hanya jika merah/kuning
           if (activityName === "Pengisian pelaksana aksi korektif") {
-            const corMeasureResponse = await getDataFromCacheOrApi(
-              'correctives',
-              'fetchCorrectivesByMeasurement',
-              {
-                year, id_project: selectedProject, id_gate: gate.id,
-                id_measurement: measurement.id, prov, kab
-              }
-            );
+            const corMeasureParams = {
+              action: 'fetchCorrectivesByMeasurement',
+              year, id_project: selectedProject, id_gate: gate.id,
+              id_measurement: measurement.id, prov, kab
+            };
+            
+            const corMeasureResponse = await makeAjaxRequest(API_URL, corMeasureParams);
             
             return (corMeasureResponse.status && corMeasureResponse.data.length > 0)
               ? "Sudah ditentukan" : "Belum ditentukan";
           }
           
           // Upload bukti korektif
-          const corMeasureResponse = await getDataFromCacheOrApi(
-            'correctives',
-            'fetchCorrectivesByMeasurement',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
+          const corMeasureParams = {
+            action: 'fetchCorrectivesByMeasurement',
+            year, id_project: selectedProject, id_gate: gate.id,
+            id_measurement: measurement.id, prov, kab
+          };
+          
+          const corMeasureResponse = await makeAjaxRequest(API_URL, corMeasureParams);
           
           if (!(corMeasureResponse.status && corMeasureResponse.data.length > 0)) {
             return "Belum ditentukan";
           }
           
-          const corKabResponse = await getDataFromCacheOrApi(
-            'correctivesKab',
-            'fetchCorrectivesByKab',
-            {
-              data: {
-                year, id_project: selectedProject, id_gate: gate.id,
-                id_measurement: measurement.id, prov, kab
-              }
+          const corKabParams = {
+            action: 'fetchCorrectivesByKab',
+            data: {
+              year, id_project: selectedProject, id_gate: gate.id,
+              id_measurement: measurement.id, prov, kab
             }
-          );
+          };
+          
+          const corKabResponse = await makeAjaxRequest(API_URL, corKabParams);
           
           return (corKabResponse.status && corKabResponse.data.length > 0 && corKabResponse.data[0].filename)
             ? "Sudah diunggah" : "Belum diunggah";
@@ -880,7 +888,11 @@
         // Reset data
         activityData = {};
         
-        // Dapatkan semua gates
+        // Reset cache untuk setiap proses baru
+        // (khusus untuk session ini, jangan reset cache global)
+        const sessionCache = {}; 
+        
+        // Dapatkan semua gates (hanya sekali)
         const gatesResponse = await makeAjaxRequest(API_URL, {
           action: "fetchGates",
           id_project: selectedProject
@@ -892,83 +904,51 @@
         
         const gates = gatesResponse.data;
         
-        // Cache untuk data API
-        const apiCache = {
-          measurements: {},
-          preventives: {},
-          preventivesKab: {},
-          assessments: {},
-          correctives: {},
-          correctivesKab: {},
-          allActions: {}
-        };
-        
-        // Fungsi untuk mendapatkan data dari cache atau API
-        const getDataFromCacheOrApi = async (cacheKey, apiAction, apiParams) => {
-          const cacheKeyString = JSON.stringify({ action: apiAction, ...apiParams });
-          
-          if (!apiCache[cacheKey][cacheKeyString]) {
-            apiCache[cacheKey][cacheKeyString] = await makeAjaxRequest(API_URL, { 
-              action: apiAction, 
-              ...apiParams 
-            });
-          }
-          
-          return apiCache[cacheKey][cacheKeyString];
-        };
-        
-        // 1. Pre-load semua measurements untuk semua gates
+        // Prefetch data assessments dan actions untuk semua wilayah
+        // Ini akan membuat cache terisi dulu untuk mengurangi request di loop berikutnya
         for (const gate of gates) {
-          // Dapatkan measurements untuk gate ini (dari pusat)
-          const measurementsResponse = await getDataFromCacheOrApi(
-            'measurements',
-            'fetchMeasurements', 
-            {
+          for (const region of regions) {
+            // Prefetch data assessments
+            await makeAjaxRequest(API_URL, {
+              action: "fetchAssessments",
               id_project: selectedProject,
               id_gate: gate.id,
-              prov: "00",
-              kab: "00"
-            }
-          );
+              prov: region.prov,
+              kab: region.kab
+            });
+            
+            // Prefetch data all actions
+            await makeAjaxRequest(API_URL, {
+              action: "fetchAllActions",
+              id_project: selectedProject,
+              id_gate: gate.id,
+              prov: region.prov,
+              kab: region.kab
+            });
+          }
+        }
+        
+        // Paralel processing untuk setiap gate
+        const gatePromises = gates.map(async (gate) => {
+          // Dapatkan measurements untuk gate ini (dari pusat)
+          const measurementsResponse = await makeAjaxRequest(API_URL, {
+            action: "fetchMeasurements",
+            id_project: selectedProject,
+            id_gate: gate.id,
+            prov: "00",
+            kab: "00"
+          });
           
           if (!measurementsResponse.status || !measurementsResponse.data.length) {
-            continue; // Skip jika tidak ada measurements
+            return; // Skip jika tidak ada measurements
           }
           
           const measurements = measurementsResponse.data;
           const gateNumber = gate.gate_number || gates.indexOf(gate) + 1;
           const gateName = `GATE${gateNumber}: ${gate.gate_name}`;
           
-          // 2. Untuk setiap wilayah, pre-load data actions dan assessments
-          for (const region of regions) {
-            // Pre-load allActions untuk gate & region
-            await getDataFromCacheOrApi(
-              'allActions',
-              'fetchAllActions',
-              {
-                id_project: selectedProject,
-                id_gate: gate.id,
-                prov: region.prov,
-                kab: region.kab
-              }
-            );
-            
-            // Pre-load assessments data untuk gate & region
-            await getDataFromCacheOrApi(
-              'assessments',
-              'fetchAssessments',
-              {
-                id_project: selectedProject,
-                id_gate: gate.id,
-                prov: region.prov,
-                kab: region.kab
-              }
-            );
-          }
-          
-          // 3. Untuk setiap measurement, lakukan pengambilan data
-          for (let j = 0; j < measurements.length; j++) {
-            const measurement = measurements[j];
+          // Paralel processing untuk setiap measurement
+          const measurementPromises = measurements.map(async (measurement, j) => {
             const ukNumber = j + 1;
             const ukName = `UK${ukNumber}: ${measurement.measurement_name}`;
             const ukLevel = getUkLevelLabel(measurement);
@@ -1007,8 +987,8 @@
               }
             ];
             
-            // 4. Cari status untuk setiap aktivitas dan setiap wilayah
-            for (const activity of activities) {
+            // Process semua aktivitas untuk measurement ini
+            const activityPromises = activities.map(async (activity) => {
               const activityKey = `${gateName}|${ukName}|${activity.name}`;
               
               // Simpan info aktivitas
@@ -1024,27 +1004,39 @@
                 };
               }
               
-              // 5. Untuk setiap wilayah, isi status
-              for (const region of regions) {
+              // Process paralel untuk setiap region
+              const regionPromises = regions.map(async (region) => {
                 // Cek apakah ukuran kualitas sesuai dengan level wilayah
                 const isApplicable = isUkApplicableForRegion(measurement, region);
                 
                 if (!isApplicable) {
                   activityData[activityKey].statuses[region.id] = "Tidak perlu";
-                  continue;
+                  return;
                 }
                 
                 // Dapatkan status aktivitas
                 const status = await determineActivityStatus(
-                  gate, measurement, year, activity.name, region.prov, region.kab, apiCache, getDataFromCacheOrApi
+                  gate, measurement, year, activity.name, region.prov, region.kab
                 );
                 
                 // Simpan status
                 activityData[activityKey].statuses[region.id] = status;
-              }
-            }
-          }
-        }
+              });
+              
+              // Tunggu semua region diproses
+              await Promise.all(regionPromises);
+            });
+            
+            // Tunggu semua aktivitas diproses
+            await Promise.all(activityPromises);
+          });
+          
+          // Tunggu semua measurements diproses
+          await Promise.all(measurementPromises);
+        });
+        
+        // Tunggu semua gates diproses
+        await Promise.all(gatePromises);
       };
 
       // --- Event Handlers ---
@@ -1055,6 +1047,14 @@
         $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
         selectedProject = null;
         selectedRegion  = null;
+        
+        // Bersihkan cache ketika tahun berubah
+        Object.keys(globalApiCache).forEach(key => {
+          if (key.includes(`"year":"${year}"`)) {
+            delete globalApiCache[key];
+          }
+        });
+        
         await loadProjects();
       });
 
@@ -1062,6 +1062,14 @@
         selectedProject = $(this).val();
         $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
         selectedRegion  = null;
+        
+        // Bersihkan cache ketika project berubah
+        Object.keys(globalApiCache).forEach(key => {
+          if (key.includes(`"id_project":"${selectedProject}"`)) {
+            delete globalApiCache[key];
+          }
+        });
+        
         if (selectedProject) await loadRegions();
       });
 
@@ -1099,8 +1107,12 @@
             regionsToProcess = [...regionsToProcess, ...kabupatenList];
           }
           
+          console.time('Data Processing');
+          
           // Proses data untuk semua wilayah terpilih
           await processData(regionsToProcess);
+          
+          console.timeEnd('Data Processing');
           
           // Tampilkan hasil dalam format tabel
           displayResultTable(regionsToProcess);
