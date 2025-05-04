@@ -290,6 +290,25 @@
       white-space: nowrap;
     }
     
+    /* Date highlighting */
+    .date-active {
+      color: var(--success-color);
+      font-weight: 700;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+    
     /* Responsif */
     @media (max-width: 768px) {
       .container-fluid {
@@ -446,6 +465,32 @@
           return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
         return dateStr;
+      };
+
+      const isDateInRange = (dateStr1, dateStr2) => {
+        if (!dateStr1 || !dateStr2 || dateStr1 === '-' || dateStr2 === '-') return false;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const parts1 = dateStr1.split('-');
+        const parts2 = dateStr2.split('-');
+        
+        if (parts1.length !== 3 || parts2.length !== 3) return false;
+        
+        const startDate = new Date(
+          parseInt(parts1[0]), 
+          parseInt(parts1[1]) - 1, 
+          parseInt(parts1[2])
+        );
+        
+        const endDate = new Date(
+          parseInt(parts2[0]), 
+          parseInt(parts2[1]) - 1, 
+          parseInt(parts2[2])
+        );
+        
+        return today >= startDate && today <= endDate;
       };
 
       const getStatusBadge = status => {
@@ -658,7 +703,7 @@
             </div>
             <div class="card-body p-0">
               <div class="table-wrapper">
-                <table class="table-monitoring">
+                <table class="table-monitoring" id="monitoring-table">
                   <thead>
                     <tr>
                       <th>Gate</th>
@@ -680,115 +725,86 @@
                   <tbody>
         `;
         
-        // Urutkan dan kelompokkan aktivitas berdasarkan gate dan UK
-        // Implementasi merge cell yang benar menggunakan rowspan
-        const orderedActivities = [];
+        // Urutkan aktivitas untuk tabel tanpa merged cells
+        const activities = [];
         
-        // 1. Kelompokkan berdasarkan gate dan UK
-        const activityGroups = {};
+        // Flatten activitiesData untuk diurutkan
         for (const key in activityData) {
-          const data = activityData[key];
-          const gateUkKey = `${data.gate}|${data.uk}`;
-          
-          if (!activityGroups[gateUkKey]) {
-            activityGroups[gateUkKey] = [];
-          }
-          
-          activityGroups[gateUkKey].push(data);
+          activities.push(activityData[key]);
         }
         
-        // 2. Urutkan aktivitas dalam setiap group berdasarkan proses, bukan abjad
-        const activityOrder = {
-          "Pengisian nama pelaksana aksi preventif": 1,
-          "Upload bukti pelaksanaan aksi preventif": 2,
-          "Penilaian ukuran kualitas": 3,
-          "Approval Gate oleh Sign-off": 4,
-          "Pengisian pelaksana aksi korektif": 5,
-          "Upload bukti pelaksanaan aksi korektif": 6
-        };
-        
-        // 3. Urutkan gate dan UK berdasarkan nomor
-        const sortedGroupKeys = Object.keys(activityGroups).sort((a, b) => {
-          const [gateA, ukA] = a.split('|');
-          const [gateB, ukB] = b.split('|');
-          
-          // Ekstrak nomor gate
-          const gateNumA = parseInt(gateA.match(/GATE(\d+)/)[1]);
-          const gateNumB = parseInt(gateB.match(/GATE(\d+)/)[1]);
+        // Sort by Gate, UK, then activity order
+        activities.sort((a, b) => {
+          // Extract gate numbers
+          const gateNumA = parseInt(a.gate.match(/GATE(\d+)/)[1]);
+          const gateNumB = parseInt(b.gate.match(/GATE(\d+)/)[1]);
           
           if (gateNumA !== gateNumB) {
             return gateNumA - gateNumB;
           }
           
-          // Ekstrak nomor UK
-          const ukNumA = parseInt(ukA.match(/UK(\d+)/)[1]);
-          const ukNumB = parseInt(ukB.match(/UK(\d+)/)[1]);
+          // Extract UK numbers
+          const ukNumA = parseInt(a.uk.match(/UK(\d+)/)[1]);
+          const ukNumB = parseInt(b.uk.match(/UK(\d+)/)[1]);
           
-          return ukNumA - ukNumB;
+          if (ukNumA !== ukNumB) {
+            return ukNumA - ukNumB;
+          }
+          
+          // Activity order
+          const activityOrder = {
+            "Pengisian nama pelaksana aksi preventif": 1,
+            "Upload bukti pelaksanaan aksi preventif": 2,
+            "Penilaian ukuran kualitas": 3,
+            "Approval Gate oleh Sign-off": 4,
+            "Pengisian pelaksana aksi korektif": 5,
+            "Upload bukti pelaksanaan aksi korektif": 6
+          };
+          
+          return activityOrder[a.activity] - activityOrder[b.activity];
         });
         
-        // Untuk menyimpan level UK
-        const ukLevels = {};
+        // Determine row classes (alternating by UK groups)
+        let currentUK = null;
+        let ukGroupCount = 0;
         
-        // 4. Proses setiap kelompok dan buat baris tabel
-        for (let groupIndex = 0; groupIndex < sortedGroupKeys.length; groupIndex++) {
-          const groupKey = sortedGroupKeys[groupIndex];
-          const activities = activityGroups[groupKey];
-          const groupClass = groupIndex % 2 === 0 ? 'uk-group-even' : 'uk-group-odd';
+        activities.forEach(data => {
+          if (data.uk !== currentUK) {
+            currentUK = data.uk;
+            ukGroupCount++;
+          }
           
-          // Dapatkan level UK dari aktivitas pertama
-          const ukKey = activities[0].uk;
+          const groupClass = ukGroupCount % 2 === 0 ? 'uk-group-even' : 'uk-group-odd';
+          const activityNumber = {
+            "Pengisian nama pelaksana aksi preventif": 1,
+            "Upload bukti pelaksanaan aksi preventif": 2,
+            "Penilaian ukuran kualitas": 3,
+            "Approval Gate oleh Sign-off": 4,
+            "Pengisian pelaksana aksi korektif": 5,
+            "Upload bukti pelaksanaan aksi korektif": 6
+          }[data.activity];
           
-          // Urutkan aktivitas berdasarkan urutan proses
-          activities.sort((a, b) => {
-            return activityOrder[a.activity] - activityOrder[b.activity];
+          // Check if current date is within range
+          const isInDateRange = isDateInRange(data.start, data.end);
+          const startDateClass = isInDateRange ? 'date-active' : '';
+          const endDateClass = isInDateRange ? 'date-active' : '';
+          
+          tableHtml += `<tr class="${groupClass}">`;
+          tableHtml += `<td>${data.gate}</td>`;
+          tableHtml += `<td>${data.uk}</td>`;
+          tableHtml += `<td style="text-align: center;">${data.ukLevel}</td>`;
+          tableHtml += `<td><span class="activity-number">${activityNumber}.</span>${data.activity}</td>`;
+          tableHtml += `<td class="date-column ${startDateClass}">${formatDate(data.start)}</td>`;
+          tableHtml += `<td class="date-column ${endDateClass}">${formatDate(data.end)}</td>`;
+          
+          // Add status for each region
+          regions.forEach(region => {
+            const status = data.statuses[region.id] || "Tidak tersedia";
+            tableHtml += `<td class="status-column">${getStatusBadge(status)}</td>`;
           });
           
-          // Buat baris untuk setiap kelompok
-          for (let i = 0; i < activities.length; i++) {
-            const data = activities[i];
-            const isFirstRow = i === 0;
-            const rowspanValue = activities.length;
-            
-            // Ambil nomor aktivitas (1-6) berdasarkan activityOrder
-            const activityNumber = activityOrder[data.activity];
-            
-            // Simpan UK Level jika belum ada
-            if (!ukLevels[data.uk]) {
-              // Ekstrak measurement_id dari salah satu status key untuk mendapatkan level
-              const someActivity = Object.values(activityGroups).find(acts => 
-                acts.find(act => act.uk === data.uk)
-              )[0];
-              const ukLevel = someActivity.ukLevel || "Tidak diketahui";
-              ukLevels[data.uk] = ukLevel;
-            }
-            
-            tableHtml += `<tr class="${groupClass}">`;
-            
-            // Untuk baris pertama saja, tampilkan gate dan UK dengan rowspan
-            if (isFirstRow) {
-              tableHtml += `
-                <td rowspan="${rowspanValue}">${data.gate}</td>
-                <td rowspan="${rowspanValue}">${data.uk}</td>
-                <td rowspan="${rowspanValue}" style="text-align: center;">${ukLevels[data.uk]}</td>
-              `;
-            }
-            
-            tableHtml += `
-              <td><span class="activity-number">${activityNumber}.</span>${data.activity}</td>
-              <td class="date-column">${formatDate(data.start)}</td>
-              <td class="date-column">${formatDate(data.end)}</td>
-            `;
-            
-            // Tambahkan status untuk setiap wilayah
-            regions.forEach(region => {
-              const status = data.statuses[region.id] || "Tidak tersedia";
-              tableHtml += `<td class="status-column">${getStatusBadge(status)}</td>`;
-            });
-            
-            tableHtml += `</tr>`;
-          }
-        }
+          tableHtml += `</tr>`;
+        });
         
         tableHtml += `
                   </tbody>
@@ -800,7 +816,7 @@
         
         $resultsContainer.html(tableHtml);
       };
-
+      
       // --- Fungsi untuk Load Data (Projects & Regions) ---
 
       const loadProjects = async () => {
