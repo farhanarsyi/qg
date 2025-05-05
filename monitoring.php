@@ -1,5 +1,222 @@
 <?php
 // monitoring.php
+
+// Database configuration
+$db_host = 'localhost';
+$db_user = 'root';
+$db_pass = '';
+$db_name = 'qg_sync';
+
+// Connect to database
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Create qg_sync table if not exists
+$sql = "CREATE TABLE IF NOT EXISTS qg_sync (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    year VARCHAR(10) NOT NULL,
+    project_id VARCHAR(100) NOT NULL,
+    region_id VARCHAR(100) NOT NULL,
+    data_type VARCHAR(50) NOT NULL,
+    cache_key VARCHAR(255) NOT NULL,
+    data_json LONGTEXT NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY cache_idx (year, project_id, region_id, data_type, cache_key)
+)";
+
+if (!$conn->query($sql)) {
+    echo "Error creating table: " . $conn->error;
+}
+
+// Function to save data to local db
+function saveToLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key, $data_json) {
+    // If any required parameter is empty, return false
+    if (empty($year) || empty($project_id) || empty($data_type) || empty($cache_key) || empty($data_json)) {
+        return false;
+    }
+    
+    $year = $conn->real_escape_string($year);
+    $project_id = $conn->real_escape_string($project_id);
+    $region_id = $conn->real_escape_string($region_id);
+    $data_type = $conn->real_escape_string($data_type);
+    $cache_key = $conn->real_escape_string($cache_key);
+    $data_json = $conn->real_escape_string($data_json);
+    
+    $sql = "INSERT INTO qg_sync (year, project_id, region_id, data_type, cache_key, data_json) 
+            VALUES ('$year', '$project_id', '$region_id', '$data_type', '$cache_key', '$data_json')
+            ON DUPLICATE KEY UPDATE data_json = '$data_json', last_updated = CURRENT_TIMESTAMP";
+    
+    return $conn->query($sql);
+}
+
+// Function to get data from local db
+function getFromLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key) {
+    // If any required parameter is empty, return not found
+    if (empty($year) || empty($project_id) || empty($data_type) || empty($cache_key)) {
+        return ['found' => false];
+    }
+    
+    $year = $conn->real_escape_string($year);
+    $project_id = $conn->real_escape_string($project_id);
+    $region_id = $conn->real_escape_string($region_id);
+    $data_type = $conn->real_escape_string($data_type);
+    $cache_key = $conn->real_escape_string($cache_key);
+    
+    $sql = "SELECT data_json, last_updated FROM qg_sync 
+            WHERE year = '$year' AND project_id = '$project_id' AND region_id = '$region_id' 
+            AND data_type = '$data_type' AND cache_key = '$cache_key'";
+    
+    $result = $conn->query($sql);
+    
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return [
+            'found' => true,
+            'data' => json_decode($row['data_json'], true),
+            'last_updated' => $row['last_updated']
+        ];
+    }
+    
+    return ['found' => false];
+}
+
+// Function to check if we should use cached data
+function shouldUseCache($conn, $year, $project_id, $region_id = 'all') {
+    // If any required parameter is empty, return false
+    if (empty($year) || empty($project_id)) {
+        return false;
+    }
+    
+    $year = $conn->real_escape_string($year);
+    $project_id = $conn->real_escape_string($project_id);
+    $region_id = $conn->real_escape_string($region_id);
+    
+    $sql = "SELECT COUNT(*) as count FROM qg_sync 
+            WHERE year = '$year' AND project_id = '$project_id' AND region_id = '$region_id'";
+    
+    $result = $conn->query($sql);
+    
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return $row['count'] > 0;
+    }
+    
+    return false;
+}
+
+// Function to save the final processed monitoring data
+function saveProcessedData($conn, $year, $project_id, $region_id, $data) {
+    return saveToLocalDB(
+        $conn, 
+        $year, 
+        $project_id, 
+        $region_id, 
+        'processed_monitoring_data', 
+        'final_result', 
+        json_encode($data)
+    );
+}
+
+// Function to get the final processed monitoring data
+function getProcessedData($conn, $year, $project_id, $region_id) {
+    return getFromLocalDB(
+        $conn, 
+        $year, 
+        $project_id, 
+        $region_id, 
+        'processed_monitoring_data', 
+        'final_result'
+    );
+}
+
+// AJAX endpoint for local database operations
+if (isset($_POST['db_action'])) {
+    header('Content-Type: application/json');
+    $db_action = $_POST['db_action'];
+    
+    if ($db_action === 'check_cache') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
+        
+        $useCache = shouldUseCache($conn, $year, $project_id, $region_id);
+        echo json_encode(['useCache' => $useCache]);
+        exit;
+    }
+    
+    if ($db_action === 'get_processed_data') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
+        
+        $data = getProcessedData($conn, $year, $project_id, $region_id);
+        echo json_encode($data);
+        exit;
+    }
+    
+    if ($db_action === 'save_processed_data') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
+        $data_json = isset($_POST['data_json']) ? $_POST['data_json'] : '';
+        
+        $result = saveProcessedData($conn, $year, $project_id, $region_id, json_decode($data_json, true));
+        echo json_encode(['status' => $result ? true : false]);
+        exit;
+    }
+    
+    if ($db_action === 'get_data') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
+        $data_type = isset($_POST['data_type']) ? $_POST['data_type'] : '';
+        $cache_key = isset($_POST['cache_key']) ? $_POST['cache_key'] : '';
+        
+        $data = getFromLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key);
+        echo json_encode($data);
+        exit;
+    }
+    
+    if ($db_action === 'save_data') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
+        $data_type = isset($_POST['data_type']) ? $_POST['data_type'] : '';
+        $cache_key = isset($_POST['cache_key']) ? $_POST['cache_key'] : '';
+        $data_json = isset($_POST['data_json']) ? $_POST['data_json'] : '';
+        
+        $result = saveToLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key, $data_json);
+        echo json_encode(['status' => $result ? true : false]);
+        exit;
+    }
+    
+    if ($db_action === 'clear_cache') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
+        
+        // Skip if missing required parameters
+        if (empty($year) || empty($project_id)) {
+            echo json_encode(['status' => false, 'message' => 'Missing required parameters']);
+            exit;
+        }
+        
+        $year = $conn->real_escape_string($year);
+        $project_id = $conn->real_escape_string($project_id);
+        $region_id = $conn->real_escape_string($region_id);
+        
+        $sql = "DELETE FROM qg_sync WHERE year = '$year' AND project_id = '$project_id' AND region_id = '$region_id'";
+        $result = $conn->query($sql);
+        
+        echo json_encode(['status' => $result ? true : false]);
+        exit;
+    }
+    
+    echo json_encode(['status' => false, 'message' => 'Invalid db_action']);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -374,9 +591,12 @@
             <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
             <select id="regionSelect" class="form-select" disabled></select>
           </div>
-          <div class="col-md-2 d-flex align-items-end">
+          <div class="col-md-2 d-flex align-items-end gap-2">
             <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
               <i class="fas fa-search me-2"></i>Tampilkan Data
+            </button>
+            <button id="refreshFromApi" class="btn btn-outline-primary flex-shrink-0" title="Muat ulang dari API">
+              <i class="fas fa-sync-alt"></i>
             </button>
           </div>
         </div>
@@ -401,6 +621,8 @@
       let selectedProject, year, selectedRegion = null;
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
+      let useLocalCache = true; // Default use local cache if available
+      let isForcingRefresh = false; // Flag when user requests a force refresh from API
 
       // Cache selector DOM
       const $yearSelect    = $("#yearSelect");
@@ -408,7 +630,70 @@
       const $regionSelect  = $("#regionSelect");
       const $resultsContainer = $("#resultsContainer");
       const $spinner       = $("#spinner");
+      const $refreshFromApi = $("#refreshFromApi");
 
+      // --- Cache Management Functions ---
+      
+      // Check if we should use local cache
+      const checkLocalCache = async (year, projectId, regionId) => {
+        if (isForcingRefresh) return false;
+        
+        // Don't check cache if any required value is missing
+        if (!year || !projectId) {
+          return false;
+        }
+        
+        try {
+          const response = await $.ajax({
+            url: window.location.href,
+            method: "POST",
+            data: {
+              db_action: "check_cache",
+              year: year,
+              project_id: projectId,
+              region_id: regionId || 'all'
+            },
+            dataType: "json"
+          });
+          
+          return response.useCache;
+        } catch (error) {
+          console.error("Error checking cache:", error);
+          return false;
+        }
+      };
+      
+      // Get processed data from local cache
+      const getProcessedDataFromCache = async (year, projectId, regionId) => {
+        // Don't try to get from cache if any required value is missing
+        if (!year || !projectId || !regionId) {
+          return null;
+        }
+        
+        try {
+          const response = await $.ajax({
+            url: window.location.href,
+            method: "POST",
+            data: {
+              db_action: "get_processed_data",
+              year: year,
+              project_id: projectId,
+              region_id: regionId
+            },
+            dataType: "json"
+          });
+          
+          if (response.found) {
+            return response.data;
+          }
+          
+          return null;
+        } catch (error) {
+          console.error("Error getting cached data:", error);
+          return null;
+        }
+      };
+      
       // --- Helper Functions ---
 
       const extractJson = response => {
@@ -429,7 +714,39 @@
         });
       };
 
-      const makeAjaxRequest = (url, data) => {
+      // Modified to support caching
+      const makeAjaxRequest = async (url, data, cacheData = true) => {
+        // Skip cache if forcing refresh or missing required parameters
+        if (!isForcingRefresh && cacheData && useLocalCache && year && selectedProject) {
+          // Create a cache key based on the request data
+          const cacheDataType = data.action;
+          const cacheKey = JSON.stringify(data);
+          
+          // Try to get from local DB first if we should use cache
+          const shouldUseCache = await checkLocalCache(year, selectedProject, selectedRegion);
+          
+          if (shouldUseCache) {
+            const cachedData = await $.ajax({
+              url: window.location.href,
+              method: "POST",
+              data: {
+                db_action: "get_data",
+                year: year,
+                project_id: selectedProject,
+                region_id: selectedRegion || 'all',
+                data_type: cacheDataType,
+                cache_key: cacheKey
+              },
+              dataType: "json"
+            });
+            
+            if (cachedData.found) {
+              return cachedData.data;
+            }
+          }
+        }
+        
+        // If no cache or cache miss, proceed with API request
         return new Promise((resolve, reject) => {
           $.ajax({
             url,
@@ -437,9 +754,31 @@
             data,
             dataType: "text",
             cache: false,
-            success: response => {
+            success: async response => {
               try {
                 const jsonData = JSON.parse(extractJson(response));
+                
+                // Save to cache if successful and caching is enabled
+                if (cacheData && jsonData.status && !isForcingRefresh && year && selectedProject) {
+                  const cacheDataType = data.action;
+                  const cacheKey = JSON.stringify(data);
+                  
+                  // Save to local database
+                  await $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: {
+                      db_action: "save_data",
+                      year: year,
+                      project_id: selectedProject,
+                      region_id: selectedRegion || 'all',
+                      data_type: cacheDataType,
+                      cache_key: cacheKey,
+                      data_json: JSON.stringify(jsonData)
+                    }
+                  });
+                }
+                
                 resolve(jsonData);
               } catch(e) {
                 reject("Terjadi kesalahan saat memproses data");
@@ -691,7 +1030,7 @@
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span>Hasil Monitoring</span>
-              <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+              <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).filter(key => !key.startsWith('_')).length} aktivitas</span>
             </div>
             <div class="card-body p-0">
               <div class="table-wrapper">
@@ -724,7 +1063,12 @@
         // 1. Kelompokkan berdasarkan gate dan UK
         const activityGroups = {};
         for (const key in activityData) {
+          // Skip metadata fields
+          if (key.startsWith('_')) continue;
+          
           const data = activityData[key];
+          if (!data || !data.gate || !data.uk) continue;
+          
           const gateUkKey = `${data.gate}|${data.uk}`;
           
           if (!activityGroups[gateUkKey]) {
@@ -749,17 +1093,32 @@
           const [gateA, ukA] = a.split('|');
           const [gateB, ukB] = b.split('|');
           
+          // Ensure valid format before extracting numbers
+          const gateAMatch = gateA.match(/GATE(\d+)/);
+          const gateBMatch = gateB.match(/GATE(\d+)/);
+          
+          if (!gateAMatch || !gateBMatch) {
+            return a.localeCompare(b); // Default to string comparison if format is unexpected
+          }
+          
           // Ekstrak nomor gate
-          const gateNumA = parseInt(gateA.match(/GATE(\d+)/)[1]);
-          const gateNumB = parseInt(gateB.match(/GATE(\d+)/)[1]);
+          const gateNumA = parseInt(gateAMatch[1]);
+          const gateNumB = parseInt(gateBMatch[1]);
           
           if (gateNumA !== gateNumB) {
             return gateNumA - gateNumB;
           }
           
           // Ekstrak nomor UK
-          const ukNumA = parseInt(ukA.match(/UK(\d+)/)[1]);
-          const ukNumB = parseInt(ukB.match(/UK(\d+)/)[1]);
+          const ukAMatch = ukA.match(/UK(\d+)/);
+          const ukBMatch = ukB.match(/UK(\d+)/);
+          
+          if (!ukAMatch || !ukBMatch) {
+            return a.localeCompare(b); // Default to string comparison if format is unexpected
+          }
+          
+          const ukNumA = parseInt(ukAMatch[1]);
+          const ukNumB = parseInt(ukBMatch[1]);
           
           return ukNumA - ukNumB;
         });
@@ -774,11 +1133,11 @@
           const groupClass = groupIndex % 2 === 0 ? 'uk-group-even' : 'uk-group-odd';
           
           // Dapatkan level UK dari aktivitas pertama
-          const ukKey = activities[0].uk;
+          const ukKey = activities[0]?.uk;
           
           // Urutkan aktivitas berdasarkan urutan proses
           activities.sort((a, b) => {
-            return activityOrder[a.activity] - activityOrder[b.activity];
+            return (activityOrder[a.activity] || 999) - (activityOrder[b.activity] || 999);
           });
           
           // Buat baris untuk setiap kelompok
@@ -788,7 +1147,7 @@
             const rowspanValue = activities.length;
             
             // Ambil nomor aktivitas (1-6) berdasarkan activityOrder
-            const activityNumber = activityOrder[data.activity];
+            const activityNumber = activityOrder[data.activity] || '';
             
             // Simpan UK Level jika belum ada
             if (!ukLevels[data.uk]) {
@@ -828,7 +1187,7 @@
             
             // Tambahkan status untuk setiap wilayah
             regions.forEach(region => {
-              const status = data.statuses[region.id] || "Tidak tersedia";
+              const status = data.statuses?.[region.id] || "Tidak tersedia";
               tableHtml += `<td class="status-column">${getStatusBadge(status)}</td>`;
             });
             
@@ -1242,17 +1601,109 @@
             regionsToProcess = [...regionsToProcess, ...kabupatenList];
           }
           
-          // Proses data untuk semua wilayah terpilih
+          // Cek apakah data tersedia di cache lokal
+          if (!isForcingRefresh && useLocalCache) {
+            const cachedData = await getProcessedDataFromCache(year, selectedProject, selectedRegion);
+            if (cachedData) {
+              // Gunakan data yang sudah diproses dari cache
+              activityData = cachedData;
+              displayResultTable(regionsToProcess);
+              
+              // Tampilkan badge "Data dari cache" di bagian atas tabel
+              const lastUpdate = new Date(cachedData._meta?.lastUpdated || Date.now()).toLocaleString('id-ID');
+              $("#resultsContainer").prepend(
+                `<div class="alert alert-info mb-4">
+                  <i class="fas fa-database me-2"></i>Data diambil dari cache lokal. 
+                  Terakhir update: ${lastUpdate}
+                  <button id="forceRefresh" class="btn btn-sm btn-outline-primary ms-3">
+                    <i class="fas fa-sync-alt me-1"></i>Muat Ulang dari API
+                  </button>
+                </div>`
+              );
+              
+              // Event handler untuk tombol refresh di pesan cache
+              $("#forceRefresh").on('click', function() {
+                isForcingRefresh = true;
+                $("#loadData").trigger('click');
+                isForcingRefresh = false;
+              });
+              
+              $spinner.fadeOut(200);
+              return;
+            }
+          }
+          
+          // Jika tidak ada cache atau forcing refresh, proses data dari API
           await processData(regionsToProcess);
           
           // Tampilkan hasil dalam format tabel
           displayResultTable(regionsToProcess);
           
+          // Simpan hasil yang sudah diproses ke database lokal
+          if (!isForcingRefresh) {
+            // Tambahkan metadata
+            activityData._meta = {
+              lastUpdated: new Date().toISOString()
+            };
+            
+            await $.ajax({
+              url: window.location.href,
+              method: "POST",
+              data: {
+                db_action: "save_processed_data",
+                year: year,
+                project_id: selectedProject,
+                region_id: selectedRegion,
+                data_json: JSON.stringify(activityData)
+              }
+            });
+          }
+          
         } catch(error) {
           showError(error.message || "Terjadi kesalahan saat memuat data");
         } finally {
           $spinner.fadeOut(200);
+          // Reset forcing refresh flag
+          isForcingRefresh = false;
         }
+      });
+      
+      // Refresh button handler
+      $refreshFromApi.on('click', function() {
+        if (!year || !selectedProject || !selectedRegion) {
+          showError("Silakan pilih tahun, kegiatan, dan cakupan wilayah terlebih dahulu");
+          return;
+        }
+        
+        Swal.fire({
+          title: 'Muat Ulang Data?',
+          text: 'Data akan dimuat ulang dari API. Proses ini mungkin memakan waktu.',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#0071e3',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'Ya, Muat Ulang',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Clear cache for this selection
+            $.ajax({
+              url: window.location.href,
+              method: "POST",
+              data: {
+                db_action: "clear_cache",
+                year: year,
+                project_id: selectedProject,
+                region_id: selectedRegion
+              },
+              success: function() {
+                // Force refresh from API
+                isForcingRefresh = true;
+                $("#loadData").trigger('click');
+              }
+            });
+          }
+        });
       });
 
       // Inisialisasi
