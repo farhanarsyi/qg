@@ -22,6 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $log = $result->fetch_assoc();
         $stmt->close();
         
+        // Add time for display
+        $log['time'] = date('H:i:s', strtotime($log['updated_at'] ?? $log['created_at']));
+        
         header('Content-Type: application/json');
         echo json_encode($log);
         exit;
@@ -59,7 +62,109 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $totalCoverages = 0;
             $startTime = microtime(true);
             
+            // Special handling - process 2025 first to ensure it works
+            $specialYear = '2025';
+            updateSyncLog($syncLogId, "Memproses tahun {$specialYear} terlebih dahulu untuk memastikan berhasil", true);
+            
+            // Directly use fix_2025_data.php approach
+            $url = $api_base_url . "Projects/fetchAll";
+            $postData = http_build_query(["year" => $specialYear]);
+            updateSyncLog($syncLogId, "Mengambil data proyek tahun {$specialYear} dengan metode khusus", true);
+            
+            $response = callApi($url, $postData);
+            
+            // Log full API response to debug file
+            $debugFile = fopen("../logs/debug_2025.txt", "w");
+            fwrite($debugFile, "API URL: " . $url . "\n");
+            fwrite($debugFile, "POST Data: " . $postData . "\n");
+            fwrite($debugFile, "API Response: " . $response . "\n");
+            fclose($debugFile);
+            
+            $jsonData = json_decode(extractJson($response), true);
+            
+            if (isset($jsonData['status']) && $jsonData['status'] && isset($jsonData['data'])) {
+                $projects = $jsonData['data'];
+                $projectCount = count($projects);
+                $totalProjects += $projectCount;
+                
+                updateSyncLog($syncLogId, "Berhasil mengambil {$projectCount} proyek tahun {$specialYear}", true);
+                
+                // Begin transaction for this year's data
+                $conn->begin_transaction();
+                
+                // Process each project
+                foreach ($projects as $projectIndex => $project) {
+                    // Skip if missing critical data
+                    if (empty($project['id']) || empty($project['name'])) {
+                        updateSyncLog($syncLogId, "Melewati proyek tidak valid: " . json_encode($project), false);
+                        continue;
+                    }
+                    
+                    $projectProgress = ($projectIndex + 1) . "/" . $projectCount;
+                    updateSyncLog($syncLogId, "Memproses proyek {$project['name']} ({$projectProgress})", true);
+                    
+                    // Insert or update project
+                    $stmt = $conn->prepare("INSERT INTO projects (id, year, name, last_synced) VALUES (?, ?, ?, NOW()) 
+                                          ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
+                    $stmt->bind_param("ssss", $project['id'], $specialYear, $project['name'], $project['name']);
+                    $stmt->execute();
+                    $stmt->close();
+                    
+                    // Get coverage for each project
+                    $url = $api_base_url . "coverages/fetchAll";
+                    $postData = http_build_query(["id_project" => $project['id']]);
+                    
+                    $responseC = callApi($url, $postData);
+                    $jsonDataC = json_decode(extractJson($responseC), true);
+                    
+                    if (isset($jsonDataC['status']) && $jsonDataC['status'] && isset($jsonDataC['data'])) {
+                        $coverages = $jsonDataC['data'];
+                        $coverageCount = count($coverages);
+                        $totalCoverages += $coverageCount;
+                        
+                        // Insert pusat (National) coverage
+                        $pusatName = 'Pusat - Nasional';
+                        $stmt = $conn->prepare("INSERT INTO coverages (project_id, year, prov, kab, name) 
+                                              VALUES (?, ?, '00', '00', ?) 
+                                              ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
+                        $stmt->bind_param("ssss", $project['id'], $specialYear, $pusatName, $pusatName);
+                        $stmt->execute();
+                        $stmt->close();
+                        
+                        // Insert other coverages
+                        foreach ($coverages as $coverage) {
+                            // Skip if missing critical data
+                            if (empty($coverage['prov']) || empty($coverage['kab']) || empty($coverage['name'])) {
+                                continue;
+                            }
+                            
+                            $stmt = $conn->prepare("INSERT INTO coverages (project_id, year, prov, kab, name) 
+                                                  VALUES (?, ?, ?, ?, ?) 
+                                                  ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
+                            $stmt->bind_param("ssssss", $project['id'], $specialYear, $coverage['prov'], $coverage['kab'], $coverage['name'], $coverage['name']);
+                            $stmt->execute();
+                            $stmt->close();
+                        }
+                    }
+                    
+                    // Commit after each project
+                    $conn->commit();
+                    $conn->begin_transaction();
+                }
+                
+                // Final commit
+                $conn->commit();
+                
+                updateSyncLog($syncLogId, "Berhasil menyimpan data {$projectCount} proyek tahun {$specialYear}", true);
+            } else {
+                updateSyncLog($syncLogId, "Gagal mengambil data proyek tahun {$specialYear}: " . json_encode($jsonData), false);
+            }
+            
+            // Now process the regular years
             foreach ($years as $yearIndex => $year) {
+                // Skip 2025 as we already processed it
+                if ($year === '2025') continue;
+                
                 // Update log for current year
                 updateSyncLog($syncLogId, "Memproses tahun {$year} (" . ($yearIndex + 1) . "/" . count($years) . ")", true);
                 
@@ -70,6 +175,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $response = callApi($url, $postData);
                 $jsonData = json_decode(extractJson($response), true);
+                
+                // Tambahkan log khusus untuk 2025
+                if ($year === '2025') {
+                    // Log respons API untuk 2025 ke file
+                    $logFile = fopen("../logs/sync_2025_log.txt", "a");
+                    fwrite($logFile, "==== Log Sync 2025 ====\n");
+                    fwrite($logFile, "Time: " . date('Y-m-d H:i:s') . "\n");
+                    fwrite($logFile, "API Response: " . substr($response, 0, 1000) . "\n");
+                    fwrite($logFile, "Parsed data: " . json_encode($jsonData) . "\n\n");
+                    fclose($logFile);
+                }
                 
                 if (isset($jsonData['status']) && $jsonData['status'] && isset($jsonData['data'])) {
                     $projects = $jsonData['data'];
@@ -167,6 +283,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                 } else {
                     updateSyncLog($syncLogId, "Gagal mengambil data proyek tahun {$year}", false);
+                    
+                    // Tambahkan penanganan khusus untuk 2025
+                    if ($year === '2025') {
+                        updateSyncLog($syncLogId, "Mencoba metode alternatif untuk tahun 2025...", true);
+                        
+                        // Gunakan pendekatan yang sama dengan fix_2025_data.php
+                        $url = $api_base_url . "Projects/fetchAll";
+                        $postData = http_build_query(["year" => "2025"]);
+                        $response = callApi($url, $postData);
+                        $jsonData = json_decode(extractJson($response), true);
+                        
+                        if (isset($jsonData['status']) && $jsonData['status'] && isset($jsonData['data'])) {
+                            $projects = $jsonData['data'];
+                            $projectCount = count($projects);
+                            $totalProjects += $projectCount;
+                            
+                            updateSyncLog($syncLogId, "Berhasil mengambil {$projectCount} proyek tahun 2025 dengan metode alternatif", true);
+                            
+                            // Begin transaction for this year's data
+                            $conn->begin_transaction();
+                            
+                            // Process projects one by one
+                            foreach ($projects as $projectIndex => $project) {
+                                $projectProgress = ($projectIndex + 1) . "/" . $projectCount;
+                                updateSyncLog($syncLogId, "Memproses proyek {$project['name']} ({$projectProgress})", true);
+                                
+                                // Insert project
+                                $stmt = $conn->prepare("INSERT INTO projects (id, year, name, last_synced) VALUES (?, '2025', ?, NOW()) 
+                                                      ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
+                                $stmt->bind_param("sss", $project['id'], $project['name'], $project['name']);
+                                $stmt->execute();
+                                $stmt->close();
+                                
+                                // Get coverage
+                                $url = $api_base_url . "coverages/fetchAll";
+                                $postData = http_build_query(["id_project" => $project['id']]);
+                                $responseCov = callApi($url, $postData);
+                                $jsonDataCov = json_decode(extractJson($responseCov), true);
+                                
+                                if (isset($jsonDataCov['status']) && $jsonDataCov['status'] && isset($jsonDataCov['data'])) {
+                                    $coverages = $jsonDataCov['data'];
+                                    $coverageCount = count($coverages);
+                                    $totalCoverages += $coverageCount;
+                                    
+                                    // Insert national coverage
+                                    $stmt = $conn->prepare("INSERT INTO coverages (project_id, year, prov, kab, name) 
+                                                          VALUES (?, '2025', '00', '00', 'Pusat - Nasional') 
+                                                          ON DUPLICATE KEY UPDATE name = 'Pusat - Nasional', last_synced = NOW()");
+                                    $stmt->bind_param("s", $project['id']);
+                                    $stmt->execute();
+                                    $stmt->close();
+                                    
+                                    // Insert other coverages
+                                    foreach ($coverages as $coverage) {
+                                        $stmt = $conn->prepare("INSERT INTO coverages (project_id, year, prov, kab, name) 
+                                                              VALUES (?, '2025', ?, ?, ?) 
+                                                              ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
+                                        $stmt->bind_param("sssss", $project['id'], $coverage['prov'], $coverage['kab'], $coverage['name'], $coverage['name']);
+                                        $stmt->execute();
+                                        $stmt->close();
+                                    }
+                                }
+                                
+                                // Commit after each project
+                                $conn->commit();
+                                $conn->begin_transaction();
+                            }
+                            
+                            // Final commit
+                            $conn->commit();
+                        }
+                    }
                 }
             }
             
@@ -631,8 +819,17 @@ $totalProjects = $projectResult->fetch_assoc()['total'];
                     dataType: 'json',
                     success: function(response) {
                         if (response) {
-                            // Update the log with the latest message
-                            addLogEntry(response.message, response.status ? 'success' : 'error');
+                            // Update the log with the latest message if it's new
+                            const existingMessages = [];
+                            $('#liveLog .live-log-entry').each(function() {
+                                existingMessages.push($(this).text().trim());
+                            });
+                            
+                            // Check if this message is already displayed
+                            const messageWithTime = `[${response.time}]${response.message}`;
+                            if (!existingMessages.includes(messageWithTime)) {
+                                addLogEntry(response.message, response.status ? 'success' : 'error');
+                            }
                             
                             // Check updated_at time difference from created_at
                             // to detect if sync is still running

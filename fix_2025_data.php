@@ -40,6 +40,12 @@ if (isset($jsonData['status']) && $jsonData['status'] && isset($jsonData['data']
     
     // 3. Insert each project
     foreach ($apiProjects as $i => $project) {
+        // Validasi data project
+        if (empty($project['id']) || empty($project['name'])) {
+            echo "<p style='color:red;'>Skipping invalid project at index {$i}: missing ID or name</p>";
+            continue;
+        }
+        
         echo "<p>Processing project {$i} of " . count($apiProjects) . ": {$project['name']}</p>";
         
         // Insert project
@@ -64,16 +70,23 @@ if (isset($jsonData['status']) && $jsonData['status'] && isset($jsonData['data']
             echo "<p>Found " . count($coverages) . " coverages for this project.</p>";
             
             // Insert pusat (National) coverage
+            $pusatName = 'Pusat - Nasional';
             $stmt = $conn->prepare("INSERT INTO coverages (project_id, year, prov, kab, name, last_synced) 
-                                  VALUES (?, '2025', '00', '00', 'Pusat - Nasional', NOW()) 
-                                  ON DUPLICATE KEY UPDATE name = 'Pusat - Nasional', last_synced = NOW()");
-            $stmt->bind_param("s", $project['id']);
+                                  VALUES (?, '2025', '00', '00', ?, NOW()) 
+                                  ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
+            $stmt->bind_param("sss", $project['id'], $pusatName, $pusatName);
             $stmt->execute();
             $coverageCount++;
             $stmt->close();
             
             // Insert other coverages
             foreach ($coverages as $coverage) {
+                // Validasi data coverage
+                if (empty($coverage['prov']) || empty($coverage['kab']) || empty($coverage['name'])) {
+                    echo "<p style='color:orange;'>Skipping invalid coverage: " . json_encode($coverage) . "</p>";
+                    continue;
+                }
+                
                 $stmt = $conn->prepare("INSERT INTO coverages (project_id, year, prov, kab, name, last_synced) 
                                       VALUES (?, '2025', ?, ?, ?, NOW()) 
                                       ON DUPLICATE KEY UPDATE name = ?, last_synced = NOW()");
@@ -111,5 +124,6 @@ if (isset($jsonData['status']) && $jsonData['status'] && isset($jsonData['data']
 } else {
     echo "<h2 style='color:red;'>Failed to get projects from API for 2025</h2>";
     echo "<p>Error: " . ($jsonData['message'] ?? 'Unknown error') . "</p>";
+    echo "<p>Raw Response: <pre>" . htmlspecialchars(substr($response, 0, 500)) . "...</pre></p>";
 }
 ?> 
