@@ -939,39 +939,57 @@
           const gateNumber = gate.gate_number || gates.indexOf(gate) + 1;
           const gateName = `GATE${gateNumber}: ${gate.gate_name}`;
           
-          // 2. Untuk setiap wilayah, pre-load data actions dan assessments
-          for (const region of regions) {
-            // Pre-load allActions untuk gate & region
-            await getDataFromCacheOrApi(
-              'allActions',
-              'fetchAllActions',
-              {
-                id_project: selectedProject,
-                id_gate: gate.id,
-                prov: region.prov,
-                kab: region.kab
-              }
-            );
-            
-            // Pre-load assessments data untuk gate & region
-            await getDataFromCacheOrApi(
-              'assessments',
-              'fetchAssessments',
-              {
-                id_project: selectedProject,
-                id_gate: gate.id,
-                prov: region.prov,
-                kab: region.kab
-              }
-            );
-          }
-          
-          // 3. Untuk setiap measurement, lakukan pengambilan data
+          // 2. Untuk setiap ukuran kualitas, tentukan region yang sesuai berdasarkan assessment_level
           for (let j = 0; j < measurements.length; j++) {
             const measurement = measurements[j];
             const ukNumber = j + 1;
             const ukName = `UK${ukNumber}: ${measurement.measurement_name}`;
             const ukLevel = getUkLevelLabel(measurement);
+            
+            // Tentukan assessment_level (default ke 1 jika tidak ada)
+            const assessmentLevel = parseInt(measurement.assessment_level || 1);
+            
+            // Filter region berdasarkan assessment_level
+            const applicableRegions = regions.filter(region => {
+              if (assessmentLevel === 1) {
+                // Khusus pusat (00, 00)
+                return region.prov === "00" && region.kab === "00";
+              } else if (assessmentLevel === 2) {
+                // Khusus level provinsi (kab = 00, prov != 00)
+                return region.prov !== "00" && region.kab === "00";
+              } else if (assessmentLevel === 3) {
+                // Khusus level kabupaten (kab != 00)
+                return region.kab !== "00";
+              }
+              return false;
+            });
+            
+            // Pre-load data hanya untuk region yang sesuai dengan assessment_level
+            for (const region of applicableRegions) {
+              // Pre-load allActions untuk gate & region
+              await getDataFromCacheOrApi(
+                'allActions',
+                'fetchAllActions',
+                {
+                  id_project: selectedProject,
+                  id_gate: gate.id,
+                  prov: region.prov,
+                  kab: region.kab
+                }
+              );
+              
+              // Pre-load assessments data untuk gate & region
+              await getDataFromCacheOrApi(
+                'assessments',
+                'fetchAssessments',
+                {
+                  id_project: selectedProject,
+                  id_gate: gate.id,
+                  prov: region.prov,
+                  kab: region.kab
+                }
+              );
+            }
             
             // Daftar aktivitas standar untuk gate ini
             const activities = [
