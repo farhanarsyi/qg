@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="login-container">
         <div class="logo-container">
-            <img src="https://bps.go.id/images/logo_bps.png" alt="Logo BPS" class="logo">
+            <img src="https://bps.go.id/images/logo_bps.png" alt="" class="logo">
             <h4 class="mt-3">Monitoring Quality Gates</h4>
         </div>
         

@@ -148,29 +148,86 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     :root {
-      --primary-color: #0071e3; /* Apple blue */
-      --success-color: #34c759; /* Apple green */
-      --warning-color: #ff9f0a; /* Apple orange */
-      --danger-color: #ff3b30;  /* Apple red */
-      --neutral-color: #8e8e93; /* Apple gray */
-      --light-color: #f5f5f7;   /* Apple light gray */
-      --dark-color: #1d1d1f;    /* Apple dark */
-      --border-color: #d2d2d7;  /* Apple border */
+      --primary-color: #2E7D32; /* Forest green */
+      --primary-light: #4CAF50; /* Medium green */
+      --primary-dark: #1B5E20; /* Dark green */
+      --success-color: #43A047; /* Green */
+      --warning-color: #FFC107; /* Amber */
+      --danger-color: #D32F2F;  /* Red */
+      --neutral-color: #757575; /* Medium gray */
+      --light-color: #F5F5F5;   /* Light gray */
+      --dark-color: #212121;    /* Very dark gray */
+      --border-color: #E0E0E0;  /* Light border */
+      --bg-color: #FAFAFA;      /* Off-white background */
+      --card-bg: #FFFFFF;       /* White card background */
     }
     
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #f5f5f7;
-      color: #1d1d1f;
+      background-color: var(--bg-color);
+      color: var(--dark-color);
       line-height: 1.5;
       margin: 0;
       padding: 0;
     }
     
     .container-fluid {
-      max-width: 1400px;
+      max-width: 1600px; /* Increased from 1400px */
       margin: 0 auto;
-      padding: 2rem;
+      padding: 1.5rem; /* Reduced from 2rem */
+    }
+    
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .main-title {
+      font-weight: 600;
+      color: var(--dark-color);
+      font-size: 1.75rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .main-title i {
+      color: var(--primary-color);
+      margin-right: 0.75rem;
+      font-size: 1.5rem;
+    }
+    
+    .user-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .user-name {
+      font-weight: 500;
+      color: var(--neutral-color);
+    }
+    
+    .logout-btn {
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      background-color: var(--light-color);
+      color: var(--dark-color);
+      border: 1px solid var(--border-color);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .logout-btn:hover {
+      background-color: #f0f0f0;
+      color: var(--danger-color);
+    }
+    
+    .logout-btn i {
+      margin-right: 0.4rem;
     }
     
     h1 {
@@ -181,37 +238,38 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
     }
     
     .card {
-      border-radius: 12px;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       border: none;
-      margin-bottom: 2rem;
-      background-color: #ffffff;
+      margin-bottom: 1rem;
+      background-color: var(--card-bg);
       overflow: hidden;
     }
     
     .card-header {
-      background-color: #fff;
+      background-color: var(--card-bg);
       border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1.25rem;
       font-weight: 500;
       font-size: 1rem;
       color: var(--dark-color);
     }
     
     .card-body {
-      padding: 1.5rem;
+      padding: 1.25rem;
     }
     
     .form-label {
       font-weight: 500;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
       color: var(--dark-color);
+      font-size: 0.9rem;
     }
     
     .form-control, .form-select {
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid var(--border-color);
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 0.75rem;
       font-size: 0.95rem;
       background-color: #fff;
       transition: all 0.2s ease;
@@ -219,59 +277,59 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
     
     .form-control:focus, .form-select:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+      box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
     }
     
     .btn-primary {
       background-color: var(--primary-color);
       border-color: var(--primary-color);
-      border-radius: 8px;
-      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
       font-weight: 500;
       transition: all 0.2s ease;
     }
     
     .btn-primary:hover {
-      background-color: #005bbc;
-      border-color: #005bbc;
-      transform: translateY(-1px);
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
     }
     
     .btn-primary:active {
-      transform: translateY(0);
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
     }
     
     .table-wrapper {
       overflow: auto;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       margin: 0;
-      max-height: 600px; /* Fixed height untuk tabel */
+      max-height: calc(100vh - 220px); /* Optimized height to fit more content */
     }
     
     .table-monitoring {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      background-color: #fff;
+      background-color: var(--card-bg);
     }
     
     .table-monitoring th {
-      background-color: #f5f5f7;
-      font-weight: 500;
-      padding: 1rem 1.25rem;
+      background-color: #f0f5f0;
+      font-weight: 600;
+      padding: 0.85rem 1rem;
       font-size: 0.9rem;
       color: var(--dark-color);
       white-space: nowrap;
       position: sticky;
       top: 0;
-      z-index: 10; /* Lebih tinggi untuk memastikan tetap di atas */
+      z-index: 10;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
     }
     
     .table-monitoring td {
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1rem;
       vertical-align: middle;
       font-size: 0.9rem;
       border-bottom: 1px solid var(--border-color);
@@ -282,12 +340,12 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
     }
     
     tbody tr:hover {
-      background-color: rgba(0,113,227,0.03);
+      background-color: rgba(46, 125, 50, 0.03);
     }
     
     /* Status badges */
     .status-badge {
-      padding: 0.35rem 0.75rem;
+      padding: 0.3rem 0.65rem;
       border-radius: 100px;
       font-weight: 500;
       font-size: 0.8rem;
@@ -297,22 +355,22 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
     }
     
     .status-success {
-      background-color: rgba(52,199,89,0.12);
+      background-color: rgba(67, 160, 71, 0.12);
       color: var(--success-color);
     }
     
     .status-danger {
-      background-color: rgba(255,59,48,0.12);
+      background-color: rgba(211, 47, 47, 0.12);
       color: var(--danger-color);
     }
     
     .status-warning {
-      background-color: rgba(255,159,10,0.12);
+      background-color: rgba(255, 193, 7, 0.12);
       color: var(--warning-color);
     }
     
     .status-neutral {
-      background-color: rgba(142,142,147,0.12);
+      background-color: rgba(117, 117, 117, 0.12);
       color: var(--neutral-color);
     }
     
@@ -338,12 +396,12 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
-      padding: 2rem;
-      border-radius: 16px;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-radius: 12px;
       background-color: rgba(255,255,255,0.8);
       backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
     }
     
     .spinner-text {
@@ -357,29 +415,29 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
       font-size: 0.85rem;
       font-weight: 500;
       text-align: center;
-      background-color: rgba(0,113,227,0.04);
+      background-color: rgba(46, 125, 50, 0.05);
     }
     
     /* Perbaikan tampilan tabel */
     .table-monitoring th:nth-child(1), /* Gate */
     .table-monitoring td:nth-child(1) {
-      min-width: 200px;
+      min-width: 180px;
     }
     
     .table-monitoring th:nth-child(2), /* UK */
     .table-monitoring td:nth-child(2) {
-      min-width: 220px;
+      min-width: 200px;
     }
     
     .table-monitoring th:nth-child(3), /* Level */
     .table-monitoring td:nth-child(3) {
-      min-width: 100px;
+      min-width: 90px;
       text-align: center;
     }
     
     .table-monitoring th:nth-child(4), /* Aktivitas */
     .table-monitoring td:nth-child(4) {
-      min-width: 280px;
+      min-width: 250px;
     }
     
     /* Kolom tanggal */
@@ -387,7 +445,7 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
     .table-monitoring td:nth-child(5),
     .table-monitoring th:nth-child(6), /* Tanggal Selesai */
     .table-monitoring td:nth-child(6) {
-      min-width: 160px;
+      min-width: 140px;
       text-align: center;
     }
     
@@ -411,11 +469,11 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
     
     /* Row colors alternating by UK group */
     .table-monitoring .uk-group-even {
-      background-color: #ffffff;
+      background-color: var(--card-bg);
     }
     
     .table-monitoring .uk-group-odd {
-      background-color: rgba(245,245,247,0.4);
+      background-color: rgba(240, 245, 240, 0.6);
     }
     
     /* Activity number */
@@ -423,42 +481,42 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
-      background-color: rgba(0,113,227,0.1);
+      width: 22px;
+      height: 22px;
+      border-radius: 11px;
+      background-color: rgba(46, 125, 50, 0.12);
       color: var(--primary-color);
       font-weight: 600;
-      margin-right: 12px;
+      margin-right: 10px;
       font-size: 0.75rem;
     }
     
     /* Status column */
     .status-column {
-      min-width: 120px;
+      min-width: 110px;
       text-align: center;
       white-space: nowrap;
     }
     
     /* Row hover and focus */
     .table-monitoring tr:hover td {
-      background-color: rgba(0,113,227,0.04);
+      background-color: rgba(46, 125, 50, 0.04);
     }
     
     /* Responsif */
     @media (max-width: 992px) {
       .container-fluid {
-        padding: 1.5rem;
+        padding: 1rem;
       }
       
       .card-body {
-        padding: 1.25rem;
+        padding: 1rem;
       }
     }
     
     @media (max-width: 768px) {
       .container-fluid {
-        padding: 1rem;
+        padding: 0.75rem;
       }
       
       h1 {
@@ -467,39 +525,68 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
       }
       
       .card-header {
-        padding: 1rem;
+        padding: 0.75rem;
       }
       
       .card-body {
-        padding: 1rem;
+        padding: 0.75rem;
       }
+      
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .user-controls {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+    
+    /* Add this to ensure we don't waste vertical space */
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      color: var(--dark-color);
+      font-size: 0.9rem;
+    }
+    
+    /* Make badge use more theme colors */
+    .badge.bg-success {
+      background-color: var(--primary-color) !important;
+    }
+    
+    .text-primary {
+      color: var(--primary-color) !important;
     }
   </style>
 </head>
 <body>
   <div class="container-fluid">
-    <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
-    
-    <!-- Add logout button to UI -->
-    <div class="ms-auto d-flex align-items-center">
-      <span class="me-3"><?php echo $_SESSION["name"]; ?></span>
-      <a href="logout.php" class="btn btn-sm btn-outline-danger">
-        <i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+    <div class="main-header">
+      <h1 class="main-title"><i class="fas fa-tasks"></i>Monitoring Quality Gates</h1>
+      
+      <div class="user-controls">
+        <span class="user-name"><?php echo $_SESSION["name"]; ?></span>
+        <a href="logout.php" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>Logout</a>
+      </div>
     </div>
     
     <!-- Input Filters -->
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center py-2">
         <span>Filter Data</span>
       </div>
       <div class="card-body">
-        <div class="row g-4">
+        <div class="row g-3">
           <div class="col-md-2">
             <label for="yearSelect" class="form-label">Tahun</label>
             <select id="yearSelect" class="form-select">
               <option value="">Pilih Tahun</option>
               <option value="2023">2023</option>
-              <option value="2024">2024</option>
+              <option value="2024" selected>2024</option>
               <option value="2025">2025</option>
             </select>
           </div>
@@ -842,9 +929,9 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
         // Buat header tabel dengan kolom status untuk setiap wilayah
         let tableHtml = `
           <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
               <span>Hasil Monitoring</span>
-              <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+              <span id="resultCount" class="badge bg-success rounded-pill ms-2">${Object.keys(activityData).length} aktivitas</span>
             </div>
             <div class="card-body p-0">
               <div class="table-wrapper">
