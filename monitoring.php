@@ -565,12 +565,22 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
 <body>
   <div class="container-fluid">
     <div class="main-header">
-      <h1 class="main-title"><i class="fas fa-tasks"></i>Monitoring Quality Gates</h1>
+      <h1 class="main-title">
+        <i class="fas fa-chart-line"></i> Monitoring Quality Gates
+      </h1>
       
-      <div class="user-controls">
-        <span class="user-name"><?php echo $_SESSION["name"]; ?></span>
-        <a href="logout.php" class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i>Logout</a>
+      <div>
+        <?php if (isSuperAdmin()): ?>
+        <a href="admin/sync_data.php" class="btn btn-success">
+          <i class="fas fa-sync"></i> Sync Data
+        </a>
+        <?php endif; ?>
+        
+        <span id="syncInfoBadge" class="badge bg-light text-dark me-2" style="display: none;"></span>
+        
+        <a href="logout.php" class="btn btn-outline-danger">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
       </div>
     </div>
     
@@ -622,7 +632,7 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
 
   <script>
     $(function(){
-      const API_URL = "api.php";
+      const API_URL = "api_local.php";
       let selectedProject, year, selectedRegion = null;
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
@@ -1110,14 +1120,11 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
           
           // For other years or refresh, use PHP endpoint instead of direct API
           const response = await $.ajax({
-            url: 'api_local.php',
+            url: API_URL,
             type: 'POST',
             data: {
-              action: 'getProjects',
-              year: year,
-              userLevel: userLevel,
-              userProv: userProv,
-              userKab: userKab
+              action: 'fetchProjects',
+              year: year
             },
             dataType: 'json'
           });
@@ -1141,15 +1148,12 @@ $projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
         try {
           // Use PHP endpoint instead of direct API
           const response = await $.ajax({
-            url: 'api_local.php',
+            url: API_URL,
             type: 'POST',
             data: {
-              action: 'getRegions',
-              projectId: selectedProject,
-              year: year,
-              userLevel: userLevel,
-              userProv: userProv,
-              userKab: userKab
+              action: 'fetchCoverages',
+              id_project: selectedProject,
+              year: year
             },
             dataType: 'json'
           });

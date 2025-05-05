@@ -252,20 +252,38 @@ if ($result) {
             <div class="col-md-3">
                 <div class="sidebar">
                     <h5 class="mb-3">Menu</h5>
-                    <div class="nav flex-column">
-                        <a href="index.php" class="nav-link active">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                        <a href="sync_coverage.php" class="nav-link">
-                            <i class="fas fa-sync"></i> Sync Coverage
-                        </a>
-                        <a href="manage_users.php" class="nav-link">
-                            <i class="fas fa-users"></i> Kelola Pengguna
-                        </a>
-                        <a href="../index.php" class="nav-link">
-                            <i class="fas fa-chart-bar"></i> Quality Gates
-                        </a>
-                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.php">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="sync_data.php">
+                                <i class="fas fa-sync-alt"></i> Synchronize Data
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="sync_coverage.php">
+                                <i class="fas fa-map-marked-alt"></i> Coverage Areas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="manage_users.php">
+                                <i class="fas fa-users"></i> User Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../monitoring.php">
+                                <i class="fas fa-chart-line"></i> Monitoring
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" href="../logout.php">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             
