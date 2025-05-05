@@ -964,31 +964,102 @@
               return false;
             });
             
+            // Optimasi untuk fetchAllActions: gunakan cache untuk kabupaten dari provinsi yang sama
+            // Pengelompokan region berdasarkan provinsi untuk level 3 (kabupaten)
+            const provinceGroups = {};
+            if (assessmentLevel === 3) {
+              applicableRegions.forEach(region => {
+                if (!provinceGroups[region.prov]) {
+                  provinceGroups[region.prov] = [];
+                }
+                provinceGroups[region.prov].push(region);
+              });
+            }
+            
             // Pre-load data hanya untuk region yang sesuai dengan assessment_level
-            for (const region of applicableRegions) {
-              // Pre-load allActions untuk gate & region
-              await getDataFromCacheOrApi(
-                'allActions',
-                'fetchAllActions',
-                {
-                  id_project: selectedProject,
-                  id_gate: gate.id,
-                  prov: region.prov,
-                  kab: region.kab
+            if (assessmentLevel === 3) {
+              // Untuk level kabupaten, ambil sampel 1 kabupaten per provinsi untuk fetchAllActions
+              for (const prov in provinceGroups) {
+                if (provinceGroups[prov].length > 0) {
+                  const sampleRegion = provinceGroups[prov][0];
+                  
+                  // Fetch allActions hanya untuk sampel kabupaten
+                  const actionsKey = JSON.stringify({
+                    action: 'fetchAllActions',
+                    id_project: selectedProject,
+                    id_gate: gate.id,
+                    prov: sampleRegion.prov,
+                    kab: sampleRegion.kab
+                  });
+                  
+                  // Ambil data Actions untuk sampel
+                  if (!apiCache.allActions[actionsKey]) {
+                    apiCache.allActions[actionsKey] = await makeAjaxRequest(API_URL, {
+                      action: 'fetchAllActions',
+                      id_project: selectedProject,
+                      id_gate: gate.id,
+                      prov: sampleRegion.prov,
+                      kab: sampleRegion.kab
+                    });
+                  }
+                  
+                  // Clone response untuk kabupaten lain dalam provinsi yang sama
+                  for (let i = 1; i < provinceGroups[prov].length; i++) {
+                    const otherRegion = provinceGroups[prov][i];
+                    const otherActionsKey = JSON.stringify({
+                      action: 'fetchAllActions',
+                      id_project: selectedProject,
+                      id_gate: gate.id,
+                      prov: otherRegion.prov,
+                      kab: otherRegion.kab
+                    });
+                    
+                    // Gunakan data yang sama
+                    apiCache.allActions[otherActionsKey] = JSON.parse(JSON.stringify(apiCache.allActions[actionsKey]));
+                  }
+                  
+                  // Tetap fetch assessments untuk semua kabupaten
+                  for (const region of provinceGroups[prov]) {
+                    await getDataFromCacheOrApi(
+                      'assessments',
+                      'fetchAssessments',
+                      {
+                        id_project: selectedProject,
+                        id_gate: gate.id,
+                        prov: region.prov,
+                        kab: region.kab
+                      }
+                    );
+                  }
                 }
-              );
-              
-              // Pre-load assessments data untuk gate & region
-              await getDataFromCacheOrApi(
-                'assessments',
-                'fetchAssessments',
-                {
-                  id_project: selectedProject,
-                  id_gate: gate.id,
-                  prov: region.prov,
-                  kab: region.kab
-                }
-              );
+              }
+            } else {
+              // Untuk level pusat dan provinsi, tetap gunakan cara normal
+              for (const region of applicableRegions) {
+                // Pre-load allActions untuk gate & region
+                await getDataFromCacheOrApi(
+                  'allActions',
+                  'fetchAllActions',
+                  {
+                    id_project: selectedProject,
+                    id_gate: gate.id,
+                    prov: region.prov,
+                    kab: region.kab
+                  }
+                );
+                
+                // Pre-load assessments data untuk gate & region
+                await getDataFromCacheOrApi(
+                  'assessments',
+                  'fetchAssessments',
+                  {
+                    id_project: selectedProject,
+                    id_gate: gate.id,
+                    prov: region.prov,
+                    kab: region.kab
+                  }
+                );
+              }
             }
             
             // Daftar aktivitas standar untuk gate ini
