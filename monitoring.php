@@ -18,132 +18,171 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     :root {
-      --primary-color: #4f46e5;
-      --success-color: #10b981;
-      --warning-color: #f59e0b;
-      --danger-color: #ef4444;
-      --neutral-color: #6b7280;
-      --light-color: #f9fafb;
-      --dark-color: #1f2937;
+      --primary-color: #0071e3; /* Apple blue */
+      --success-color: #34c759; /* Apple green */
+      --warning-color: #ff9f0a; /* Apple orange */
+      --danger-color: #ff3b30;  /* Apple red */
+      --neutral-color: #8e8e93; /* Apple gray */
+      --light-color: #f5f5f7;   /* Apple light gray */
+      --dark-color: #1d1d1f;    /* Apple dark */
+      --border-color: #d2d2d7;  /* Apple border */
     }
     
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      color: #334155;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
     }
     
     .container-fluid {
-      max-width: 100%;
-      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
     }
     
     h1 {
-      font-weight: 700;
-      margin-bottom: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
       color: var(--dark-color);
+      font-size: 2rem;
     }
     
     .card {
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      border-radius: 12px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
       border: none;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      background-color: #ffffff;
+      overflow: hidden;
     }
     
     .card-header {
       background-color: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 1rem 1.5rem;
-      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+      font-weight: 500;
+      font-size: 1rem;
+      color: var(--dark-color);
+    }
+    
+    .card-body {
+      padding: 1.5rem;
     }
     
     .form-label {
       font-weight: 500;
       margin-bottom: 0.5rem;
+      color: var(--dark-color);
     }
     
     .form-control, .form-select {
-      border-radius: 0.375rem;
-      border: 1px solid #d1d5db;
-      padding: 0.625rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      background-color: #fff;
+      transition: all 0.2s ease;
     }
     
     .form-control:focus, .form-select:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(79,70,229,0.25);
+      box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
     }
     
     .btn-primary {
       background-color: var(--primary-color);
       border-color: var(--primary-color);
-      border-radius: 0.375rem;
-      padding: 0.625rem 1.25rem;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
       font-weight: 500;
+      transition: all 0.2s ease;
     }
     
     .btn-primary:hover {
-      background-color: #4338ca;
-      border-color: #4338ca;
+      background-color: #005bbc;
+      border-color: #005bbc;
+      transform: translateY(-1px);
     }
     
-    .table {
-      border-radius: 0.5rem;
-      overflow: hidden;
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .table-wrapper {
+      overflow: auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin: 0;
+      max-height: 600px; /* Fixed height untuk tabel */
+    }
+    
+    .table-monitoring {
+      width: 100%;
+      border-collapse: separate;
       border-spacing: 0;
-      margin-bottom: 0;
+      background-color: #fff;
     }
     
-    .table th {
-      background-color: #f8fafc;
-      font-weight: 600;
-      padding: 1rem;
-      font-size: 0.875rem;
+    .table-monitoring th {
+      background-color: #f5f5f7;
+      font-weight: 500;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
       color: var(--dark-color);
       white-space: nowrap;
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 10; /* Lebih tinggi untuk memastikan tetap di atas */
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
     }
     
-    .table td {
-      padding: 1rem;
+    .table-monitoring td {
+      padding: 1rem 1.25rem;
       vertical-align: middle;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .table-monitoring tr:last-child td {
+      border-bottom: none;
     }
     
     tbody tr:hover {
-      background-color: rgba(243,244,246,0.5);
+      background-color: rgba(0,113,227,0.03);
     }
     
     /* Status badges */
     .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
+      padding: 0.35rem 0.75rem;
+      border-radius: 100px;
       font-weight: 500;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       text-align: center;
       white-space: nowrap;
       display: inline-block;
     }
     
     .status-success {
-      background-color: rgba(16,185,129,0.1);
+      background-color: rgba(52,199,89,0.12);
       color: var(--success-color);
     }
     
     .status-danger {
-      background-color: rgba(239,68,68,0.1);
+      background-color: rgba(255,59,48,0.12);
       color: var(--danger-color);
     }
     
     .status-warning {
-      background-color: rgba(245,158,11,0.1);
+      background-color: rgba(255,159,10,0.12);
       color: var(--warning-color);
     }
     
     .status-neutral {
-      background-color: rgba(107,114,128,0.1);
+      background-color: rgba(142,142,147,0.12);
       color: var(--neutral-color);
     }
     
@@ -159,7 +198,7 @@
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.9);
       z-index: 9999;
       justify-content: center;
       align-items: center;
@@ -169,55 +208,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1rem;
+      gap: 1.5rem;
+      padding: 2rem;
+      border-radius: 16px;
+      background-color: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
     }
     
     .spinner-text {
       font-weight: 500;
       color: var(--primary-color);
+      font-size: 1rem;
     }
     
     /* Region header styles */
     .region-header {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.85rem;
+      font-weight: 500;
       text-align: center;
-      background-color: rgba(79,70,229,0.05);
-      border-bottom: 2px solid #e5e7eb;
+      background-color: rgba(0,113,227,0.04);
     }
     
     /* Perbaikan tampilan tabel */
-    .table-wrapper {
-      overflow-x: auto;
-      position: relative;
-      width: 100%;
-      margin-bottom: 1rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .table-monitoring {
-      min-width: 100%;
-      border-collapse: collapse;
-      border-spacing: 0;
-      width: 100%;
-    }
-    
-    .table-monitoring th,
-    .table-monitoring td {
-      padding: 0.75rem;
-      vertical-align: middle;
-    }
-    
-    /* Menetapkan lebar kolom */
     .table-monitoring th:nth-child(1), /* Gate */
     .table-monitoring td:nth-child(1) {
-      min-width: 180px;
+      min-width: 200px;
     }
     
     .table-monitoring th:nth-child(2), /* UK */
     .table-monitoring td:nth-child(2) {
-      min-width: 200px;
+      min-width: 220px;
     }
     
     .table-monitoring th:nth-child(3), /* Level */
@@ -228,7 +249,7 @@
     
     .table-monitoring th:nth-child(4), /* Aktivitas */
     .table-monitoring td:nth-child(4) {
-      min-width: 250px;
+      min-width: 280px;
     }
     
     /* Kolom tanggal */
@@ -236,20 +257,21 @@
     .table-monitoring td:nth-child(5),
     .table-monitoring th:nth-child(6), /* Tanggal Selesai */
     .table-monitoring td:nth-child(6) {
-      min-width: 150px;
+      min-width: 160px;
       text-align: center;
     }
     
-    /* Header tetap saat scroll */
-    .table-monitoring thead th {
-      position: sticky;
-      top: 0;
-      background-color: #f8fafc;
-      z-index: 10;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    /* Date in range (blinking effect) */
+    .date-in-range {
+      color: var(--success-color);
       font-weight: 600;
-      text-align: left;
-      white-space: nowrap;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
     }
     
     /* Untuk kompatibilitas */
@@ -259,28 +281,26 @@
     
     /* Row colors alternating by UK group */
     .table-monitoring .uk-group-even {
-      background-color: rgba(243, 244, 246, 0.5);
-    }
-    
-    .table-monitoring .uk-group-odd {
       background-color: #ffffff;
     }
     
-    /* Styling for rows */
-    .table-monitoring tr {
-      border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .table-monitoring td {
-      border-right: 1px solid #f0f0f0;
+    .table-monitoring .uk-group-odd {
+      background-color: rgba(245,245,247,0.4);
     }
     
     /* Activity number */
     .activity-number {
-      display: inline-block;
-      font-weight: 600;
-      margin-right: 8px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: rgba(0,113,227,0.1);
       color: var(--primary-color);
+      font-weight: 600;
+      margin-right: 12px;
+      font-size: 0.75rem;
     }
     
     /* Status column */
@@ -290,7 +310,22 @@
       white-space: nowrap;
     }
     
+    /* Row hover and focus */
+    .table-monitoring tr:hover td {
+      background-color: rgba(0,113,227,0.04);
+    }
+    
     /* Responsif */
+    @media (max-width: 992px) {
+      .container-fluid {
+        padding: 1.5rem;
+      }
+      
+      .card-body {
+        padding: 1.25rem;
+      }
+    }
+    
     @media (max-width: 768px) {
       .container-fluid {
         padding: 1rem;
@@ -298,30 +333,22 @@
       
       h1 {
         font-size: 1.5rem;
+        margin-bottom: 1.5rem;
       }
       
       .card-header {
-        padding: 0.75rem 1rem;
+        padding: 1rem;
       }
       
       .card-body {
         padding: 1rem;
-      }
-      
-      .row.g-3 {
-        margin-bottom: 0;
-      }
-      
-      .table-monitoring th,
-      .table-monitoring td {
-        padding: 0.5rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="container-fluid">
-    <h1><i class="fas fa-tasks me-2"></i>Monitoring Quality Gates</h1>
+    <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
     
     <!-- Input Filters -->
     <div class="card mb-4">
@@ -329,7 +356,7 @@
         <span>Filter Data</span>
       </div>
       <div class="card-body">
-        <div class="row g-3">
+        <div class="row g-4">
           <div class="col-md-2">
             <label for="yearSelect" class="form-label">Tahun</label>
             <select id="yearSelect" class="form-select">
@@ -348,7 +375,7 @@
             <select id="regionSelect" class="form-select" disabled></select>
           </div>
           <div class="col-md-2 d-flex align-items-end">
-            <button id="loadData" class="btn btn-primary w-100">
+            <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
               <i class="fas fa-search me-2"></i>Tampilkan Data
             </button>
           </div>
@@ -398,7 +425,7 @@
           icon: 'error',
           title: 'Terjadi Kesalahan',
           text: message,
-          confirmButtonColor: '#4f46e5'
+          confirmButtonColor: '#0071e3'
         });
       };
 
@@ -432,6 +459,24 @@
           return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
         return dateStr;
+      };
+      
+      // Function to check if date is within range
+      const isDateInRange = (startDateStr, endDateStr) => {
+        if (!startDateStr || !endDateStr || startDateStr === '-' || endDateStr === '-') return false;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        const parts = startDateStr.split('-');
+        const startDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        startDate.setHours(0, 0, 0, 0);
+        
+        const endParts = endDateStr.split('-');
+        const endDate = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+        endDate.setHours(23, 59, 59, 999); // Set to end of day
+        
+        return today >= startDate && today <= endDate;
       };
 
       const getStatusBadge = status => {
@@ -766,10 +811,19 @@
               `;
             }
             
+            // Tentukan apakah tanggal dalam rentang aktif
+            const startDate = data.start;
+            const endDate = data.end;
+            const isInDateRange = isDateInRange(startDate, endDate);
+            
+            // Tambahkan class untuk tanggal yang dalam rentang
+            const startDateClass = isInDateRange ? 'date-in-range' : '';
+            const endDateClass = isInDateRange ? 'date-in-range' : '';
+            
             tableHtml += `
-              <td><span class="activity-number">${activityNumber}.</span>${data.activity}</td>
-              <td class="date-column">${formatDate(data.start)}</td>
-              <td class="date-column">${formatDate(data.end)}</td>
+              <td><span class="activity-number">${activityNumber}</span>${data.activity}</td>
+              <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
+              <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
             `;
             
             // Tambahkan status untuk setiap wilayah
