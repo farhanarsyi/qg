@@ -1,5 +1,135 @@
 <?php
 // monitoring.php
+require_once 'config.php';
+
+// Check if user is authenticated
+if (!isAuthenticated()) {
+    header('Location: login.php');
+    exit;
+}
+
+// Get user area information
+$userArea = getUserArea();
+$userLevel = $userArea['level'];
+$userProv = $userArea['prov'];
+$userKab = $userArea['kab'];
+
+// Get projects from database for dropdown
+function getProjectsFromDB($year, $userLevel, $userProv, $userKab) {
+    global $conn;
+    
+    $projects = [];
+    $sql = "";
+    $params = [];
+    $types = "";
+    
+    // Prepare query based on user level
+    if ($userLevel === 'pusat' || $userLevel === 'superadmin') {
+        // Pusat and superadmin can see all projects
+        $sql = "SELECT * FROM projects WHERE year = ?";
+        $types = "s";
+        $params = [$year];
+    } else if ($userLevel === 'provinsi') {
+        // Province can see projects with coverage in that province
+        $sql = "SELECT DISTINCT p.* FROM projects p 
+              JOIN coverages c ON p.id = c.project_id AND p.year = c.year 
+              WHERE p.year = ? AND c.prov = ?";
+        $types = "ss";
+        $params = [$year, $userProv];
+    } else if ($userLevel === 'kabkot') {
+        // Kabkot can see projects with coverage in that kabkot
+        $sql = "SELECT DISTINCT p.* FROM projects p 
+              JOIN coverages c ON p.id = c.project_id AND p.year = c.year 
+              WHERE p.year = ? AND c.prov = ? AND (c.kab = ? OR c.kab = '00')";
+        $types = "sss";
+        $params = [$year, $userProv, $userKab];
+    }
+    
+    $stmt = $conn->prepare($sql);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $projects[] = [
+            'id' => $row['id'],
+            'name' => $row['name']
+        ];
+    }
+    
+    $stmt->close();
+    return $projects;
+}
+
+// Get regions/coverages from database for dropdown
+function getRegionsFromDB($projectId, $year, $userLevel, $userProv, $userKab) {
+    global $conn;
+    
+    $regions = [];
+    $sql = "";
+    $params = [];
+    $types = "";
+    
+    // Add pusat region for superadmin and pusat users
+    if ($userLevel === 'pusat' || $userLevel === 'superadmin') {
+        $regions[] = [
+            'id' => 'pusat',
+            'prov' => '00',
+            'kab' => '00',
+            'name' => 'Pusat - Nasional'
+        ];
+    }
+    
+    // Prepare query based on user level
+    if ($userLevel === 'pusat' || $userLevel === 'superadmin') {
+        // Get all regions
+        $sql = "SELECT * FROM coverages WHERE project_id = ? AND year = ?";
+        $types = "ss";
+        $params = [$projectId, $year];
+    } else if ($userLevel === 'provinsi') {
+        // Province can see coverages in that province
+        $sql = "SELECT * FROM coverages WHERE project_id = ? AND year = ? AND prov = ?";
+        $types = "sss";
+        $params = [$projectId, $year, $userProv];
+    } else if ($userLevel === 'kabkot') {
+        // Kabkot can see coverages in that kabkot
+        $sql = "SELECT * FROM coverages WHERE project_id = ? AND year = ? AND prov = ? AND (kab = ? OR kab = '00')";
+        $types = "ssss";
+        $params = [$projectId, $year, $userProv, $userKab];
+    }
+    
+    if (!empty($sql)) {
+        $stmt = $conn->prepare($sql);
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            // Skip pusat if already added
+            if ($row['prov'] === '00' && $row['kab'] === '00') {
+                continue;
+            }
+            
+            $regions[] = [
+                'id' => $row['prov'] . $row['kab'],
+                'prov' => $row['prov'],
+                'kab' => $row['kab'],
+                'name' => $row['name']
+            ];
+        }
+        $stmt->close();
+    }
+    
+    return $regions;
+}
+
+// Get projects for initial load
+$initialYear = date('Y');
+$projects = getProjectsFromDB($initialYear, $userLevel, $userProv, $userKab);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -350,6 +480,13 @@
   <div class="container-fluid">
     <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
     
+    <!-- Add logout button to UI -->
+    <div class="ms-auto d-flex align-items-center">
+      <span class="me-3"><?php echo $_SESSION["name"]; ?></span>
+      <a href="logout.php" class="btn btn-sm btn-outline-danger">
+        <i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+    </div>
+    
     <!-- Input Filters -->
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
@@ -366,15 +503,16 @@
               <option value="2025">2025</option>
             </select>
           </div>
-          <div class="col-md-5">
+          <div class="<?php echo ($userLevel === 'pusat' || $userLevel === 'superadmin') ? 'col-md-5' : 'col-md-8'; ?>">
             <label for="projectSelect" class="form-label">Pilih Kegiatan</label>
             <select id="projectSelect" class="form-select" disabled></select>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3" id="regionSelectContainer">
             <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
             <select id="regionSelect" class="form-select" disabled></select>
           </div>
-          <div class="col-md-2 d-flex align-items-end">
+          <div class="<?php echo ($userLevel === 'pusat' || $userLevel === 'superadmin') ? 'col-md-2' : 'col-md-2'; ?>">
+            <label class="form-label d-none d-md-block">&nbsp;</label>
             <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
               <i class="fas fa-search me-2"></i>Tampilkan Data
             </button>
@@ -401,6 +539,11 @@
       let selectedProject, year, selectedRegion = null;
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
+      
+      // User area restrictions
+      const userLevel = "<?php echo $userLevel; ?>";
+      const userProv = "<?php echo $userProv; ?>";
+      const userKab = "<?php echo $userKab; ?>";
 
       // Cache selector DOM
       const $yearSelect    = $("#yearSelect");
@@ -408,6 +551,11 @@
       const $regionSelect  = $("#regionSelect");
       const $resultsContainer = $("#resultsContainer");
       const $spinner       = $("#spinner");
+
+      // Hide region field for provinsi and kabkot users on page load
+      if (userLevel === 'provinsi' || userLevel === 'kabkot') {
+        $("#regionSelectContainer").hide();
+      }
 
       // --- Helper Functions ---
 
@@ -425,7 +573,8 @@
           icon: 'error',
           title: 'Terjadi Kesalahan',
           text: message,
-          confirmButtonColor: '#0071e3'
+          confirmButtonColor: '#0071e3',
+          footer: 'Silakan refresh halaman atau hubungi administrator'
         });
       };
 
@@ -442,10 +591,14 @@
                 const jsonData = JSON.parse(extractJson(response));
                 resolve(jsonData);
               } catch(e) {
-                reject("Terjadi kesalahan saat memproses data");
+                console.error("Parse error:", e, "Response:", response);
+                reject("Terjadi kesalahan saat memproses data: " + e.message);
               }
             },
-            error: () => reject("Terjadi kesalahan pada server")
+            error: (jqXHR, textStatus, errorThrown) => {
+              console.error("AJAX error:", textStatus, errorThrown, jqXHR.responseText);
+              reject("Terjadi kesalahan pada server: " + textStatus + " - " + (errorThrown || "Tidak ada detail"));
+            }
           });
         });
       };
@@ -847,14 +1000,43 @@
         $resultsContainer.html(tableHtml);
       };
 
-      // --- Fungsi untuk Load Data (Projects & Regions) ---
+      // --- Remote Data Loading ---
 
+      // Load projects from PHP instead of API
       const loadProjects = async () => {
-        $projectSelect.empty().append('<option value="">Memuat data...</option>');
         try {
-          const response = await makeAjaxRequest(API_URL, { action: "fetchProjects", year });
+          // Get projects from PHP variable first
+          if (year === '<?php echo $initialYear; ?>') {
+            // Use pre-loaded PHP data for initial year
+            const phpProjects = <?php echo json_encode($projects); ?>;
+            $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
+            
+            if (phpProjects.length > 0) {
+              phpProjects.forEach(project => {
+                $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
+              });
+            } else {
+              $projectSelect.append('<option value="" disabled>Tidak ada kegiatan ditemukan</option>');
+            }
+            return;
+          }
+          
+          // For other years or refresh, use PHP endpoint instead of direct API
+          const response = await $.ajax({
+            url: 'api_local.php',
+            type: 'POST',
+            data: {
+              action: 'getProjects',
+              year: year,
+              userLevel: userLevel,
+              userProv: userProv,
+              userKab: userKab
+            },
+            dataType: 'json'
+          });
+          
           $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
-          if (response.status && response.data.length) {
+          if (response.status && response.data.length > 0) {
             response.data.forEach(project => {
               $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
             });
@@ -870,58 +1052,79 @@
       const loadRegions = async () => {
         $regionSelect.empty().append('<option value="">Memuat data...</option>');
         try {
-          const response = await makeAjaxRequest(API_URL, { action: "fetchCoverages", id_project: selectedProject });
-          $regionSelect.empty();
-          coverageData = [];
-          if (!response.status)
-            throw new Error("Gagal memuat data wilayah");
-          
-          // Tambahkan opsi Pusat
-          $regionSelect.append(`<option value="pusat">Pusat - Nasional</option>`);
-          coverageData.push({
-            id: "pusat",
-            prov: "00",
-            kab: "00",
-            name: "Pusat - Nasional"
+          // Use PHP endpoint instead of direct API
+          const response = await $.ajax({
+            url: 'api_local.php',
+            type: 'POST',
+            data: {
+              action: 'getRegions',
+              projectId: selectedProject,
+              year: year,
+              userLevel: userLevel,
+              userProv: userProv,
+              userKab: userKab
+            },
+            dataType: 'json'
           });
           
-          if (response.data && response.data.length) {
-            const apiData = response.data.map(cov => ({
-              id: `${cov.prov}${cov.kab}`,
-              prov: cov.prov,
-              kab: cov.kab,
-              name: cov.name
-            }));
-            coverageData = [...coverageData, ...apiData];
+          $regionSelect.empty();
+          coverageData = [];
+          
+          if (!response.status || !response.data || response.data.length === 0) {
+            throw new Error("Tidak ada data wilayah yang tersedia");
+          }
+          
+          coverageData = response.data;
+          
+          // Auto-select region based on user level
+          if (userLevel === 'kabkot') {
+            // Hide region select dropdown for kabupaten users - they only see their own district
+            $("#regionSelectContainer").hide();
+            selectedRegion = `${userProv}${userKab}`;
+            $regionSelect.append(`<option value="${selectedRegion}" selected>${coverageData.find(r => r.prov === userProv && r.kab === userKab)?.name || 'Kabupaten/Kota'}</option>`);
+          } else if (userLevel === 'provinsi') {
+            // Hide region select dropdown for province users - they only see their own province
+            $("#regionSelectContainer").hide();
+            selectedRegion = `${userProv}00`;
+            $regionSelect.append(`<option value="${selectedRegion}" selected>${coverageData.find(r => r.prov === userProv && r.kab === '00')?.name || 'Provinsi'}</option>`);
+          } else {
+            // Show region container for pusat/superadmin
+            $("#regionSelectContainer").show();
+
+            // Build dropdowns based on coverage data
+            // For pusat/superadmin
+            const pusatData = coverageData.find(r => r.id === 'pusat');
+            if (pusatData) {
+              $regionSelect.append(`<option value="pusat">${pusatData.name}</option>`);
+            }
             
-            // Filter provinsi (kab == "00" dan prov tidak "00")
+            // Add provinces
             const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
-            provinces.forEach(province => {
-              $regionSelect.append(`<option value="${province.id}">${province.name}</option>`);
-            });
+            if (provinces.length > 0) {
+              provinces.forEach(province => {
+                $regionSelect.append(`<option value="${province.id}">${province.name}</option>`);
+              });
+            }
             
-            // Jika tidak ada provinsi, tampilkan semua kabupaten/kota
+            // Add kabupaten if no provinces
             if (provinces.length === 0) {
-              // Filter kabupaten/kota (kab != "00")
+              // For pusat/superadmin if no provinces
               const kabupatens = coverageData.filter(cov => cov.kab !== "00");
               kabupatens.forEach(kabupaten => {
                 $regionSelect.append(`<option value="${kabupaten.id}">${kabupaten.name}</option>`);
               });
             }
+            
+            // Auto-select first option for pusat/superadmin
+            if ($regionSelect.find('option[value="pusat"]').length > 0) {
+              selectedRegion = "pusat";
+              $regionSelect.val(selectedRegion);
+            } else if ($regionSelect.find('option').length > 0) {
+              selectedRegion = $regionSelect.find('option:first').val();
+              $regionSelect.val(selectedRegion);
+            }
           }
           
-          // Selalu pilih Pusat sebagai default jika ada
-          if ($regionSelect.find('option[value="pusat"]').length > 0) {
-            selectedRegion = "pusat";
-            $regionSelect.val(selectedRegion);
-          } else if ($regionSelect.find('option').length > 0) {
-            // Jika tidak ada pusat, pilih opsi pertama yang tersedia
-            selectedRegion = $regionSelect.find('option:first').val();
-            $regionSelect.val(selectedRegion);
-          }
-          
-          if (coverageData.length === 0)
-            throw new Error("Tidak ada data wilayah yang tersedia");
         } catch (error) {
           showError(error.message || "Gagal memuat daftar wilayah");
           $regionSelect.empty().append('<option value="">Pilih Cakupan Wilayah</option>');
@@ -1003,10 +1206,11 @@
             // Tentukan assessment_level (default ke 1 jika tidak ada)
             const assessmentLevel = parseInt(measurement.assessment_level || 1);
             
-            // Filter region berdasarkan assessment_level
+            // Filter region berdasarkan assessment_level dan user level
             const applicableRegions = regions.filter(region => {
+              // Filter berdasarkan assessment_level
               if (assessmentLevel === 1) {
-                // Khusus pusat (00, 00)
+                // Khusus pusat (kode 00)
                 return region.prov === "00" && region.kab === "00";
               } else if (assessmentLevel === 2) {
                 // Khusus level provinsi (kab = 00, prov != 00)
@@ -1018,20 +1222,33 @@
               return false;
             });
             
-            // Optimasi untuk fetchAllActions: gunakan cache untuk kabupaten dari provinsi yang sama
-            // Pengelompokan region berdasarkan provinsi untuk level 3 (kabupaten)
-            const provinceGroups = {};
-            if (assessmentLevel === 3) {
-              applicableRegions.forEach(region => {
+            // Optimasi untuk fetchAllActions berdasarkan user level
+            let regionsToFetch = [];
+
+            // Untuk level kabupaten, hanya fetch data kabupaten sendiri
+            if (userLevel === 'kabkot') {
+              regionsToFetch = applicableRegions.filter(r => r.prov === userProv && r.kab === userKab);
+            }
+            // Untuk level provinsi, hanya fetch data provinsi dan kabupaten di bawahnya
+            else if (userLevel === 'provinsi') {
+              regionsToFetch = applicableRegions.filter(r => r.prov === userProv);
+            }
+            // Untuk pusat, fetch semua regions yang applicable
+            else {
+              regionsToFetch = applicableRegions;
+            }
+            
+            // Optimasi untuk kabupaten level
+            if (assessmentLevel === 3 && userLevel !== 'kabkot') {
+              // Pengelompokan region berdasarkan provinsi untuk level 3 (kabupaten)
+              const provinceGroups = {};
+              regionsToFetch.forEach(region => {
                 if (!provinceGroups[region.prov]) {
                   provinceGroups[region.prov] = [];
                 }
                 provinceGroups[region.prov].push(region);
               });
-            }
-            
-            // Pre-load data hanya untuk region yang sesuai dengan assessment_level
-            if (assessmentLevel === 3) {
+              
               // Untuk level kabupaten, ambil sampel 1 kabupaten per provinsi untuk fetchAllActions
               for (const prov in provinceGroups) {
                 if (provinceGroups[prov].length > 0) {
@@ -1088,8 +1305,8 @@
                 }
               }
             } else {
-              // Untuk level pusat dan provinsi, tetap gunakan cara normal
-              for (const region of applicableRegions) {
+              // Untuk level pusat dan provinsi, atau jika pengguna kabupaten melihat data kabupaten sendiri
+              for (const region of regionsToFetch) {
                 // Pre-load allActions untuk gate & region
                 await getDataFromCacheOrApi(
                   'allActions',
@@ -1203,9 +1420,19 @@
 
       $projectSelect.on('change', async function(){
         selectedProject = $(this).val();
-        $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
-        selectedRegion  = null;
-        if (selectedProject) await loadRegions();
+        
+        // For kabupaten and provinsi users, we'll auto-select region and auto-load data
+        if (selectedProject && (userLevel === 'kabkot' || userLevel === 'provinsi')) {
+          await loadRegions();
+          
+          // Automatically load data for kabupaten and provinsi users
+          $("#loadData").trigger('click');
+        } else {
+          // For pusat/superadmin, just enable the region dropdown
+          $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+          selectedRegion = null;
+          if (selectedProject) await loadRegions();
+        }
       });
 
       $regionSelect.on('change', function(){
@@ -1220,26 +1447,51 @@
         $spinner.fadeIn(200);
         $resultsContainer.empty();
         try {
-          const regionData = coverageData.find(r => r.id === selectedRegion);
-          if (!regionData)
-            throw new Error("Data wilayah tidak ditemukan");
-          
-          // Tentukan daftar wilayah yang akan diproses
+          // Tentukan daftar wilayah yang akan diproses berdasarkan user level
           let regionsToProcess = [];
           
-          if (selectedRegion === "pusat") {
-            // Hanya pusat
-            regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
-          } else {
-            const prov = regionData.prov;
-            // Provinsi dan semua kabupaten di dalamnya
-            regionsToProcess = [
-              { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
-            ];
+          if (userLevel === 'kabkot') {
+            // Untuk kabupaten, hanya tampilkan wilayah mereka sendiri
+            const kabRegion = coverageData.find(r => r.prov === userProv && r.kab === userKab);
+            if (kabRegion) {
+              regionsToProcess = [kabRegion];
+            } else {
+              throw new Error("Data wilayah tidak ditemukan");
+            }
+          } else if (userLevel === 'provinsi') {
+            // Untuk provinsi, tampilkan provinsi dan kabupaten di bawahnya
+            const provRegion = coverageData.find(r => r.prov === userProv && r.kab === '00');
+            if (!provRegion) {
+              throw new Error("Data provinsi tidak ditemukan");
+            }
             
-            // Tambahkan kabupaten
-            const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
+            // Provinsi
+            regionsToProcess = [provRegion];
+            
+            // Tambahkan kabupaten di provinsi tersebut
+            const kabupatenList = coverageData.filter(r => r.prov === userProv && r.kab !== '00');
             regionsToProcess = [...regionsToProcess, ...kabupatenList];
+          } else {
+            // Untuk pusat/superadmin, gunakan logika yang sudah ada
+            const regionData = coverageData.find(r => r.id === selectedRegion);
+            if (!regionData) {
+              throw new Error("Data wilayah tidak ditemukan");
+            }
+            
+            if (selectedRegion === "pusat") {
+              // Hanya pusat
+              regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
+            } else {
+              const prov = regionData.prov;
+              // Provinsi dan semua kabupaten di dalamnya
+              regionsToProcess = [
+                { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
+              ];
+              
+              // Tambahkan kabupaten
+              const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
+              regionsToProcess = [...regionsToProcess, ...kabupatenList];
+            }
           }
           
           // Proses data untuk semua wilayah terpilih
@@ -1249,6 +1501,7 @@
           displayResultTable(regionsToProcess);
           
         } catch(error) {
+          console.error("Error details:", error);
           showError(error.message || "Terjadi kesalahan saat memuat data");
         } finally {
           $spinner.fadeOut(200);
