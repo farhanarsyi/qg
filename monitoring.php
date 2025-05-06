@@ -1576,33 +1576,80 @@ if (isset($_POST['db_action'])) {
             for (const project of projects) {
               try {
                 const directNameResponse = await $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: {
+                    db_action: "get_direct_project_name",
+                      year: year,
+                      project_id: project.id
+                    },
+                    dataType: "json"
+                  });
+                  
+                if (directNameResponse.status && directNameResponse.name) {
+                  console.log(`Direct name for project ${project.id}: ${directNameResponse.name}`);
+                  project.name = directNameResponse.name;
+                  }
+                } catch (error) {
+                console.error(`Error getting direct name for project ${project.id}:`, error);
+                }
+              }
+              
+            // Verify which projects actually have data downloaded
+            const projectsWithData = [];
+            for (const project of projects) {
+              try {
+                // Check if project has any data by attempting to get regions
+                const hasDataResponse = await $.ajax({
                   url: window.location.href,
                   method: "POST",
                   data: {
-                    db_action: "get_direct_project_name",
-                    year: year,
+                    db_action: "get_available_regions",
                     project_id: project.id
                   },
                   dataType: "json"
                 });
                 
-                if (directNameResponse.status && directNameResponse.name) {
-                  console.log(`Direct name for project ${project.id}: ${directNameResponse.name}`);
-                  project.name = directNameResponse.name;
+                if (hasDataResponse.status && hasDataResponse.data && hasDataResponse.data.length > 0) {
+                  console.log(`Project ${project.id} has data available`);
+                  projectsWithData.push(project);
+                } else {
+                  console.log(`Project ${project.id} has NO data available`);
                 }
               } catch (error) {
-                console.error(`Error getting direct name for project ${project.id}:`, error);
+                console.error(`Error checking data for project ${project.id}:`, error);
               }
             }
             
-            // Sort and display projects
-            projects.sort((a, b) => a.name.localeCompare(b.name));
+            // Sort and display only projects with data
+            projectsWithData.sort((a, b) => a.name.localeCompare(b.name));
             
-            projects.forEach(project => {
-              $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
-            });
-            
-            $projectSelect.prop('disabled', false);
+            if (projectsWithData.length > 0) {
+              projectsWithData.forEach(project => {
+                $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
+              });
+              
+              $projectSelect.prop('disabled', false);
+            } else {
+              $projectSelect.append('<option value="" disabled>Tidak ada kegiatan dengan data tersedia</option>');
+              $projectSelect.prop('disabled', true);
+              
+              // Show information that they need to download data first
+              $resultsContainer.html(`
+                <div class="card">
+                  <div class="card-body">
+                    <div class="no-data-message">
+                      <i class="fas fa-info-circle fa-3x mb-3 text-primary"></i>
+                      <h4>Tidak ada data kegiatan tersedia untuk tahun ${year}</h4>
+                      <p>Silahkan download data terlebih dahulu dari halaman Download Data.</p>
+                      <a href="download.php" class="btn btn-primary mt-3">
+                        <i class="fas fa-download me-2"></i>Download Data
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `);
+            }
           } else {
             $projectSelect.append('<option value="" disabled>Tidak ada kegiatan tersedia di database lokal</option>');
             $projectSelect.prop('disabled', true);
@@ -1837,7 +1884,9 @@ if (isset($_POST['db_action'])) {
             dataType: "json"
           });
           
-          if (processedDataResponse.found) {
+          console.log("Processed data response:", processedDataResponse);
+          
+          if (processedDataResponse && processedDataResponse.found && processedDataResponse.data) {
             // Use the pre-processed data
             activityData = processedDataResponse.data;
             displayResultTable(regionsToProcess);
@@ -1853,14 +1902,14 @@ if (isset($_POST['db_action'])) {
               </div>`
             );
           } else {
-            // No processed data available
+            // No processed data available - show clear message
             $resultsContainer.html(`
               <div class="card">
                 <div class="card-body">
                   <div class="no-data-message">
                     <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
                     <h4>Data Monitoring Belum Tersedia</h4>
-                    <p>Silahkan download data terlebih dahulu dari halaman Download Data.</p>
+                    <p>Silahkan download data monitoring terlebih dahulu dari halaman Download Data.</p>
                     <a href="download.php" class="btn btn-primary mt-3">
                       <i class="fas fa-download me-2"></i>Download Data
                     </a>
@@ -1870,7 +1919,24 @@ if (isset($_POST['db_action'])) {
             `);
           }
         } catch (error) {
+          console.error("Error loading monitoring data:", error);
           showError(error.message || "Terjadi kesalahan saat memuat data monitoring");
+          
+          // Also show the error message in the results container for clarity
+          $resultsContainer.html(`
+            <div class="card">
+              <div class="card-body">
+                <div class="no-data-message">
+                  <i class="fas fa-exclamation-circle fa-3x mb-3 text-danger"></i>
+                  <h4>Terjadi Kesalahan</h4>
+                  <p>${error.message || "Terjadi kesalahan saat memuat data monitoring. Silahkan coba lagi."}</p>
+                  <a href="download.php" class="btn btn-primary mt-3">
+                    <i class="fas fa-download me-2"></i>Download Data
+                  </a>
+                </div>
+              </div>
+            </div>
+          `);
         } finally {
           $spinner.fadeOut(200);
         }
