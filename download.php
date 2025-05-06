@@ -549,10 +549,28 @@ if (isset($_POST['db_action'])) {
               console.error("Error saving original project list:", error);
             }
             
-            // Add projects to dropdown
-            response.data.forEach(project => {
-              console.log(`Adding project to dropdown: ID=${project.id}, Name=${project.name}`);
-              $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
+            // Add projects to dropdown with correct names
+            // First sort projects alphabetically by name
+            const sortedProjects = [...response.data].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+            
+            sortedProjects.forEach(project => {
+              // Make sure we display a proper name, not just ID
+              let displayName = project.name;
+              
+              // Check if name is missing, just numeric, or generic
+              const isGenericName = !displayName || 
+                                    /^\d+$/.test(displayName) || 
+                                    displayName === "Project ID: " + project.id || 
+                                    displayName === "Kegiatan " + project.id ||
+                                    displayName === "Project " + project.id;
+              
+              if (isGenericName) {
+                // Use a descriptive fallback if needed
+                displayName = "Kegiatan " + project.id;
+              }
+              
+              console.log(`Adding project to dropdown: ID=${project.id}, Name=${displayName}`);
+              $projectSelect.append(`<option value="${project.id}">${displayName}</option>`);
             });
             
             // Save each project details separately with names

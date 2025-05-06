@@ -101,9 +101,9 @@ if (isset($_POST['db_action'])) {
                     $projectName = null;
                     
                     // Try different fields where name might be stored
-                    if (isset($project['name'])) {
+                    if (isset($project['name']) && !empty($project['name']) && $project['name'] !== (string)$projectId) {
                         $projectName = $project['name'];
-                    } elseif (isset($project['project_name'])) {
+                    } elseif (isset($project['project_name']) && !empty($project['project_name'])) {
                         $projectName = $project['project_name'];
                     }
                     
@@ -113,6 +113,13 @@ if (isset($_POST['db_action'])) {
                             'name' => $projectName
                         ];
                         error_log("Added project: $projectId - $projectName");
+                    } elseif ($projectId) {
+                        // If name is empty or just the ID, add with fallback name
+                        $projects[] = [
+                            'id' => $projectId,
+                            'name' => "Kegiatan " . $projectId
+                        ];
+                        error_log("Added project with fallback name: $projectId");
                     }
                 }
             }
@@ -307,77 +314,174 @@ if (isset($_POST['db_action'])) {
         $year = $conn->real_escape_string($year);
         $project_id = $conn->real_escape_string($project_id);
         
-        // Try multiple approaches to get the project name
+        // Enhanced debugging
+        error_log("Looking up name for project ID: $project_id in year: $year");
+        
+        // Try a more direct SQL query to get project names from the stored JSON data
         $projectName = null;
         
-        // Approach 1: Check fetchProjects list
-        $sql1 = "SELECT data_json FROM qg_sync 
-                WHERE year = '$year' AND project_id = 'all' AND data_type = 'fetchProjects' 
+        // This SQL query will find the project name directly from the JSON data
+        $sql = "SELECT data_json FROM qg_sync 
+                WHERE year = '$year' AND data_type = 'fetchProjects' 
                 ORDER BY last_updated DESC LIMIT 1";
         
-        $result1 = $conn->query($sql1);
-        if ($result1 && $result1->num_rows > 0) {
-            $row1 = $result1->fetch_assoc();
-            $projectsList = json_decode($row1['data_json'], true);
+        // Log the SQL query for debugging
+        error_log("SQL Query: $sql");
+        
+        $result = $conn->query($sql);
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $rawJson = $row['data_json'];
+            error_log("Found JSON data of length: " . strlen($rawJson));
             
-            if (isset($projectsList['data']) && is_array($projectsList['data'])) {
-                foreach ($projectsList['data'] as $project) {
-                    if ($project['id'] == $project_id && isset($project['name'])) {
-                        $projectName = $project['name'];
-                        break;
+            // Extract a small sample for debugging
+            $sampleJson = substr($rawJson, 0, 500) . "...";
+            error_log("JSON sample: " . $sampleJson);
+            
+            // Parse the JSON data
+            $projectsData = json_decode($rawJson, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error: " . json_last_error_msg());
+            }
+            
+            // Check if we have project data
+            if (isset($projectsData['data']) && is_array($projectsData['data'])) {
+                error_log("Found " . count($projectsData['data']) . " projects in JSON data");
+                
+                // Look for our specific project
+                foreach ($projectsData['data'] as $project) {
+                    if (isset($project['id']) && $project['id'] == $project_id) {
+                        error_log("Found matching project with ID: " . $project['id']);
+                        
+                        if (isset($project['name'])) {
+                            $projectName = $project['name'];
+                            error_log("Found project name: $projectName");
+                            break;
+                        } else {
+                            error_log("Project has no 'name' field");
+                        }
+                    }
+                }
+            } else {
+                error_log("No 'data' array found in JSON");
+            }
+        } else {
+            error_log("No matching record found for SQL query");
+        }
+        
+        // If we still don't have a name, use a fallback
+        if (empty($projectName)) {
+            $projectName = "Kegiatan " . $project_id;
+            error_log("Using fallback name: $projectName");
+        }
+        
+        echo json_encode(['status' => true, 'project_name' => $projectName]);
+        exit;
+    }
+    
+    if ($db_action === 'debug_projects') {
+        // This endpoint is for debugging the project name lookup issue
+        $year = isset($_POST['year']) ? $_POST['year'] : '2024';
+        
+        // Find projects data in the database - specifically looking for the record with project names
+        $sql = "SELECT * FROM qg_sync 
+                WHERE year = '$year' AND data_type = 'fetchProjects' 
+                ORDER BY last_updated DESC";
+        
+        $result = $conn->query($sql);
+        $debug_info = [
+            'sql' => $sql,
+            'found_rows' => 0,
+            'records' => [],
+            'project_15_name' => 'Not found'
+        ];
+        
+        if ($result && $result->num_rows > 0) {
+            $debug_info['found_rows'] = $result->num_rows;
+            
+            // Check all records
+            while ($row = $result->fetch_assoc()) {
+                $recordInfo = [
+                    'id' => $row['id'],
+                    'year' => $row['year'],
+                    'project_id' => $row['project_id'],
+                    'region_id' => $row['region_id'],
+                    'data_type' => $row['data_type'],
+                    'cache_key' => $row['cache_key'],
+                    'last_updated' => $row['last_updated'],
+                    'json_size' => strlen($row['data_json']),
+                    'has_project_15' => false,
+                    'project_15_name' => 'Not found in this record'
+                ];
+                
+                // Parse the JSON data
+                $projectsData = json_decode($row['data_json'], true);
+                
+                if (json_last_error() === JSON_ERROR_NONE && isset($projectsData['data']) && is_array($projectsData['data'])) {
+                    $recordInfo['project_count'] = count($projectsData['data']);
+                    
+                    // Look specifically for project ID 15 (PODES 2024)
+                    foreach ($projectsData['data'] as $project) {
+                        if (isset($project['id']) && $project['id'] == 15) {
+                            $recordInfo['has_project_15'] = true;
+                            $recordInfo['project_15_name'] = $project['name'] ?? 'No name field';
+                            
+                            // Also update the main debug info
+                            $debug_info['project_15_name'] = $project['name'] ?? 'No name field';
+                            break;
+                        }
+                    }
+                }
+                
+                $debug_info['records'][] = $recordInfo;
+            }
+        }
+        
+        echo json_encode($debug_info);
+        exit;
+    }
+    
+    if ($db_action === 'get_direct_project_name') {
+        $year = isset($_POST['year']) ? $_POST['year'] : '';
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        
+        if (empty($year) || empty($project_id)) {
+            echo json_encode(['status' => false, 'message' => 'Year and project_id are required']);
+            exit;
+        }
+        
+        $year = $conn->real_escape_string($year);
+        $project_id = $conn->real_escape_string($project_id);
+        
+        // Direct SQL approach to find the project name from the stored JSON
+        // The SQL query extracts the project name directly
+        $sql = "SELECT data_json FROM qg_sync 
+                WHERE year = '$year' AND data_type = 'fetchProjects' 
+                ORDER BY last_updated DESC";
+        
+        $result = $conn->query($sql);
+        $name = null;
+        
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $data = json_decode($row['data_json'], true);
+                if ($data && isset($data['data']) && is_array($data['data'])) {
+                    foreach ($data['data'] as $project) {
+                        if (isset($project['id']) && $project['id'] == $project_id && isset($project['name'])) {
+                            $name = $project['name'];
+                            break 2; // Break out of both loops
+                        }
                     }
                 }
             }
         }
         
-        // Approach 2: Check project-specific data
-        if (!$projectName) {
-            $sql2 = "SELECT data_json FROM qg_sync 
-                    WHERE year = '$year' AND project_id = '$project_id' AND data_type = 'fetchProjectSpesific'
-                    ORDER BY last_updated DESC LIMIT 1";
-            
-            $result2 = $conn->query($sql2);
-            if ($result2 && $result2->num_rows > 0) {
-                $row2 = $result2->fetch_assoc();
-                $projectData = json_decode($row2['data_json'], true);
-                
-                if (isset($projectData['data']['project_name'])) {
-                    $projectName = $projectData['data']['project_name'];
-                } elseif (isset($projectData['data']['name'])) {
-                    $projectName = $projectData['data']['name'];
-                } elseif (isset($projectData['name'])) {
-                    $projectName = $projectData['name'];
-                }
-            }
+        if (!$name) {
+            $name = "Kegiatan " . $project_id;
         }
         
-        // Approach 3: Check any data for this project
-        if (!$projectName) {
-            $sql3 = "SELECT data_json FROM qg_sync 
-                    WHERE year = '$year' AND project_id = '$project_id'
-                    ORDER BY last_updated DESC LIMIT 1";
-            
-            $result3 = $conn->query($sql3);
-            if ($result3 && $result3->num_rows > 0) {
-                $row3 = $result3->fetch_assoc();
-                $anyData = json_decode($row3['data_json'], true);
-                
-                if (isset($anyData['data']['project_name'])) {
-                    $projectName = $anyData['data']['project_name'];
-                } elseif (isset($anyData['data']['name'])) {
-                    $projectName = $anyData['data']['name'];
-                } elseif (isset($anyData['name'])) {
-                    $projectName = $anyData['name'];
-                }
-            }
-        }
-        
-        // Fallback
-        if (!$projectName) {
-            $projectName = "Kegiatan " . $project_id;
-        }
-        
-        echo json_encode(['status' => true, 'project_name' => $projectName]);
+        echo json_encode(['status' => true, 'name' => $name]);
         exit;
     }
     
@@ -1208,6 +1312,7 @@ if (isset($_POST['db_action'])) {
       const loadProjects = async () => {
         $projectSelect.empty().append('<option value="">Memuat data...</option>');
         try {
+          // First get the standard project list
           const response = await $.ajax({
             url: window.location.href,
             method: "POST",
@@ -1223,75 +1328,38 @@ if (isset($_POST['db_action'])) {
           $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
           
           if (response.status && response.data && response.data.length > 0) {
-            // Display the actual data for debugging
-            console.log("Projects to display:", JSON.stringify(response.data));
+            // Get project names using our direct approach
+            const projects = [...response.data];
             
-            // Check if we have real project names or just IDs with prefixes
-            const needsFallback = response.data.some(p => 
-              p.name === "Kegiatan " + p.id || 
-              p.name === "Project ID: " + p.id || 
-              p.name === "Project " + p.id
-            );
-            
-            console.log("Needs fallback for names:", needsFallback);
-            
-            // If we need a fallback, get names one by one
-            if (needsFallback) {
-              console.log("Using fallback to get real project names");
-              const projects = [];
-              
-              for (const project of response.data) {
-                try {
-                  // Get the actual project name directly
-                  const nameResponse = await $.ajax({
-                    url: window.location.href,
-                    method: "POST",
-                    data: {
-                      db_action: "get_project_name",
-                      year: year,
-                      project_id: project.id
-                    },
-                    dataType: "json"
-                  });
-                  
-                  if (nameResponse.status) {
-                    console.log(`Got name for project ${project.id}:`, nameResponse.project_name);
-                    projects.push({
-                      id: project.id,
-                      name: nameResponse.project_name
-                    });
-                  } else {
-                    console.log(`Failed to get name for project ${project.id}, using default`);
-                    projects.push(project);
-                  }
-                } catch (error) {
-                  console.error(`Error getting name for project ${project.id}:`, error);
-                  projects.push(project);
+            // Get names for all projects
+            for (const project of projects) {
+              try {
+                const directNameResponse = await $.ajax({
+                  url: window.location.href,
+                  method: "POST",
+                  data: {
+                    db_action: "get_direct_project_name",
+                    year: year,
+                    project_id: project.id
+                  },
+                  dataType: "json"
+                });
+                
+                if (directNameResponse.status && directNameResponse.name) {
+                  console.log(`Direct name for project ${project.id}: ${directNameResponse.name}`);
+                  project.name = directNameResponse.name;
                 }
+              } catch (error) {
+                console.error(`Error getting direct name for project ${project.id}:`, error);
               }
-              
-              // Sort and populate the dropdown
-              projects.sort((a, b) => a.name.localeCompare(b.name));
-              
-              projects.forEach(project => {
-                $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
-              });
-            } else {
-              // Sort projects by name for better usability
-              const sortedProjects = [...response.data].sort((a, b) => a.name.localeCompare(b.name));
-              
-              sortedProjects.forEach(project => {
-                // Make sure the project name doesn't start with "Project ID" or similar
-                let projectName = project.name;
-                
-                // If it's just a numeric ID or has "Project ID" prefix, improve the display
-                if (/^Project ID: \d+$/.test(projectName) || /^Kegiatan \d+$/.test(projectName)) {
-                  projectName = "Kegiatan " + project.id;
-                }
-                
-                $projectSelect.append(`<option value="${project.id}">${projectName}</option>`);
-              });
             }
+            
+            // Sort and display projects
+            projects.sort((a, b) => a.name.localeCompare(b.name));
+            
+            projects.forEach(project => {
+              $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
+            });
             
             $projectSelect.prop('disabled', false);
           } else {
