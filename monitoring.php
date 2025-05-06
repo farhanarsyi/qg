@@ -1,5 +1,7 @@
 <?php
-// monitoring.php
+// monitoring.php - View data from local database (no external API)
+
+require_once 'db_functions.php';
 
 // Database configuration
 $db_host = 'localhost';
@@ -13,123 +15,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Create qg_sync table if not exists
-$sql = "CREATE TABLE IF NOT EXISTS qg_sync (
-    id INT(11) AUTO_INCREMENT PRIMARY KEY,
-    year VARCHAR(10) NOT NULL,
-    project_id VARCHAR(100) NOT NULL,
-    region_id VARCHAR(100) NOT NULL,
-    data_type VARCHAR(50) NOT NULL,
-    cache_key VARCHAR(255) NOT NULL,
-    data_json LONGTEXT NOT NULL,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY cache_idx (year, project_id, region_id, data_type, cache_key)
-)";
-
-if (!$conn->query($sql)) {
-    echo "Error creating table: " . $conn->error;
-}
-
-// Function to save data to local db
-function saveToLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key, $data_json) {
-    // If any required parameter is empty, return false
-    if (empty($year) || empty($project_id) || empty($data_type) || empty($cache_key) || empty($data_json)) {
-        return false;
-    }
-    
-    $year = $conn->real_escape_string($year);
-    $project_id = $conn->real_escape_string($project_id);
-    $region_id = $conn->real_escape_string($region_id);
-    $data_type = $conn->real_escape_string($data_type);
-    $cache_key = $conn->real_escape_string($cache_key);
-    $data_json = $conn->real_escape_string($data_json);
-    
-    $sql = "INSERT INTO qg_sync (year, project_id, region_id, data_type, cache_key, data_json) 
-            VALUES ('$year', '$project_id', '$region_id', '$data_type', '$cache_key', '$data_json')
-            ON DUPLICATE KEY UPDATE data_json = '$data_json', last_updated = CURRENT_TIMESTAMP";
-    
-    return $conn->query($sql);
-}
-
-// Function to get data from local db
-function getFromLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key) {
-    // If any required parameter is empty, return not found
-    if (empty($year) || empty($project_id) || empty($data_type) || empty($cache_key)) {
-        return ['found' => false];
-    }
-    
-    $year = $conn->real_escape_string($year);
-    $project_id = $conn->real_escape_string($project_id);
-    $region_id = $conn->real_escape_string($region_id);
-    $data_type = $conn->real_escape_string($data_type);
-    $cache_key = $conn->real_escape_string($cache_key);
-    
-    $sql = "SELECT data_json, last_updated FROM qg_sync 
-            WHERE year = '$year' AND project_id = '$project_id' AND region_id = '$region_id' 
-            AND data_type = '$data_type' AND cache_key = '$cache_key'";
-    
-    $result = $conn->query($sql);
-    
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return [
-            'found' => true,
-            'data' => json_decode($row['data_json'], true),
-            'last_updated' => $row['last_updated']
-        ];
-    }
-    
-    return ['found' => false];
-}
-
-// Function to check if we should use cached data
-function shouldUseCache($conn, $year, $project_id, $region_id = 'all') {
-    // If any required parameter is empty, return false
-    if (empty($year) || empty($project_id)) {
-        return false;
-    }
-    
-    $year = $conn->real_escape_string($year);
-    $project_id = $conn->real_escape_string($project_id);
-    $region_id = $conn->real_escape_string($region_id);
-    
-    $sql = "SELECT COUNT(*) as count FROM qg_sync 
-            WHERE year = '$year' AND project_id = '$project_id' AND region_id = '$region_id'";
-    
-    $result = $conn->query($sql);
-    
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['count'] > 0;
-    }
-    
-    return false;
-}
-
-// Function to save the final processed monitoring data
-function saveProcessedData($conn, $year, $project_id, $region_id, $data) {
-    return saveToLocalDB(
-        $conn, 
-        $year, 
-        $project_id, 
-        $region_id, 
-        'processed_monitoring_data', 
-        'final_result', 
-        json_encode($data)
-    );
-}
-
-// Function to get the final processed monitoring data
-function getProcessedData($conn, $year, $project_id, $region_id) {
-    return getFromLocalDB(
-        $conn, 
-        $year, 
-        $project_id, 
-        $region_id, 
-        'processed_monitoring_data', 
-        'final_result'
-    );
-}
+// Create necessary tables if they don't exist
+createTables($conn);
 
 // AJAX endpoint for local database operations
 if (isset($_POST['db_action'])) {
@@ -156,17 +43,6 @@ if (isset($_POST['db_action'])) {
         exit;
     }
     
-    if ($db_action === 'save_processed_data') {
-        $year = isset($_POST['year']) ? $_POST['year'] : '';
-        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
-        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
-        $data_json = isset($_POST['data_json']) ? $_POST['data_json'] : '';
-        
-        $result = saveProcessedData($conn, $year, $project_id, $region_id, json_decode($data_json, true));
-        echo json_encode(['status' => $result ? true : false]);
-        exit;
-    }
-    
     if ($db_action === 'get_data') {
         $year = isset($_POST['year']) ? $_POST['year'] : '';
         $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
@@ -179,38 +55,329 @@ if (isset($_POST['db_action'])) {
         exit;
     }
     
-    if ($db_action === 'save_data') {
+    if ($db_action === 'get_available_projects') {
         $year = isset($_POST['year']) ? $_POST['year'] : '';
-        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
-        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
-        $data_type = isset($_POST['data_type']) ? $_POST['data_type'] : '';
-        $cache_key = isset($_POST['cache_key']) ? $_POST['cache_key'] : '';
-        $data_json = isset($_POST['data_json']) ? $_POST['data_json'] : '';
         
-        $result = saveToLocalDB($conn, $year, $project_id, $region_id, $data_type, $cache_key, $data_json);
-        echo json_encode(['status' => $result ? true : false]);
+        if (empty($year)) {
+            echo json_encode(['status' => false, 'message' => 'Year is required']);
+            exit;
+        }
+        
+        // Debug: Log input parameters
+        error_log("get_available_projects for year: " . $year);
+        
+        // Get distinct project IDs for the selected year
+        $year = $conn->real_escape_string($year);
+        
+        // First, try to find the projects list saved during the fetchProjects call
+        $sql = "SELECT data_json FROM qg_sync 
+                WHERE year = '$year' AND project_id = 'all' AND data_type = 'fetchProjects' 
+                ORDER BY last_updated DESC LIMIT 1";
+        
+        $result = $conn->query($sql);
+        $projects = [];
+        
+        if ($result && $result->num_rows > 0) {
+            // We found the saved projects list
+            $row = $result->fetch_assoc();
+            $rawJson = $row['data_json'];
+            error_log("Raw JSON from projects list: " . substr($rawJson, 0, 200) . "...");
+            
+            $projectsData = json_decode($rawJson, true);
+            
+            // Debug: Log structure of projectsData
+            error_log("Project data structure keys: " . json_encode(array_keys($projectsData ?? [])));
+            error_log("Project data has 'data' key: " . (isset($projectsData['data']) ? 'yes' : 'no'));
+            
+            if (isset($projectsData['data']) && is_array($projectsData['data'])) {
+                // Log first project structure
+                if (count($projectsData['data']) > 0) {
+                    error_log("First project structure: " . json_encode($projectsData['data'][0]));
+                }
+                
+                // Direct approach - extract just what we need
+                foreach ($projectsData['data'] as $project) {
+                    $projectId = isset($project['id']) ? $project['id'] : null;
+                    $projectName = null;
+                    
+                    // Try different fields where name might be stored
+                    if (isset($project['name'])) {
+                        $projectName = $project['name'];
+                    } elseif (isset($project['project_name'])) {
+                        $projectName = $project['project_name'];
+                    }
+                    
+                    if ($projectId && $projectName) {
+                        $projects[] = [
+                            'id' => $projectId,
+                            'name' => $projectName
+                        ];
+                        error_log("Added project: $projectId - $projectName");
+                    }
+                }
+            }
+        }
+        
+        // If no projects found yet, try alternative approach
+        if (empty($projects)) {
+            error_log("No projects found in first attempt, trying alternative approaches...");
+            
+            // Get distinct project IDs
+            $sql = "SELECT DISTINCT project_id FROM qg_sync WHERE year = '$year' AND project_id != 'all'";
+            $result = $conn->query($sql);
+            
+            if ($result && $result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $projectId = $row['project_id'];
+                    $projectName = null;
+                    
+                    // Approach 1: Check fetchProjectSpesific
+                    $sql1 = "SELECT data_json FROM qg_sync 
+                            WHERE year = '$year' AND project_id = '$projectId' 
+                            AND data_type = 'fetchProjectSpesific'
+                            ORDER BY last_updated DESC LIMIT 1";
+                    
+                    $result1 = $conn->query($sql1);
+                    if ($result1 && $result1->num_rows > 0) {
+                        $row1 = $result1->fetch_assoc();
+                        $rawJson = $row1['data_json'];
+                        $data = json_decode($rawJson, true);
+                        
+                        // Debug specific project data
+                        error_log("Project $projectId specific data: " . substr($rawJson, 0, 200) . "...");
+                        error_log("Project $projectId structure keys: " . json_encode(array_keys($data ?? [])));
+                        error_log("Project $projectId has 'data' key: " . (isset($data['data']) ? 'yes' : 'no'));
+                        if (isset($data['data'])) {
+                            error_log("Project $projectId data keys: " . json_encode(array_keys($data['data'] ?? [])));
+                        }
+                        
+                        // Try multiple nested structures
+                        if (isset($data['data']['name'])) {
+                            $projectName = $data['data']['name'];
+                            error_log("Found name in data.name: $projectName");
+                        } elseif (isset($data['data']['project_name'])) {
+                            $projectName = $data['data']['project_name'];
+                            error_log("Found name in data.project_name: $projectName");
+                        } elseif (isset($data['name'])) {
+                            $projectName = $data['name'];
+                            error_log("Found name in name: $projectName");
+                        }
+                    }
+                    
+                    // Approach 2: Check if project appears in the full list
+                    if (!$projectName) {
+                        $sql2 = "SELECT data_json FROM qg_sync 
+                                WHERE year = '$year' AND project_id = 'all' 
+                                AND data_type = 'fetchProjects'
+                                ORDER BY last_updated DESC LIMIT 1";
+                        
+                        $result2 = $conn->query($sql2);
+                        if ($result2 && $result2->num_rows > 0) {
+                            $row2 = $result2->fetch_assoc();
+                            $projectsList = json_decode($row2['data_json'], true);
+                            
+                            if (isset($projectsList['data']) && is_array($projectsList['data'])) {
+                                foreach ($projectsList['data'] as $p) {
+                                    if ($p['id'] == $projectId && isset($p['name'])) {
+                                        $projectName = $p['name'];
+                                        error_log("Found name in projects list: $projectName");
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // As a last resort, try to get name from any related data
+                    if (!$projectName) {
+                        $sql3 = "SELECT data_json FROM qg_sync 
+                                WHERE year = '$year' AND project_id = '$projectId'
+                                ORDER BY last_updated DESC LIMIT 1";
+                        
+                        $result3 = $conn->query($sql3);
+                        if ($result3 && $result3->num_rows > 0) {
+                            $row3 = $result3->fetch_assoc();
+                            $anyData = json_decode($row3['data_json'], true);
+                            
+                            // Try to find any field that might contain the name
+                            if (isset($anyData['data']['project_name'])) {
+                                $projectName = $anyData['data']['project_name'];
+                                error_log("Found name in any data.project_name: $projectName");
+                            } elseif (isset($anyData['data']['name'])) {
+                                $projectName = $anyData['data']['name'];
+                                error_log("Found name in any data.name: $projectName");
+                            } elseif (isset($anyData['name'])) {
+                                $projectName = $anyData['name'];
+                                error_log("Found name in any name: $projectName");
+                            }
+                        }
+                    }
+                    
+                    // If still no name, use ID with a prefix to be clear
+                    if (!$projectName) {
+                        $projectName = "Kegiatan " . $projectId;
+                        error_log("No name found, using fallback: $projectName");
+                    }
+                    
+                    $projects[] = [
+                        'id' => $projectId,
+                        'name' => $projectName
+                    ];
+                }
+            }
+        }
+        
+        // Sort projects by name for better usability
+        usort($projects, function($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+        
+        error_log("Final projects array: " . json_encode($projects));
+        echo json_encode(['status' => true, 'data' => $projects]);
         exit;
     }
     
-    if ($db_action === 'clear_cache') {
+    if ($db_action === 'get_available_regions') {
+        $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
+        
+        if (empty($project_id)) {
+            echo json_encode(['status' => false, 'message' => 'Project ID is required']);
+            exit;
+        }
+        
+        // Get regions for the selected project
+        $project_id = $conn->real_escape_string($project_id);
+        $sql = "SELECT DISTINCT region_id, 
+                (SELECT data_json FROM qg_sync WHERE project_id = '$project_id' AND data_type = 'fetchCoverages' LIMIT 1) as coverage_data
+                FROM qg_sync 
+                WHERE project_id = '$project_id'";
+        
+        $result = $conn->query($sql);
+        $regions = [];
+        
+        // Always add "pusat" option
+        $regions[] = [
+            'id' => 'pusat',
+            'prov' => '00',
+            'kab' => '00',
+            'name' => 'Pusat - Nasional'
+        ];
+        
+        if ($result && $result->num_rows > 0) {
+            $coverageData = null;
+            
+            while ($row = $result->fetch_assoc()) {
+                if (empty($coverageData) && !empty($row['coverage_data'])) {
+                    $coverageJson = json_decode($row['coverage_data'], true);
+                    if (isset($coverageJson['data'])) {
+                        $coverageData = $coverageJson['data'];
+                    }
+                }
+                
+                // If we have coverageData, we can map region_ids to actual region info
+                if (!empty($coverageData)) {
+                    foreach ($coverageData as $coverage) {
+                        $regionId = $coverage['prov'] . $coverage['kab'];
+                        if ($regionId !== '0000' && !in_array($regionId, array_column($regions, 'id'))) {
+                            $regions[] = [
+                                'id' => $regionId,
+                                'prov' => $coverage['prov'],
+                                'kab' => $coverage['kab'],
+                                'name' => $coverage['name']
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+        
+        echo json_encode(['status' => true, 'data' => $regions]);
+        exit;
+    }
+    
+    if ($db_action === 'get_project_name') {
         $year = isset($_POST['year']) ? $_POST['year'] : '';
         $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : '';
-        $region_id = isset($_POST['region_id']) ? $_POST['region_id'] : 'all';
         
-        // Skip if missing required parameters
         if (empty($year) || empty($project_id)) {
-            echo json_encode(['status' => false, 'message' => 'Missing required parameters']);
+            echo json_encode(['status' => false, 'message' => 'Year and project_id are required']);
             exit;
         }
         
         $year = $conn->real_escape_string($year);
         $project_id = $conn->real_escape_string($project_id);
-        $region_id = $conn->real_escape_string($region_id);
         
-        $sql = "DELETE FROM qg_sync WHERE year = '$year' AND project_id = '$project_id' AND region_id = '$region_id'";
-        $result = $conn->query($sql);
+        // Try multiple approaches to get the project name
+        $projectName = null;
         
-        echo json_encode(['status' => $result ? true : false]);
+        // Approach 1: Check fetchProjects list
+        $sql1 = "SELECT data_json FROM qg_sync 
+                WHERE year = '$year' AND project_id = 'all' AND data_type = 'fetchProjects' 
+                ORDER BY last_updated DESC LIMIT 1";
+        
+        $result1 = $conn->query($sql1);
+        if ($result1 && $result1->num_rows > 0) {
+            $row1 = $result1->fetch_assoc();
+            $projectsList = json_decode($row1['data_json'], true);
+            
+            if (isset($projectsList['data']) && is_array($projectsList['data'])) {
+                foreach ($projectsList['data'] as $project) {
+                    if ($project['id'] == $project_id && isset($project['name'])) {
+                        $projectName = $project['name'];
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Approach 2: Check project-specific data
+        if (!$projectName) {
+            $sql2 = "SELECT data_json FROM qg_sync 
+                    WHERE year = '$year' AND project_id = '$project_id' AND data_type = 'fetchProjectSpesific'
+                    ORDER BY last_updated DESC LIMIT 1";
+            
+            $result2 = $conn->query($sql2);
+            if ($result2 && $result2->num_rows > 0) {
+                $row2 = $result2->fetch_assoc();
+                $projectData = json_decode($row2['data_json'], true);
+                
+                if (isset($projectData['data']['project_name'])) {
+                    $projectName = $projectData['data']['project_name'];
+                } elseif (isset($projectData['data']['name'])) {
+                    $projectName = $projectData['data']['name'];
+                } elseif (isset($projectData['name'])) {
+                    $projectName = $projectData['name'];
+                }
+            }
+        }
+        
+        // Approach 3: Check any data for this project
+        if (!$projectName) {
+            $sql3 = "SELECT data_json FROM qg_sync 
+                    WHERE year = '$year' AND project_id = '$project_id'
+                    ORDER BY last_updated DESC LIMIT 1";
+            
+            $result3 = $conn->query($sql3);
+            if ($result3 && $result3->num_rows > 0) {
+                $row3 = $result3->fetch_assoc();
+                $anyData = json_decode($row3['data_json'], true);
+                
+                if (isset($anyData['data']['project_name'])) {
+                    $projectName = $anyData['data']['project_name'];
+                } elseif (isset($anyData['data']['name'])) {
+                    $projectName = $anyData['data']['name'];
+                } elseif (isset($anyData['name'])) {
+                    $projectName = $anyData['name'];
+                }
+            }
+        }
+        
+        // Fallback
+        if (!$projectName) {
+            $projectName = "Kegiatan " . $project_id;
+        }
+        
+        echo json_encode(['status' => true, 'project_name' => $projectName]);
         exit;
     }
     
@@ -233,6 +400,8 @@ if (isset($_POST['db_action'])) {
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
       --primary-color: #0071e3; /* Apple blue */
@@ -352,7 +521,7 @@ if (isset($_POST['db_action'])) {
       white-space: nowrap;
       position: sticky;
       top: 0;
-      z-index: 10; /* Lebih tinggi untuk memastikan tetap di atas */
+      z-index: 10;
       text-align: left;
       border-bottom: 1px solid var(--border-color);
     }
@@ -447,36 +616,13 @@ if (isset($_POST['db_action'])) {
       background-color: rgba(0,113,227,0.04);
     }
     
-    /* Perbaikan tampilan tabel */
-    .table-monitoring th:nth-child(1), /* Gate */
-    .table-monitoring td:nth-child(1) {
-      min-width: 200px;
-    }
-    
-    .table-monitoring th:nth-child(2), /* UK */
-    .table-monitoring td:nth-child(2) {
-      min-width: 220px;
-    }
-    
-    .table-monitoring th:nth-child(3), /* Level */
-    .table-monitoring td:nth-child(3) {
-      min-width: 100px;
-      text-align: center;
-    }
-    
-    .table-monitoring th:nth-child(4), /* Aktivitas */
-    .table-monitoring td:nth-child(4) {
-      min-width: 280px;
-    }
-    
-    /* Kolom tanggal */
-    .table-monitoring th:nth-child(5), /* Tanggal Mulai */
-    .table-monitoring td:nth-child(5),
-    .table-monitoring th:nth-child(6), /* Tanggal Selesai */
-    .table-monitoring td:nth-child(6) {
-      min-width: 160px;
-      text-align: center;
-    }
+    /* Column widths */
+    .table-monitoring th:nth-child(1), .table-monitoring td:nth-child(1) { min-width: 200px; }
+    .table-monitoring th:nth-child(2), .table-monitoring td:nth-child(2) { min-width: 220px; }
+    .table-monitoring th:nth-child(3), .table-monitoring td:nth-child(3) { min-width: 100px; text-align: center; }
+    .table-monitoring th:nth-child(4), .table-monitoring td:nth-child(4) { min-width: 280px; }
+    .table-monitoring th:nth-child(5), .table-monitoring td:nth-child(5), 
+    .table-monitoring th:nth-child(6), .table-monitoring td:nth-child(6) { min-width: 160px; text-align: center; }
     
     /* Date in range (blinking effect) */
     .date-in-range {
@@ -491,19 +637,11 @@ if (isset($_POST['db_action'])) {
       100% { opacity: 1; }
     }
     
-    /* Untuk kompatibilitas */
-    .date-column {
-      text-align: center;
-    }
+    .date-column { text-align: center; }
     
     /* Row colors alternating by UK group */
-    .table-monitoring .uk-group-even {
-      background-color: #ffffff;
-    }
-    
-    .table-monitoring .uk-group-odd {
-      background-color: rgba(245,245,247,0.4);
-    }
+    .table-monitoring .uk-group-even { background-color: #ffffff; }
+    .table-monitoring .uk-group-odd { background-color: rgba(245,245,247,0.4); }
     
     /* Activity number */
     .activity-number {
@@ -527,45 +665,58 @@ if (isset($_POST['db_action'])) {
       white-space: nowrap;
     }
     
-    /* Row hover and focus */
-    .table-monitoring tr:hover td {
-      background-color: rgba(0,113,227,0.04);
-    }
+    /* Row hover */
+    .table-monitoring tr:hover td { background-color: rgba(0,113,227,0.04); }
     
-    /* Responsif */
+    /* Responsiveness */
     @media (max-width: 992px) {
-      .container-fluid {
-        padding: 1.5rem;
-      }
-      
-      .card-body {
-        padding: 1.25rem;
-      }
+      .container-fluid { padding: 1.5rem; }
+      .card-body { padding: 1.25rem; }
     }
     
     @media (max-width: 768px) {
-      .container-fluid {
-        padding: 1rem;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-      
-      .card-header {
-        padding: 1rem;
-      }
-      
-      .card-body {
-        padding: 1rem;
-      }
+      .container-fluid { padding: 1rem; }
+      h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+      .card-header { padding: 1rem; }
+      .card-body { padding: 1rem; }
+    }
+    
+    /* No data message */
+    .no-data-message {
+      text-align: center;
+      padding: 3rem;
+      color: var(--neutral-color);
+    }
+    
+    /* Download link */
+    .download-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    
+    .download-link:hover {
+      text-decoration: underline;
+    }
+    
+    .download-link i {
+      margin-right: 0.5rem;
     }
   </style>
 </head>
 <body>
   <div class="container-fluid">
     <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
+    
+    <!-- Navigation Menu -->
+    <div class="mb-4">
+      <a href="download.php" class="download-link">
+        <i class="fas fa-download"></i> Pergi ke halaman Download Data
+      </a>
+    </div>
     
     <!-- Input Filters -->
     <div class="card mb-4">
@@ -574,7 +725,7 @@ if (isset($_POST['db_action'])) {
       </div>
       <div class="card-body">
         <div class="row g-4">
-          <div class="col-md-2">
+          <div class="col-md-3">
             <label for="yearSelect" class="form-label">Tahun</label>
             <select id="yearSelect" class="form-select">
               <option value="">Pilih Tahun</option>
@@ -591,12 +742,9 @@ if (isset($_POST['db_action'])) {
             <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
             <select id="regionSelect" class="form-select" disabled></select>
           </div>
-          <div class="col-md-2 d-flex align-items-end gap-2">
+          <div class="col-md-1 d-flex align-items-end">
             <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-              <i class="fas fa-search me-2"></i>Tampilkan Data
-            </button>
-            <button id="refreshFromApi" class="btn btn-outline-primary flex-shrink-0" title="Muat ulang dari API">
-              <i class="fas fa-sync-alt"></i>
+              <i class="fas fa-search me-2"></i>Tampilkan
             </button>
           </div>
         </div>
@@ -617,93 +765,18 @@ if (isset($_POST['db_action'])) {
 
   <script>
     $(function(){
-      const API_URL = "api.php";
       let selectedProject, year, selectedRegion = null;
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
-      let useLocalCache = true; // Default use local cache if available
-      let isForcingRefresh = false; // Flag when user requests a force refresh from API
-
+      
       // Cache selector DOM
       const $yearSelect    = $("#yearSelect");
       const $projectSelect = $("#projectSelect");
       const $regionSelect  = $("#regionSelect");
       const $resultsContainer = $("#resultsContainer");
       const $spinner       = $("#spinner");
-      const $refreshFromApi = $("#refreshFromApi");
 
-      // --- Cache Management Functions ---
-      
-      // Check if we should use local cache
-      const checkLocalCache = async (year, projectId, regionId) => {
-        if (isForcingRefresh) return false;
-        
-        // Don't check cache if any required value is missing
-        if (!year || !projectId) {
-          return false;
-        }
-        
-        try {
-          const response = await $.ajax({
-            url: window.location.href,
-            method: "POST",
-            data: {
-              db_action: "check_cache",
-              year: year,
-              project_id: projectId,
-              region_id: regionId || 'all'
-            },
-            dataType: "json"
-          });
-          
-          return response.useCache;
-        } catch (error) {
-          console.error("Error checking cache:", error);
-          return false;
-        }
-      };
-      
-      // Get processed data from local cache
-      const getProcessedDataFromCache = async (year, projectId, regionId) => {
-        // Don't try to get from cache if any required value is missing
-        if (!year || !projectId || !regionId) {
-          return null;
-        }
-        
-        try {
-          const response = await $.ajax({
-            url: window.location.href,
-            method: "POST",
-            data: {
-              db_action: "get_processed_data",
-              year: year,
-              project_id: projectId,
-              region_id: regionId
-            },
-            dataType: "json"
-          });
-          
-          if (response.found) {
-            return response.data;
-          }
-          
-          return null;
-        } catch (error) {
-          console.error("Error getting cached data:", error);
-          return null;
-        }
-      };
-      
       // --- Helper Functions ---
-
-      const extractJson = response => {
-        const start = response.indexOf('{');
-        const end = response.lastIndexOf('}');
-        return (start !== -1 && end !== -1 && end > start)
-          ? response.substring(start, end + 1)
-          : response;
-      };
-
       const showError = message => {
         console.error(message);
         Swal.fire({
@@ -711,81 +784,6 @@ if (isset($_POST['db_action'])) {
           title: 'Terjadi Kesalahan',
           text: message,
           confirmButtonColor: '#0071e3'
-        });
-      };
-
-      // Modified to support caching
-      const makeAjaxRequest = async (url, data, cacheData = true) => {
-        // Skip cache if forcing refresh or missing required parameters
-        if (!isForcingRefresh && cacheData && useLocalCache && year && selectedProject) {
-          // Create a cache key based on the request data
-          const cacheDataType = data.action;
-          const cacheKey = JSON.stringify(data);
-          
-          // Try to get from local DB first if we should use cache
-          const shouldUseCache = await checkLocalCache(year, selectedProject, selectedRegion);
-          
-          if (shouldUseCache) {
-            const cachedData = await $.ajax({
-              url: window.location.href,
-              method: "POST",
-              data: {
-                db_action: "get_data",
-                year: year,
-                project_id: selectedProject,
-                region_id: selectedRegion || 'all',
-                data_type: cacheDataType,
-                cache_key: cacheKey
-              },
-              dataType: "json"
-            });
-            
-            if (cachedData.found) {
-              return cachedData.data;
-            }
-          }
-        }
-        
-        // If no cache or cache miss, proceed with API request
-        return new Promise((resolve, reject) => {
-          $.ajax({
-            url,
-            method: "POST",
-            data,
-            dataType: "text",
-            cache: false,
-            success: async response => {
-              try {
-                const jsonData = JSON.parse(extractJson(response));
-                
-                // Save to cache if successful and caching is enabled
-                if (cacheData && jsonData.status && !isForcingRefresh && year && selectedProject) {
-                  const cacheDataType = data.action;
-                  const cacheKey = JSON.stringify(data);
-                  
-                  // Save to local database
-                  await $.ajax({
-                    url: window.location.href,
-                    method: "POST",
-                    data: {
-                      db_action: "save_data",
-                      year: year,
-                      project_id: selectedProject,
-                      region_id: selectedRegion || 'all',
-                      data_type: cacheDataType,
-                      cache_key: cacheKey,
-                      data_json: JSON.stringify(jsonData)
-                    }
-                  });
-                }
-                
-                resolve(jsonData);
-              } catch(e) {
-                reject("Terjadi kesalahan saat memproses data");
-              }
-            },
-            error: () => reject("Terjadi kesalahan pada server")
-          });
         });
       };
 
@@ -1206,22 +1204,118 @@ if (isset($_POST['db_action'])) {
         $resultsContainer.html(tableHtml);
       };
 
-      // --- Fungsi untuk Load Data (Projects & Regions) ---
-
+      // --- Load Data Functions (Projects & Regions) ---
       const loadProjects = async () => {
         $projectSelect.empty().append('<option value="">Memuat data...</option>');
         try {
-          const response = await makeAjaxRequest(API_URL, { action: "fetchProjects", year });
+          const response = await $.ajax({
+            url: window.location.href,
+            method: "POST",
+            data: {
+              db_action: "get_available_projects",
+              year: year
+            },
+            dataType: "json"
+          });
+          
+          console.log("Project data response:", response);
+          
           $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
-          if (response.status && response.data.length) {
-            response.data.forEach(project => {
-              $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
-            });
+          
+          if (response.status && response.data && response.data.length > 0) {
+            // Display the actual data for debugging
+            console.log("Projects to display:", JSON.stringify(response.data));
+            
+            // Check if we have real project names or just IDs with prefixes
+            const needsFallback = response.data.some(p => 
+              p.name === "Kegiatan " + p.id || 
+              p.name === "Project ID: " + p.id || 
+              p.name === "Project " + p.id
+            );
+            
+            console.log("Needs fallback for names:", needsFallback);
+            
+            // If we need a fallback, get names one by one
+            if (needsFallback) {
+              console.log("Using fallback to get real project names");
+              const projects = [];
+              
+              for (const project of response.data) {
+                try {
+                  // Get the actual project name directly
+                  const nameResponse = await $.ajax({
+                    url: window.location.href,
+                    method: "POST",
+                    data: {
+                      db_action: "get_project_name",
+                      year: year,
+                      project_id: project.id
+                    },
+                    dataType: "json"
+                  });
+                  
+                  if (nameResponse.status) {
+                    console.log(`Got name for project ${project.id}:`, nameResponse.project_name);
+                    projects.push({
+                      id: project.id,
+                      name: nameResponse.project_name
+                    });
+                  } else {
+                    console.log(`Failed to get name for project ${project.id}, using default`);
+                    projects.push(project);
+                  }
+                } catch (error) {
+                  console.error(`Error getting name for project ${project.id}:`, error);
+                  projects.push(project);
+                }
+              }
+              
+              // Sort and populate the dropdown
+              projects.sort((a, b) => a.name.localeCompare(b.name));
+              
+              projects.forEach(project => {
+                $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
+              });
+            } else {
+              // Sort projects by name for better usability
+              const sortedProjects = [...response.data].sort((a, b) => a.name.localeCompare(b.name));
+              
+              sortedProjects.forEach(project => {
+                // Make sure the project name doesn't start with "Project ID" or similar
+                let projectName = project.name;
+                
+                // If it's just a numeric ID or has "Project ID" prefix, improve the display
+                if (/^Project ID: \d+$/.test(projectName) || /^Kegiatan \d+$/.test(projectName)) {
+                  projectName = "Kegiatan " + project.id;
+                }
+                
+                $projectSelect.append(`<option value="${project.id}">${projectName}</option>`);
+              });
+            }
+            
+            $projectSelect.prop('disabled', false);
           } else {
-            $projectSelect.append('<option value="" disabled>Tidak ada kegiatan ditemukan</option>');
+            $projectSelect.append('<option value="" disabled>Tidak ada kegiatan tersedia di database lokal</option>');
+            $projectSelect.prop('disabled', true);
+            
+            // Show information that they need to download data first
+            $resultsContainer.html(`
+              <div class="card">
+                <div class="card-body">
+                  <div class="no-data-message">
+                    <i class="fas fa-info-circle fa-3x mb-3 text-primary"></i>
+                    <h4>Tidak ada data untuk tahun ${year}</h4>
+                    <p>Silahkan download data terlebih dahulu dari halaman Download Data.</p>
+                    <a href="download.php" class="btn btn-primary mt-3">
+                      <i class="fas fa-download me-2"></i>Download Data
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `);
           }
         } catch (error) {
-          showError("Gagal memuat daftar kegiatan");
+          showError("Gagal memuat daftar kegiatan dari database lokal");
           $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
         }
       };
@@ -1229,491 +1323,171 @@ if (isset($_POST['db_action'])) {
       const loadRegions = async () => {
         $regionSelect.empty().append('<option value="">Memuat data...</option>');
         try {
-          const response = await makeAjaxRequest(API_URL, { action: "fetchCoverages", id_project: selectedProject });
-          $regionSelect.empty();
-          coverageData = [];
-          if (!response.status)
-            throw new Error("Gagal memuat data wilayah");
-          
-          // Tambahkan opsi Pusat
-          $regionSelect.append(`<option value="pusat">Pusat - Nasional</option>`);
-          coverageData.push({
-            id: "pusat",
-            prov: "00",
-            kab: "00",
-            name: "Pusat - Nasional"
+          const response = await $.ajax({
+            url: window.location.href,
+            method: "POST",
+            data: {
+              db_action: "get_available_regions",
+              project_id: selectedProject
+            },
+            dataType: "json"
           });
           
-          if (response.data && response.data.length) {
-            const apiData = response.data.map(cov => ({
-              id: `${cov.prov}${cov.kab}`,
-              prov: cov.prov,
-              kab: cov.kab,
-              name: cov.name
-            }));
-            coverageData = [...coverageData, ...apiData];
-            
-            // Filter provinsi (kab == "00" dan prov tidak "00")
-            const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
-            provinces.forEach(province => {
-              $regionSelect.append(`<option value="${province.id}">${province.name}</option>`);
-            });
-            
-            // Jika tidak ada provinsi, tampilkan semua kabupaten/kota
-            if (provinces.length === 0) {
-              // Filter kabupaten/kota (kab != "00")
-              const kabupatens = coverageData.filter(cov => cov.kab !== "00");
-              kabupatens.forEach(kabupaten => {
-                $regionSelect.append(`<option value="${kabupaten.id}">${kabupaten.name}</option>`);
-              });
-            }
+          $regionSelect.empty();
+          coverageData = [];
+          
+          if (!response.status || !response.data || response.data.length === 0) {
+            throw new Error("Tidak ada data wilayah tersedia di database lokal");
           }
           
-          // Selalu pilih Pusat sebagai default jika ada
+          coverageData = response.data;
+          
+          // Display regions in the select element
+          coverageData.forEach(region => {
+            $regionSelect.append(`<option value="${region.id}">${region.name}</option>`);
+          });
+          
+          // Select 'pusat' as default if available
           if ($regionSelect.find('option[value="pusat"]').length > 0) {
             selectedRegion = "pusat";
             $regionSelect.val(selectedRegion);
           } else if ($regionSelect.find('option').length > 0) {
-            // Jika tidak ada pusat, pilih opsi pertama yang tersedia
             selectedRegion = $regionSelect.find('option:first').val();
             $regionSelect.val(selectedRegion);
           }
           
-          if (coverageData.length === 0)
-            throw new Error("Tidak ada data wilayah yang tersedia");
+          $regionSelect.prop('disabled', false);
+          
         } catch (error) {
           showError(error.message || "Gagal memuat daftar wilayah");
           $regionSelect.empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+          $regionSelect.prop('disabled', true);
           coverageData = [];
         }
       };
 
-      // --- Fungsi untuk memproses dan menyimpan data aktivitas per wilayah ---
-      const processData = async (regions) => {
-        // Reset data
-        activityData = {};
-        
-        // Dapatkan semua gates
-        const gatesResponse = await makeAjaxRequest(API_URL, {
-          action: "fetchGates",
-          id_project: selectedProject
-        });
-        
-        if (!gatesResponse.status || !gatesResponse.data.length) {
-          throw new Error("Tidak ada data gate");
-        }
-        
-        const gates = gatesResponse.data;
-        
-        // Cache untuk data API
-        const apiCache = {
-          measurements: {},
-          preventives: {},
-          preventivesKab: {},
-          assessments: {},
-          correctives: {},
-          correctivesKab: {},
-          allActions: {}
-        };
-        
-        // Fungsi untuk mendapatkan data dari cache atau API
-        const getDataFromCacheOrApi = async (cacheKey, apiAction, apiParams) => {
-          const cacheKeyString = JSON.stringify({ action: apiAction, ...apiParams });
-          
-          if (!apiCache[cacheKey][cacheKeyString]) {
-            apiCache[cacheKey][cacheKeyString] = await makeAjaxRequest(API_URL, { 
-              action: apiAction, 
-              ...apiParams 
-            });
-          }
-          
-          return apiCache[cacheKey][cacheKeyString];
-        };
-        
-        // 1. Pre-load semua measurements untuk semua gates
-        for (const gate of gates) {
-          // Dapatkan measurements untuk gate ini (dari pusat)
-          const measurementsResponse = await getDataFromCacheOrApi(
-            'measurements',
-            'fetchMeasurements', 
-            {
-              id_project: selectedProject,
-              id_gate: gate.id,
-              prov: "00",
-              kab: "00"
-            }
-          );
-          
-          if (!measurementsResponse.status || !measurementsResponse.data.length) {
-            continue; // Skip jika tidak ada measurements
-          }
-          
-          const measurements = measurementsResponse.data;
-          const gateNumber = gate.gate_number || gates.indexOf(gate) + 1;
-          const gateName = `GATE${gateNumber}: ${gate.gate_name}`;
-          
-          // 2. Untuk setiap ukuran kualitas, tentukan region yang sesuai berdasarkan assessment_level
-          for (let j = 0; j < measurements.length; j++) {
-            const measurement = measurements[j];
-            const ukNumber = j + 1;
-            const ukName = `UK${ukNumber}: ${measurement.measurement_name}`;
-            const ukLevel = getUkLevelLabel(measurement);
-            
-            // Tentukan assessment_level (default ke 1 jika tidak ada)
-            const assessmentLevel = parseInt(measurement.assessment_level || 1);
-            
-            // Filter region berdasarkan assessment_level
-            const applicableRegions = regions.filter(region => {
-              if (assessmentLevel === 1) {
-                // Khusus pusat (00, 00)
-                return region.prov === "00" && region.kab === "00";
-              } else if (assessmentLevel === 2) {
-                // Khusus level provinsi (kab = 00, prov != 00)
-                return region.prov !== "00" && region.kab === "00";
-              } else if (assessmentLevel === 3) {
-                // Khusus level kabupaten (kab != 00)
-                return region.kab !== "00";
-              }
-              return false;
-            });
-            
-            // Optimasi untuk fetchAllActions: gunakan cache untuk kabupaten dari provinsi yang sama
-            // Pengelompokan region berdasarkan provinsi untuk level 3 (kabupaten)
-            const provinceGroups = {};
-            if (assessmentLevel === 3) {
-              applicableRegions.forEach(region => {
-                if (!provinceGroups[region.prov]) {
-                  provinceGroups[region.prov] = [];
-                }
-                provinceGroups[region.prov].push(region);
-              });
-            }
-            
-            // Pre-load data hanya untuk region yang sesuai dengan assessment_level
-            if (assessmentLevel === 3) {
-              // Untuk level kabupaten, ambil sampel 1 kabupaten per provinsi untuk fetchAllActions
-              for (const prov in provinceGroups) {
-                if (provinceGroups[prov].length > 0) {
-                  const sampleRegion = provinceGroups[prov][0];
-                  
-                  // Fetch allActions hanya untuk sampel kabupaten
-                  const actionsKey = JSON.stringify({
-                    action: 'fetchAllActions',
-                    id_project: selectedProject,
-                    id_gate: gate.id,
-                    prov: sampleRegion.prov,
-                    kab: sampleRegion.kab
-                  });
-                  
-                  // Ambil data Actions untuk sampel
-                  if (!apiCache.allActions[actionsKey]) {
-                    apiCache.allActions[actionsKey] = await makeAjaxRequest(API_URL, {
-                      action: 'fetchAllActions',
-                      id_project: selectedProject,
-                      id_gate: gate.id,
-                      prov: sampleRegion.prov,
-                      kab: sampleRegion.kab
-                    });
-                  }
-                  
-                  // Clone response untuk kabupaten lain dalam provinsi yang sama
-                  for (let i = 1; i < provinceGroups[prov].length; i++) {
-                    const otherRegion = provinceGroups[prov][i];
-                    const otherActionsKey = JSON.stringify({
-                      action: 'fetchAllActions',
-                      id_project: selectedProject,
-                      id_gate: gate.id,
-                      prov: otherRegion.prov,
-                      kab: otherRegion.kab
-                    });
-                    
-                    // Gunakan data yang sama
-                    apiCache.allActions[otherActionsKey] = JSON.parse(JSON.stringify(apiCache.allActions[actionsKey]));
-                  }
-                  
-                  // Tetap fetch assessments untuk semua kabupaten
-                  for (const region of provinceGroups[prov]) {
-                    await getDataFromCacheOrApi(
-                      'assessments',
-                      'fetchAssessments',
-                      {
-                        id_project: selectedProject,
-                        id_gate: gate.id,
-                        prov: region.prov,
-                        kab: region.kab
-                      }
-                    );
-                  }
-                }
-              }
-            } else {
-              // Untuk level pusat dan provinsi, tetap gunakan cara normal
-              for (const region of applicableRegions) {
-                // Pre-load allActions untuk gate & region
-                await getDataFromCacheOrApi(
-                  'allActions',
-                  'fetchAllActions',
-                  {
-                    id_project: selectedProject,
-                    id_gate: gate.id,
-                    prov: region.prov,
-                    kab: region.kab
-                  }
-                );
-                
-                // Pre-load assessments data untuk gate & region
-                await getDataFromCacheOrApi(
-                  'assessments',
-                  'fetchAssessments',
-                  {
-                    id_project: selectedProject,
-                    id_gate: gate.id,
-                    prov: region.prov,
-                    kab: region.kab
-                  }
-                );
-              }
-            }
-            
-            // Daftar aktivitas standar untuk gate ini
-            const activities = [
-              {
-                name: "Pengisian nama pelaksana aksi preventif",
-                start: gate.prev_insert_start,
-                end: gate.prev_insert_end
-              },
-              {
-                name: "Upload bukti pelaksanaan aksi preventif",
-                start: gate.prev_upload_start,
-                end: gate.prev_upload_end
-              },
-              {
-                name: "Penilaian ukuran kualitas",
-                start: gate.evaluation_start,
-                end: gate.evaluation_end
-              },
-              {
-                name: "Approval Gate oleh Sign-off",
-                start: gate.approval_start,
-                end: gate.approval_end
-              },
-              {
-                name: "Pengisian pelaksana aksi korektif",
-                start: gate.cor_insert_start,
-                end: gate.cor_insert_end
-              },
-              {
-                name: "Upload bukti pelaksanaan aksi korektif",
-                start: gate.cor_upload_start,
-                end: gate.cor_upload_end
-              }
-            ];
-            
-            // 4. Cari status untuk setiap aktivitas dan setiap wilayah
-            for (const activity of activities) {
-              const activityKey = `${gateName}|${ukName}|${activity.name}`;
-              
-              // Simpan info aktivitas
-              if (!activityData[activityKey]) {
-                activityData[activityKey] = {
-                  gate: gateName,
-                  uk: ukName,
-                  ukLevel: ukLevel,
-                  activity: activity.name,
-                  start: activity.start,
-                  end: activity.end,
-                  statuses: {}
-                };
-              }
-              
-              // 5. Untuk setiap wilayah, isi status
-              for (const region of regions) {
-                // Cek apakah ukuran kualitas sesuai dengan level wilayah
-                const isApplicable = isUkApplicableForRegion(measurement, region);
-                
-                if (!isApplicable) {
-                  activityData[activityKey].statuses[region.id] = "Tidak perlu";
-                  continue;
-                }
-                
-                // Dapatkan status aktivitas
-                const status = await determineActivityStatus(
-                  gate, measurement, year, activity.name, region.prov, region.kab, apiCache, getDataFromCacheOrApi
-                );
-                
-                // Simpan status
-                activityData[activityKey].statuses[region.id] = status;
-              }
-            }
-          }
-        }
-      };
-
-      // --- Event Handlers ---
-
-      $yearSelect.on('change', async function(){
-        year = $(this).val();
-        $projectSelect.prop('disabled', false).empty().append('<option value="">Pilih Kegiatan</option>');
-        $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
-        selectedProject = null;
-        selectedRegion  = null;
-        await loadProjects();
-      });
-
-      $projectSelect.on('change', async function(){
-        selectedProject = $(this).val();
-        $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
-        selectedRegion  = null;
-        if (selectedProject) await loadRegions();
-      });
-
-      $regionSelect.on('change', function(){
-        selectedRegion = $(this).val();
-      });
-
-      $("#loadData").on('click', async function(){
+      // --- Main function to load monitoring data ---
+      const loadMonitoringData = async () => {
         if (!year || !selectedProject || !selectedRegion) {
           showError("Silakan pilih tahun, kegiatan, dan cakupan wilayah terlebih dahulu");
           return;
         }
+        
         $spinner.fadeIn(200);
         $resultsContainer.empty();
+        
         try {
           const regionData = coverageData.find(r => r.id === selectedRegion);
-          if (!regionData)
+          if (!regionData) {
             throw new Error("Data wilayah tidak ditemukan");
+          }
           
-          // Tentukan daftar wilayah yang akan diproses
+          // Get regions to display in the table
           let regionsToProcess = [];
           
           if (selectedRegion === "pusat") {
-            // Hanya pusat
+            // Only show the center
             regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
           } else {
             const prov = regionData.prov;
-            // Provinsi dan semua kabupaten di dalamnya
+            
+            // Show the province and all kabupaten in it
             regionsToProcess = [
               { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
             ];
             
-            // Tambahkan kabupaten
+            // Add kabupaten if they exist in coverageData
             const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
             regionsToProcess = [...regionsToProcess, ...kabupatenList];
           }
           
-          // Cek apakah data tersedia di cache lokal
-          if (!isForcingRefresh && useLocalCache) {
-            const cachedData = await getProcessedDataFromCache(year, selectedProject, selectedRegion);
-            if (cachedData) {
-              // Gunakan data yang sudah diproses dari cache
-              activityData = cachedData;
-              displayResultTable(regionsToProcess);
-              
-              // Tampilkan badge "Data dari cache" di bagian atas tabel
-              const lastUpdate = new Date(cachedData._meta?.lastUpdated || Date.now()).toLocaleString('id-ID');
-              $("#resultsContainer").prepend(
-                `<div class="alert alert-info mb-4">
-                  <i class="fas fa-database me-2"></i>Data diambil dari cache lokal. 
-                  Terakhir update: ${lastUpdate}
-                  <button id="forceRefresh" class="btn btn-sm btn-outline-primary ms-3">
-                    <i class="fas fa-sync-alt me-1"></i>Muat Ulang dari API
-                  </button>
-                </div>`
-              );
-              
-              // Event handler untuk tombol refresh di pesan cache
-              $("#forceRefresh").on('click', function() {
-                isForcingRefresh = true;
-                $("#loadData").trigger('click');
-                isForcingRefresh = false;
-              });
-              
-              $spinner.fadeOut(200);
-              return;
-            }
-          }
+          // Get processed data from database
+          const processedDataResponse = await $.ajax({
+            url: window.location.href,
+            method: "POST",
+            data: {
+              db_action: "get_processed_data",
+              year: year,
+              project_id: selectedProject,
+              region_id: selectedRegion
+            },
+            dataType: "json"
+          });
           
-          // Jika tidak ada cache atau forcing refresh, proses data dari API
-          await processData(regionsToProcess);
-          
-          // Tampilkan hasil dalam format tabel
-          displayResultTable(regionsToProcess);
-          
-          // Simpan hasil yang sudah diproses ke database lokal
-          if (!isForcingRefresh) {
-            // Tambahkan metadata
-            activityData._meta = {
-              lastUpdated: new Date().toISOString()
-            };
+          if (processedDataResponse.found) {
+            // Use the pre-processed data
+            activityData = processedDataResponse.data;
+            displayResultTable(regionsToProcess);
             
-            await $.ajax({
-              url: window.location.href,
-              method: "POST",
-              data: {
-                db_action: "save_processed_data",
-                year: year,
-                project_id: selectedProject,
-                region_id: selectedRegion,
-                data_json: JSON.stringify(activityData)
-              }
-            });
+            // Show when the data was last updated
+            const lastUpdate = new Date(activityData._meta?.lastUpdated || processedDataResponse.last_updated).toLocaleString('id-ID');
+            $("#resultsContainer").prepend(
+              `<div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle me-2"></i>Data terakhir diperbarui: ${lastUpdate}
+                <a href="download.php" class="btn btn-sm btn-outline-primary ms-3">
+                  <i class="fas fa-download me-1"></i>Download Data Baru
+                </a>
+              </div>`
+            );
+          } else {
+            // No processed data available
+            $resultsContainer.html(`
+              <div class="card">
+                <div class="card-body">
+                  <div class="no-data-message">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                    <h4>Data Monitoring Belum Tersedia</h4>
+                    <p>Silahkan download data terlebih dahulu dari halaman Download Data.</p>
+                    <a href="download.php" class="btn btn-primary mt-3">
+                      <i class="fas fa-download me-2"></i>Download Data
+                    </a>
+                  </div>
+                </div>
+              </div>
+            `);
           }
-          
-        } catch(error) {
-          showError(error.message || "Terjadi kesalahan saat memuat data");
+        } catch (error) {
+          showError(error.message || "Terjadi kesalahan saat memuat data monitoring");
         } finally {
           $spinner.fadeOut(200);
-          // Reset forcing refresh flag
-          isForcingRefresh = false;
         }
-      });
-      
-      // Refresh button handler
-      $refreshFromApi.on('click', function() {
-        if (!year || !selectedProject || !selectedRegion) {
-          showError("Silakan pilih tahun, kegiatan, dan cakupan wilayah terlebih dahulu");
-          return;
-        }
+      };
+
+      // --- Event Handlers ---
+      $yearSelect.on('change', async function(){
+        year = $(this).val();
+        $projectSelect.prop('disabled', true).empty().append('<option value="">Pilih Kegiatan</option>');
+        $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+        selectedProject = null;
+        selectedRegion  = null;
+        $resultsContainer.empty();
         
-        Swal.fire({
-          title: 'Muat Ulang Data?',
-          text: 'Data akan dimuat ulang dari API. Proses ini mungkin memakan waktu.',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonColor: '#0071e3',
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'Ya, Muat Ulang',
-          cancelButtonText: 'Batal'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Clear cache for this selection
-            $.ajax({
-              url: window.location.href,
-              method: "POST",
-              data: {
-                db_action: "clear_cache",
-                year: year,
-                project_id: selectedProject,
-                region_id: selectedRegion
-              },
-              success: function() {
-                // Force refresh from API
-                isForcingRefresh = true;
-                $("#loadData").trigger('click');
-              }
-            });
-          }
-        });
+        if (year) {
+          await loadProjects();
+        }
       });
 
-      // Inisialisasi
-      year = $yearSelect.val();
-      loadProjects();
+      $projectSelect.on('change', async function(){
+        selectedProject = $(this).val();
+        $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+        selectedRegion  = null;
+        $resultsContainer.empty();
+        
+        if (selectedProject) {
+          await loadRegions();
+        }
+      });
+
+      $regionSelect.on('change', function(){
+        selectedRegion = $(this).val();
+        $resultsContainer.empty();
+      });
+
+      $("#loadData").on('click', loadMonitoringData);
+
+      // Initialize
       $spinner.hide();
     });
   </script>
-  
-  <!-- SweetAlert2 untuk notifikasi -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

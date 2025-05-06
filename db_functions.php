@@ -207,4 +207,64 @@ function getDownloadLogs($conn, $limit = 10) {
     
     return [];
 }
+
+// Function to save the final processed monitoring data
+function saveProcessedData($conn, $year, $project_id, $region_id, $data) {
+    return saveToLocalDB(
+        $conn, 
+        $year, 
+        $project_id, 
+        $region_id, 
+        'processed_monitoring_data', 
+        'final_result', 
+        json_encode($data)
+    );
+}
+
+// Function to get the final processed monitoring data
+function getProcessedData($conn, $year, $project_id, $region_id) {
+    return getFromLocalDB(
+        $conn, 
+        $year, 
+        $project_id, 
+        $region_id, 
+        'processed_monitoring_data', 
+        'final_result'
+    );
+}
+
+// Create tables function
+function createTables($conn) {
+    // Create qg_sync table if not exists
+    $sql = "CREATE TABLE IF NOT EXISTS qg_sync (
+        id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        year VARCHAR(10) NOT NULL,
+        project_id VARCHAR(100) NOT NULL,
+        region_id VARCHAR(100) NOT NULL,
+        data_type VARCHAR(50) NOT NULL,
+        cache_key VARCHAR(255) NOT NULL,
+        data_json LONGTEXT NOT NULL,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY cache_idx (year, project_id, region_id, data_type, cache_key)
+    )";
+
+    $conn->query($sql);
+
+    // Create download_logs table if not exists
+    $sql = "CREATE TABLE IF NOT EXISTS download_logs (
+        id INT(11) AUTO_INCREMENT PRIMARY KEY,
+        year VARCHAR(10) NOT NULL,
+        project_id VARCHAR(100) NOT NULL,
+        region_id VARCHAR(100) NOT NULL,
+        status VARCHAR(20) NOT NULL,
+        progress INT(3) DEFAULT 0,
+        total_items INT(11) DEFAULT 0,
+        completed_items INT(11) DEFAULT 0,
+        start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        end_time TIMESTAMP NULL DEFAULT NULL,
+        error_message TEXT DEFAULT NULL
+    )";
+
+    $conn->query($sql);
+}
 ?> 
