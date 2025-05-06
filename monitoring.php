@@ -252,52 +252,170 @@ if (isset($_POST['db_action'])) {
             exit;
         }
         
-        // Get regions for the selected project
-        $project_id = $conn->real_escape_string($project_id);
-        $sql = "SELECT DISTINCT region_id, 
-                (SELECT data_json FROM qg_sync WHERE project_id = '$project_id' AND data_type = 'fetchCoverages' LIMIT 1) as coverage_data
-                FROM qg_sync 
-                WHERE project_id = '$project_id'";
+        error_log("Getting available regions for project ID: $project_id");
         
-        $result = $conn->query($sql);
+        // Get regions that actually have data for this project
+        $project_id = $conn->real_escape_string($project_id);
+        
+        // First, let's see if we actually have any data at all for specific regions
+        $sql_check = "SELECT COUNT(*) as count FROM qg_sync 
+                     WHERE project_id = '$project_id' AND region_id != 'all' AND region_id != ''";
+        
+        $result_check = $conn->query($sql_check);
+        $has_region_data = false;
+        
+        if ($result_check && $result_check->num_rows > 0) {
+            $row = $result_check->fetch_assoc();
+            $has_region_data = ($row['count'] > 0);
+        }
+        
+        error_log("Project $project_id has region-specific data: " . ($has_region_data ? "Yes" : "No"));
+        
+        // Get all regions that have data
         $regions = [];
         
-        // Always add "pusat" option
-        $regions[] = [
-            'id' => 'pusat',
-            'prov' => '00',
-            'kab' => '00',
-            'name' => 'Pusat - Nasional'
-        ];
-        
-        if ($result && $result->num_rows > 0) {
-            $coverageData = null;
+        if ($has_region_data) {
+            // Get all distinct regions for this project
+            $sql = "SELECT DISTINCT region_id FROM qg_sync 
+                   WHERE project_id = '$project_id' AND region_id != 'all' AND region_id != ''";
             
-            while ($row = $result->fetch_assoc()) {
-                if (empty($coverageData) && !empty($row['coverage_data'])) {
-                    $coverageJson = json_decode($row['coverage_data'], true);
-                    if (isset($coverageJson['data'])) {
-                        $coverageData = $coverageJson['data'];
-                    }
-                }
+            error_log("SQL query for regions: $sql");
+            
+            $result = $conn->query($sql);
+            
+            if ($result) {
+                error_log("Found " . $result->num_rows . " distinct regions");
                 
-                // If we have coverageData, we can map region_ids to actual region info
-                if (!empty($coverageData)) {
-                    foreach ($coverageData as $coverage) {
-                        $regionId = $coverage['prov'] . $coverage['kab'];
-                        if ($regionId !== '0000' && !in_array($regionId, array_column($regions, 'id'))) {
-                            $regions[] = [
-                                'id' => $regionId,
-                                'prov' => $coverage['prov'],
-                                'kab' => $coverage['kab'],
-                                'name' => $coverage['name']
-                            ];
+                while ($row = $result->fetch_assoc()) {
+                    $region_id = $row['region_id'];
+                    error_log("Processing region: $region_id");
+                    
+                    // Skip empty region IDs
+                    if (empty($region_id)) continue;
+                    
+                    if ($region_id === 'pusat') {
+                        $regions[] = [
+                            'id' => 'pusat',
+                            'prov' => '00',
+                            'kab' => '00',
+                            'name' => 'Pusat - Nasional'
+                        ];
+                        continue;
+                    }
+                    
+                    // Try to parse province and kabupaten codes
+                    $prov = substr($region_id, 0, 2);
+                    $kab = substr($region_id, 2);
+                    
+                    if (strlen($prov) !== 2) {
+                        error_log("Invalid region ID format: $region_id");
+                        continue;
+                    }
+                    
+                    $region_name = "Wilayah $region_id"; // Default name
+                    
+                    // Try to find region name from coverage data
+                    $sql_coverage = "SELECT data_json FROM qg_sync 
+                                   WHERE project_id = '$project_id' AND data_type = 'fetchCoverages' 
+                                   ORDER BY last_updated DESC LIMIT 1";
+                    
+                    $result_coverage = $conn->query($sql_coverage);
+                    
+                    if ($result_coverage && $result_coverage->num_rows > 0) {
+                        $row_coverage = $result_coverage->fetch_assoc();
+                        $coverage_data = json_decode($row_coverage['data_json'], true);
+                        
+                        if (isset($coverage_data['data']) && is_array($coverage_data['data'])) {
+                            foreach ($coverage_data['data'] as $coverage) {
+                                if ($coverage['prov'] === $prov && $coverage['kab'] === $kab) {
+                                    $region_name = $coverage['name'];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    $regions[] = [
+                        'id' => $region_id,
+                        'prov' => $prov,
+                        'kab' => $kab,
+                        'name' => $region_name
+                    ];
+                }
+            }
+        } else {
+            // If no region-specific data, check if there's data with region_id='all'
+            $sql_all = "SELECT COUNT(*) as count FROM qg_sync 
+                       WHERE project_id = '$project_id' AND region_id = 'all'";
+            
+            $result_all = $conn->query($sql_all);
+            $has_all_region_data = false;
+            
+            if ($result_all && $result_all->num_rows > 0) {
+                $row = $result_all->fetch_assoc();
+                $has_all_region_data = ($row['count'] > 0);
+            }
+            
+            error_log("Project $project_id has 'all' region data: " . ($has_all_region_data ? "Yes" : "No"));
+            
+            if ($has_all_region_data) {
+                // At minimum, include Pusat (national level)
+                $regions[] = [
+                    'id' => 'pusat',
+                    'prov' => '00',
+                    'kab' => '00',
+                    'name' => 'Pusat - Nasional'
+                ];
+                
+                // Check if we have coverage data to potentially include other regions
+                $sql_coverage = "SELECT data_json FROM qg_sync 
+                               WHERE project_id = '$project_id' AND data_type = 'fetchCoverages' 
+                               ORDER BY last_updated DESC LIMIT 1";
+                
+                $result_coverage = $conn->query($sql_coverage);
+                
+                if ($result_coverage && $result_coverage->num_rows > 0) {
+                    $row_coverage = $result_coverage->fetch_assoc();
+                    $coverage_json = json_decode($row_coverage['data_json'], true);
+                    
+                    if (isset($coverage_json['data']) && is_array($coverage_json['data']) && !empty($coverage_json['data'])) {
+                        error_log("Found coverage data with " . count($coverage_json['data']) . " regions");
+                        
+                        // Only include provinces for simplicity
+                        $added_provinces = [];
+                        
+                        foreach ($coverage_json['data'] as $coverage) {
+                            // Skip 00 (national)
+                            if ($coverage['prov'] === '00') continue;
+                            
+                            // Only add provinces (where kab is '00')
+                            if ($coverage['kab'] === '00' && !in_array($coverage['prov'], $added_provinces)) {
+                                $region_id = $coverage['prov'] . $coverage['kab'];
+                                $regions[] = [
+                                    'id' => $region_id,
+                                    'prov' => $coverage['prov'],
+                                    'kab' => $coverage['kab'],
+                                    'name' => $coverage['name']
+                                ];
+                                $added_provinces[] = $coverage['prov'];
+                            }
                         }
                     }
                 }
             }
         }
         
+        // Sort regions
+        usort($regions, function($a, $b) {
+            // Pusat always comes first
+            if ($a['id'] === 'pusat') return -1;
+            if ($b['id'] === 'pusat') return 1;
+            
+            // Then sort by name
+            return strcmp($a['name'], $b['name']);
+        });
+        
+        error_log("Returning " . count($regions) . " regions");
         echo json_encode(['status' => true, 'data' => $regions]);
         exit;
     }
@@ -482,6 +600,101 @@ if (isset($_POST['db_action'])) {
         }
         
         echo json_encode(['status' => true, 'name' => $name]);
+        exit;
+    }
+    
+    if ($db_action === 'debug_data_availability') {
+        // This endpoint will map out which projects have data for which regions
+        
+        // Get all distinct project IDs
+        $sql_projects = "SELECT DISTINCT project_id FROM qg_sync 
+                         WHERE project_id != 'all' AND project_id != '' 
+                         ORDER BY project_id";
+        $result_projects = $conn->query($sql_projects);
+        
+        $data_map = [];
+        
+        if ($result_projects && $result_projects->num_rows > 0) {
+            while ($project_row = $result_projects->fetch_assoc()) {
+                $project_id = $project_row['project_id'];
+                
+                // Get project name
+                $project_name = "Kegiatan " . $project_id;
+                $sql_name = "SELECT data_json FROM qg_sync 
+                            WHERE data_type = 'fetchProjects' 
+                            ORDER BY last_updated DESC LIMIT 1";
+                $result_name = $conn->query($sql_name);
+                
+                if ($result_name && $result_name->num_rows > 0) {
+                    $name_row = $result_name->fetch_assoc();
+                    $projects_data = json_decode($name_row['data_json'], true);
+                    
+                    if (isset($projects_data['data']) && is_array($projects_data['data'])) {
+                        foreach ($projects_data['data'] as $project) {
+                            if (isset($project['id']) && $project['id'] == $project_id && isset($project['name'])) {
+                                $project_name = $project['name'];
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Get regions with data for this project
+                $sql_regions = "SELECT DISTINCT region_id FROM qg_sync 
+                               WHERE project_id = '$project_id' AND region_id != 'all' AND region_id != ''";
+                $result_regions = $conn->query($sql_regions);
+                
+                $regions = [];
+                if ($result_regions && $result_regions->num_rows > 0) {
+                    while ($region_row = $result_regions->fetch_assoc()) {
+                        $region_id = $region_row['region_id'];
+                        
+                        // Try to get region name
+                        $region_name = $region_id;
+                        if ($region_id === 'pusat') {
+                            $region_name = 'Pusat - Nasional';
+                        } else {
+                            // Find region name from coverage data
+                            $sql_coverage = "SELECT data_json FROM qg_sync 
+                                          WHERE project_id = '$project_id' AND data_type = 'fetchCoverages' 
+                                          ORDER BY last_updated DESC LIMIT 1";
+                            $result_coverage = $conn->query($sql_coverage);
+                            
+                            if ($result_coverage && $result_coverage->num_rows > 0) {
+                                $coverage_row = $result_coverage->fetch_assoc();
+                                $coverage_data = json_decode($coverage_row['data_json'], true);
+                                
+                                if (isset($coverage_data['data']) && is_array($coverage_data['data'])) {
+                                    $prov = substr($region_id, 0, 2);
+                                    $kab = substr($region_id, 2, 2);
+                                    
+                                    foreach ($coverage_data['data'] as $coverage) {
+                                        if ($coverage['prov'] === $prov && $coverage['kab'] === $kab) {
+                                            $region_name = $coverage['name'];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        $regions[] = [
+                            'id' => $region_id,
+                            'name' => $region_name
+                        ];
+                    }
+                }
+                
+                $data_map[] = [
+                    'project_id' => $project_id,
+                    'project_name' => $project_name,
+                    'regions' => $regions,
+                    'region_count' => count($regions)
+                ];
+            }
+        }
+        
+        echo json_encode(['status' => true, 'data_map' => $data_map]);
         exit;
     }
     
@@ -820,8 +1033,36 @@ if (isset($_POST['db_action'])) {
       <a href="download.php" class="download-link">
         <i class="fas fa-download"></i> Pergi ke halaman Download Data
       </a>
+      <button id="showDataAvailability" class="btn btn-sm btn-outline-primary ms-3">
+        <i class="fas fa-table me-1"></i> Lihat Ketersediaan Data
+      </button>
     </div>
-    
+
+    <!-- Modal for data availability -->
+    <div class="modal fade" id="dataAvailabilityModal" tabindex="-1" aria-labelledby="dataAvailabilityModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="dataAvailabilityModalLabel">Ketersediaan Data per Kegiatan dan Wilayah</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="dataAvailabilityContent" class="p-2">
+              <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Memuat data ketersediaan...</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Input Filters -->
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
@@ -1388,9 +1629,100 @@ if (isset($_POST['db_action'])) {
         }
       };
 
+      // Add function to load and display the data availability map
+      const loadDataAvailabilityMap = async () => {
+        try {
+          // Show modal
+          const modal = new bootstrap.Modal(document.getElementById('dataAvailabilityModal'));
+          modal.show();
+          
+          // Get data availability
+          const response = await $.ajax({
+            url: window.location.href,
+            method: "POST",
+            data: {
+              db_action: "debug_data_availability"
+            },
+            dataType: "json"
+          });
+          
+          if (response.status && response.data_map) {
+            // Build HTML table
+            let html = `
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID Kegiatan</th>
+                      <th>Nama Kegiatan</th>
+                      <th>Jumlah Wilayah</th>
+                      <th>Wilayah Tersedia</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+            `;
+            
+            response.data_map.forEach(project => {
+              html += `
+                <tr>
+                  <td>${project.project_id}</td>
+                  <td>${project.project_name}</td>
+                  <td>${project.region_count}</td>
+                  <td>
+              `;
+              
+              if (project.regions.length === 0) {
+                html += `<span class="badge bg-danger">Tidak ada data wilayah</span>`;
+              } else {
+                project.regions.forEach(region => {
+                  html += `<span class="badge bg-success me-1 mb-1">${region.name}</span>`;
+                });
+              }
+              
+              html += `
+                  </td>
+                </tr>
+              `;
+            });
+            
+            html += `
+                  </tbody>
+                </table>
+              </div>
+              <div class="mt-3 alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Tabel ini menunjukkan kegiatan mana saja yang sudah memiliki data pada wilayah tertentu.
+                Untuk mendownload data kegiatan dan wilayah lainnya, silahkan kunjungi 
+                <a href="download.php" class="alert-link">halaman Download Data</a>.
+              </div>
+            `;
+            
+            $("#dataAvailabilityContent").html(html);
+          } else {
+            $("#dataAvailabilityContent").html(`
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Tidak dapat memuat informasi ketersediaan data.
+              </div>
+            `);
+          }
+        } catch (error) {
+          console.error("Error loading data availability map:", error);
+          $("#dataAvailabilityContent").html(`
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle me-2"></i>
+              Terjadi kesalahan saat memuat informasi ketersediaan data: ${error.message || "Unknown error"}
+            </div>
+          `);
+        }
+      };
+
+      // Enhanced region loading function with better debugging
       const loadRegions = async () => {
         $regionSelect.empty().append('<option value="">Memuat data...</option>');
         try {
+          console.log(`Loading regions for project ID: ${selectedProject}`);
+          
           const response = await $.ajax({
             url: window.location.href,
             method: "POST",
@@ -1401,6 +1733,8 @@ if (isset($_POST['db_action'])) {
             dataType: "json"
           });
           
+          console.log("Region load response:", response);
+          
           $regionSelect.empty();
           coverageData = [];
           
@@ -1409,6 +1743,7 @@ if (isset($_POST['db_action'])) {
           }
           
           coverageData = response.data;
+          console.log(`Loaded ${coverageData.length} regions with downloaded data`);
           
           // Display regions in the select element
           coverageData.forEach(region => {
@@ -1427,10 +1762,30 @@ if (isset($_POST['db_action'])) {
           $regionSelect.prop('disabled', false);
           
         } catch (error) {
-          showError(error.message || "Gagal memuat daftar wilayah");
+          console.error("Error loading regions:", error);
+          
+          // Show a more specific message about downloading data
           $regionSelect.empty().append('<option value="">Pilih Cakupan Wilayah</option>');
           $regionSelect.prop('disabled', true);
           coverageData = [];
+          
+          // If no regions available, show a message about downloading data
+          $resultsContainer.html(`
+            <div class="card">
+              <div class="card-body">
+                <div class="no-data-message">
+                  <i class="fas fa-info-circle fa-3x mb-3 text-warning"></i>
+                  <h4>Belum Ada Data Wilayah</h4>
+                  <p>Untuk kegiatan ini, belum ada data wilayah yang didownload. Silahkan download data terlebih dahulu dari halaman Download Data.</p>
+                  <a href="download.php" class="btn btn-primary mt-3">
+                    <i class="fas fa-download me-2"></i>Download Data
+                  </a>
+                </div>
+              </div>
+            </div>
+          `);
+          
+          showError(error.message || "Belum ada data wilayah tersedia. Silahkan download data terlebih dahulu.");
         }
       };
 
@@ -1552,6 +1907,9 @@ if (isset($_POST['db_action'])) {
       });
 
       $("#loadData").on('click', loadMonitoringData);
+
+      // Attach click handler to the data availability button
+      $("#showDataAvailability").on('click', loadDataAvailabilityMap);
 
       // Initialize
       $spinner.hide();
