@@ -55,6 +55,34 @@ function executeQuery($query, $params = []) {
     return json_encode(["status" => true, "data" => $result]);
 }
 
+// Function to format assessment data to match the old API format
+function formatAssessmentResponse($data) {
+    if (empty($data)) {
+        return ["status" => true, "data" => []];
+    }
+    
+    $assessment = $data[0];
+    
+    // Convert state to status field to match old API
+    // The old API seems to use a "status" field while database uses "state"
+    if (isset($assessment['state'])) {
+        $assessment['status'] = $assessment['state'];
+    }
+    
+    // Additional processing if needed
+    // For example, ensure assessment data is properly formatted as JSON
+    if (isset($assessment['assessment']) && !is_array($assessment['assessment'])) {
+        $assessment['assessment'] = json_decode($assessment['assessment'], true);
+    }
+    
+    // Format notes field as needed
+    if (isset($assessment['notes']) && !is_array($assessment['notes'])) {
+        $assessment['notes'] = json_decode($assessment['notes'], true);
+    }
+    
+    return ["status" => true, "data" => $assessment];
+}
+
 if(isset($_POST['action'])){
     $action = $_POST['action'];
     
@@ -129,7 +157,53 @@ if(isset($_POST['action'])){
                       WHERE [id_project] = ? AND [id_gate] = ? 
                       AND [prov] = ? AND [kab] = ?";
             
-            echo executeQuery($query, [$id_project, $id_gate, $prov, $kab]);
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            $stmt = sqlsrv_query($conn, $query, [$id_project, $id_gate, $prov, $kab]);
+            if ($stmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $result = [];
+            if ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                // Convert DateTime objects to string format
+                foreach ($row as $key => $value) {
+                    if ($value instanceof DateTime) {
+                        $row[$key] = $value->format('Y-m-d H:i:s');
+                    }
+                }
+                
+                // Add status field to match old API format
+                if (isset($row['state'])) {
+                    $row['status'] = $row['state'];
+                }
+                
+                // Ensure assessment JSON is properly decoded
+                if (isset($row['assessment'])) {
+                    $row['assessment'] = json_decode($row['assessment'], true);
+                }
+                
+                // Format notes field if present
+                if (isset($row['notes']) && $row['notes'] !== null) {
+                    $row['notes'] = json_decode($row['notes'], true);
+                }
+                
+                // Put the row in an array to match the original API format
+                $result[] = $row;
+            }
+            
+            sqlsrv_free_stmt($stmt);
+            sqlsrv_close($conn);
+            
+            echo json_encode(["status" => true, "data" => $result]);
             break;
             
         case "fetchNeedCorrectives":
@@ -306,6 +380,11 @@ if(isset($_POST['action'])){
             $assessment = null;
             if ($row = sqlsrv_fetch_array($assessStmt, SQLSRV_FETCH_ASSOC)) {
                 $assessment = $row;
+                
+                // Add status field to match old API format
+                if (isset($assessment['state'])) {
+                    $assessment['status'] = $assessment['state'];
+                }
             }
             sqlsrv_free_stmt($assessStmt);
             
