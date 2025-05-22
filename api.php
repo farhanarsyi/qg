@@ -1,124 +1,248 @@
 <?php
+// SQL Server connection setup
+$serverName = "DCSQLSRV03.bps.go.id"; // or IP "10.0.77.23"
+$connectionOptions = [
+    "Database" => "QG_PROD",
+    "Uid" => "qgreadonly",
+    "PWD" => "A!rNeoHa55"
+];
+
+// Function to establish database connection
+function getConnection() {
+    global $serverName, $connectionOptions;
+    try {
+        $conn = sqlsrv_connect($serverName, $connectionOptions);
+        if ($conn === false) {
+            return null;
+        }
+        return $conn;
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+// Function to execute query and return JSON response
+function executeQuery($query, $params = []) {
+    $conn = getConnection();
+    if ($conn === null) {
+        $errors = sqlsrv_errors();
+        $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Connection failed";
+        return json_encode(["status" => false, "message" => $errorMsg]);
+    }
+    
+    $stmt = sqlsrv_query($conn, $query, $params);
+    if ($stmt === false) {
+        $errors = sqlsrv_errors();
+        $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+        sqlsrv_close($conn);
+        return json_encode(["status" => false, "message" => $errorMsg]);
+    }
+    
+    $result = [];
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+        // Convert DateTime objects to string format
+        foreach ($row as $key => $value) {
+            if ($value instanceof DateTime) {
+                $row[$key] = $value->format('Y-m-d H:i:s');
+            }
+        }
+        $result[] = $row;
+    }
+    
+    sqlsrv_free_stmt($stmt);
+    sqlsrv_close($conn);
+    
+    return json_encode(["status" => true, "data" => $result]);
+}
+
 if(isset($_POST['action'])){
     $action = $_POST['action'];
     
     switch($action){
         case "fetchProjects":
             $year = $_POST['year'];
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Projects/fetchAll";
-            $postData = http_build_query([
-                "year" => $year
-            ]);
-            echo callApi($url, $postData);
+            $query = "SELECT * FROM [projects] WHERE [year] = ? AND [is_deleted] IS NULL ORDER BY [id]";
+            echo executeQuery($query, [$year]);
             break;
+            
         case "fetchGates":
             $id_project = $_POST['id_project'];
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/gates/fetchAll";
-            $postData = http_build_query([
-                "id_project" => $id_project
-            ]);
-            echo callApi($url, $postData);
+            $query = "SELECT * FROM [project_gates] WHERE [id_project] = ? AND [is_deleted] IS NULL ORDER BY [gate_number]";
+            echo executeQuery($query, [$id_project]);
             break;
+            
         case "fetchMeasurements":
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
-            $kab  = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/measurements/fetchAll";
-            $postData = http_build_query([
-                "id_project" => $id_project,
-                "id_gate"    => $id_gate,
-                "prov"       => $prov,
-                "kab"        => $kab
-            ]);
-            echo callApi($url, $postData);
+            $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
+            
+            $query = "SELECT * FROM [project_measurements] 
+                      WHERE [id_project] = ? AND [id_gate] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [measurement_number]";
+            
+            echo executeQuery($query, [$id_project, $id_gate]);
             break;
+            
         case "fetchPreventivesByKab":
             $year = $_POST['year'];
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
             $id_measurement = $_POST['id_measurement'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
-            $kab  = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Preventives/fetchByKab";
-            $postData = http_build_query([
-                "data[year]" => $year,
-                "data[id_project]" => $id_project,
-                "data[id_gate]" => $id_gate,
-                "data[id_measurement]" => $id_measurement,
-                "data[prov]" => $prov,
-                "data[kab]" => $kab
-            ]);
-            echo callApi($url, $postData);
+            $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
+            
+            $query = "SELECT * FROM [project_preventives] 
+                      WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                      AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [index_action]";
+            
+            echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement, $prov, $kab]);
             break;
+            
         case "fetchPreventivesByMeasurement":
             $year = $_POST['year'];
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
             $id_measurement = $_POST['id_measurement'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
-            $kab  = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Preventives/fetchByMeasurement";
-            $postData = http_build_query([
-                "year" => $year,
-                "param[year]" => $year,
-                "param[id_project]" => $id_project,
-                "param[id_gate]" => $id_gate,
-                "param[id_measurement]" => $id_measurement,
-                "param[prov]" => $prov,
-                "param[kab]" => $kab
-            ]);
-            echo callApi($url, $postData);
+            $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
+            
+            $query = "SELECT * FROM [project_preventives] 
+                      WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                      AND [id_measurement] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [prov], [kab], [index_action]";
+            
+            echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement]);
             break;
+            
         case "fetchAssessments":
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
             $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Measurements/fetchAllAssessments";
-            $postData = http_build_query([
-                "id_project" => $id_project,
-                "id_gate" => $id_gate,
-                "prov" => $prov,
-                "kab" => $kab
-            ]);
             
-            echo callApi($url, $postData);
+            $query = "SELECT * FROM [project_assessments] 
+                      WHERE [id_project] = ? AND [id_gate] = ? 
+                      AND [prov] = ? AND [kab] = ?";
+            
+            echo executeQuery($query, [$id_project, $id_gate, $prov, $kab]);
             break;
+            
         case "fetchNeedCorrectives":
             $year = isset($_POST['year']) ? $_POST['year'] : "2025";
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
             $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/assessments/fetchNeedCorrectives";
-            $postData = http_build_query([
-                "id_project" => $id_project,
-                "id_gate" => $id_gate,
-                "prov" => $prov,
-                "kab" => $kab,
-                "year" => $year
-            ]);
-            echo callApi($url, $postData);
+            
+            // First get assessments to check which ones need correctives
+            $assessQuery = "SELECT * FROM [project_assessments] 
+                           WHERE [id_project] = ? AND [id_gate] = ? 
+                           AND [prov] = ? AND [kab] = ? AND [year] = ?";
+            
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            $assessStmt = sqlsrv_query($conn, $assessQuery, [$id_project, $id_gate, $prov, $kab, $year]);
+            if ($assessStmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $assessment = null;
+            if ($row = sqlsrv_fetch_array($assessStmt, SQLSRV_FETCH_ASSOC)) {
+                $assessment = $row;
+            }
+            sqlsrv_free_stmt($assessStmt);
+            
+            if ($assessment === null) {
+                sqlsrv_close($conn);
+                echo json_encode(["status" => true, "data" => []]);
+                break;
+            }
+            
+            // Parse assessment JSON to determine which measurements need correctives
+            $assessmentData = json_decode($assessment['assessment'], true);
+            if (!is_array($assessmentData)) {
+                sqlsrv_close($conn);
+                echo json_encode(["status" => true, "data" => []]);
+                break;
+            }
+            
+            $needCorrectiveMeasurements = [];
+            foreach ($assessmentData as $item) {
+                if (isset($item['idm']) && isset($item['ass']) && ($item['ass'] == "1" || $item['ass'] == "2")) {
+                    $needCorrectiveMeasurements[] = $item['idm'];
+                }
+            }
+            
+            if (empty($needCorrectiveMeasurements)) {
+                sqlsrv_close($conn);
+                echo json_encode(["status" => true, "data" => []]);
+                break;
+            }
+            
+            // Fetch measurements that need correctives
+            $placeholders = implode(',', array_fill(0, count($needCorrectiveMeasurements), '?'));
+            $measureQuery = "SELECT * FROM [project_measurements] 
+                            WHERE [id_project] = ? AND [id_gate] = ? 
+                            AND [id] IN ($placeholders) AND [is_deleted] IS NULL";
+            
+            $params = array_merge([$id_project, $id_gate], $needCorrectiveMeasurements);
+            $measureStmt = sqlsrv_query($conn, $measureQuery, $params);
+            
+            if ($measureStmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $result = [];
+            while ($row = sqlsrv_fetch_array($measureStmt, SQLSRV_FETCH_ASSOC)) {
+                // Convert DateTime objects to string format
+                foreach ($row as $key => $value) {
+                    if ($value instanceof DateTime) {
+                        $row[$key] = $value->format('Y-m-d H:i:s');
+                    }
+                }
+                $result[] = $row;
+            }
+            
+            sqlsrv_free_stmt($measureStmt);
+            sqlsrv_close($conn);
+            
+            echo json_encode(["status" => true, "data" => $result]);
             break;
+            
         case "fetchProjectSpesific":
             $year = $_POST['year'];
             $project_id = $_POST['project_id'];
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Projects/fetchSpesific";
-            $postData = http_build_query([
-                "year" => $year,
-                "project_id" => $project_id
-            ]);
-            echo callApi($url, $postData);
+            
+            $query = "SELECT * FROM [projects] WHERE [year] = ? AND [id] = ? AND [is_deleted] IS NULL";
+            
+            echo executeQuery($query, [$year, $project_id]);
             break;
+            
         case "fetchCoverages":
             $id_project = $_POST['id_project'];
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/coverages/fetchAll";
-            $postData = http_build_query([
-                "id_project" => $id_project
-            ]);
-            echo callApi($url, $postData);
+            
+            $query = "SELECT * FROM [project_coverages] WHERE [id_project] = ? ORDER BY [prov], [kab]";
+            
+            echo executeQuery($query, [$id_project]);
             break;
+            
         case "fetchCorrectivesByKab":
             $year = $_POST['data']['year'];
             $id_project = $_POST['data']['id_project'];
@@ -126,17 +250,16 @@ if(isset($_POST['action'])){
             $id_measurement = $_POST['data']['id_measurement'];
             $prov = isset($_POST['data']['prov']) ? $_POST['data']['prov'] : "00";
             $kab = isset($_POST['data']['kab']) ? $_POST['data']['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Correctives/fetchByKab";
-            $postData = http_build_query([
-                "data[year]" => $year,
-                "data[id_project]" => $id_project,
-                "data[id_gate]" => $id_gate,
-                "data[id_measurement]" => $id_measurement,
-                "data[prov]" => $prov,
-                "data[kab]" => $kab
-            ]);
-            echo callApi($url, $postData);
+            
+            $query = "SELECT * FROM [project_correctives] 
+                      WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                      AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [index_action]";
+            
+            echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement, $prov, $kab]);
             break;
+            
         case "fetchCorrectivesByMeasurement":
             $year = $_POST['year'];
             $id_project = $_POST['id_project'];
@@ -144,56 +267,132 @@ if(isset($_POST['action'])){
             $id_measurement = $_POST['id_measurement'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
             $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/Correctives/fetchByMeasurement";
-            $postData = http_build_query([
-                "year" => $year,
-                "param[year]" => $year,
-                "param[id_project]" => $id_project,
-                "param[id_gate]" => $id_gate,
-                "param[id_measurement]" => $id_measurement,
-                "param[prov]" => $prov,
-                "param[kab]" => $kab
-            ]);
-            echo callApi($url, $postData);
+            
+            $query = "SELECT * FROM [project_correctives] 
+                      WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                      AND [id_measurement] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [prov], [kab], [index_action]";
+            
+            echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement]);
             break;
+            
         case "fetchAllActions":
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
             $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
             $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
-            $url = "https://webapps.bps.go.id/nqaf/qgate/api/measurements/fetchAllActions";
-            $postData = http_build_query([
-                "id_project" => $id_project,
-                "id_gate" => $id_gate,
-                "prov" => $prov,
-                "kab" => $kab
-            ]);
-            echo callApi($url, $postData);
+            
+            // Get assessment data first
+            $assessQuery = "SELECT * FROM [project_assessments] 
+                           WHERE [id_project] = ? AND [id_gate] = ? 
+                           AND [prov] = ? AND [kab] = ?";
+            
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            $assessStmt = sqlsrv_query($conn, $assessQuery, [$id_project, $id_gate, $prov, $kab]);
+            if ($assessStmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $assessment = null;
+            if ($row = sqlsrv_fetch_array($assessStmt, SQLSRV_FETCH_ASSOC)) {
+                $assessment = $row;
+            }
+            sqlsrv_free_stmt($assessStmt);
+            
+            if ($assessment === null) {
+                sqlsrv_close($conn);
+                echo json_encode(["status" => true, "data" => []]);
+                break;
+            }
+            
+            // Get year from assessment
+            $year = $assessment['year'];
+            
+            // Get all measurements for this project and gate
+            $measureQuery = "SELECT * FROM [project_measurements] 
+                            WHERE [id_project] = ? AND [id_gate] = ? 
+                            AND [is_deleted] IS NULL";
+            
+            $measureStmt = sqlsrv_query($conn, $measureQuery, [$id_project, $id_gate]);
+            if ($measureStmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $measurements = [];
+            while ($row = sqlsrv_fetch_array($measureStmt, SQLSRV_FETCH_ASSOC)) {
+                $measurements[] = $row;
+            }
+            sqlsrv_free_stmt($measureStmt);
+            
+            if (empty($measurements)) {
+                sqlsrv_close($conn);
+                echo json_encode(["status" => true, "data" => []]);
+                break;
+            }
+            
+            // Parse assessment JSON to get the assessment value for each measurement
+            $assessmentData = json_decode($assessment['assessment'], true);
+            $assessmentMap = [];
+            if (is_array($assessmentData)) {
+                foreach ($assessmentData as $item) {
+                    if (isset($item['idm']) && isset($item['ass'])) {
+                        $assessmentMap[$item['idm']] = $item['ass'];
+                    }
+                }
+            }
+            
+            $result = [];
+            
+            // For each measurement, get the appropriate actions based on assessment
+            foreach ($measurements as $measurement) {
+                $id_measurement = $measurement['id'];
+                $assessValue = isset($assessmentMap[$id_measurement]) ? $assessmentMap[$id_measurement] : "";
+                
+                $actions = [];
+                
+                // Determine which actions to fetch based on assessment value
+                if ($assessValue == "3") {
+                    // Green assessment - get preventive actions
+                    $actions = json_decode($measurement['green_preventif'], true);
+                } else if ($assessValue == "1") {
+                    // Red assessment - get corrective actions
+                    $actions = json_decode($measurement['red_action'], true);
+                } else if ($assessValue == "2") {
+                    // Yellow assessment - get yellow actions
+                    $actions = json_decode($measurement['yellow_action'], true);
+                }
+                
+                if (!empty($actions)) {
+                    $result[] = [
+                        'measurement' => $measurement,
+                        'assessment' => $assessValue,
+                        'actions' => $actions
+                    ];
+                }
+            }
+            
+            sqlsrv_close($conn);
+            echo json_encode(["status" => true, "data" => $result]);
             break;
+            
         default:
             echo json_encode(["status" => false, "message" => "Invalid action"]);
     }
 } else {
     echo json_encode(["status" => false, "message" => "No action specified"]);
-}
-
-function callApi($url, $postData){
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With: XMLHttpRequest',
-        'Cookie: ci_session=5503368b0cb86766c2be9ed5d93c038762698865'
-    ]);
-    $response = curl_exec($ch);
-    if(curl_errno($ch)){
-        $error_msg = curl_error($ch);
-        curl_close($ch);
-        return json_encode(["status" => false, "message" => $error_msg]);
-    }
-    curl_close($ch);
-    return $response;
 }
 ?>
