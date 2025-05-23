@@ -502,6 +502,278 @@ if(isset($_POST['action'])){
             echo json_encode(["status" => true, "data" => $result]);
             break;
             
+        case "login":
+            $username = $_POST['username'];
+            $password = $_POST['password'];
+            
+            // Hardcoded password untuk semua user
+            if ($password !== 'password123') {
+                echo json_encode(["status" => false, "message" => "Password salah"]);
+                break;
+            }
+            
+            $query = "SELECT id, username, prov, kab, name FROM [users] WHERE [username] = ?";
+            
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            $stmt = sqlsrv_query($conn, $query, [$username]);
+            if ($stmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $user = null;
+            if ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $user = $row;
+                
+                // Tentukan role berdasarkan prov dan kab
+                if ($user['prov'] === "00" && $user['kab'] === "00") {
+                    $user['role'] = 'pusat';
+                    $user['role_name'] = 'Pusat';
+                } else if ($user['prov'] !== "00" && $user['kab'] === "00") {
+                    $user['role'] = 'provinsi';
+                    $user['role_name'] = 'Provinsi';
+                } else {
+                    $user['role'] = 'kabupaten';
+                    $user['role_name'] = 'Kabupaten/Kota';
+                }
+            }
+            
+            sqlsrv_free_stmt($stmt);
+            sqlsrv_close($conn);
+            
+            if ($user) {
+                // Simulasi session - dalam implementasi nyata gunakan PHP session
+                echo json_encode(["status" => true, "data" => $user]);
+            } else {
+                echo json_encode(["status" => false, "message" => "Username tidak ditemukan"]);
+            }
+            break;
+            
+        case "fetchDashboardData":
+            $user_prov = $_POST['user_prov'];
+            $user_kab = $_POST['user_kab'];
+            $filter_year = isset($_POST['filter_year']) ? $_POST['filter_year'] : null;
+            $filter_project = isset($_POST['filter_project']) ? $_POST['filter_project'] : null;
+            $filter_region = isset($_POST['filter_region']) ? $_POST['filter_region'] : null;
+            
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            // Query untuk mendapatkan data dashboard
+            $query = "
+                SELECT DISTINCT
+                    p.id as project_id,
+                    p.name as project_name,
+                    p.year,
+                    pg.id as gate_id,
+                    pg.gate_number,
+                    pg.gate_name,
+                    pg.prev_insert_start,
+                    pg.cor_upload_end,
+                    pc.prov,
+                    pc.kab,
+                    pc.name as region_name
+                FROM [projects] p
+                INNER JOIN [project_gates] pg ON p.id = pg.id_project
+                INNER JOIN [project_coverages] pc ON p.id = pc.id_project
+                WHERE p.is_deleted IS NULL 
+                AND pg.is_deleted IS NULL
+            ";
+            
+            $params = [];
+            
+            // Filter berdasarkan role user
+            if ($user_prov === "00" && $user_kab === "00") {
+                // Pusat - bisa lihat semua
+            } else if ($user_prov !== "00" && $user_kab === "00") {
+                // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
+                $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
+                $params[] = $user_prov;
+                $params[] = $user_prov;
+            } else {
+                // Kabupaten - hanya kabupaten spesifik
+                $query .= " AND pc.prov = ? AND pc.kab = ?";
+                $params[] = $user_prov;
+                $params[] = $user_kab;
+            }
+            
+            // Tambahan filter
+            if ($filter_year) {
+                $query .= " AND p.year = ?";
+                $params[] = $filter_year;
+            }
+            
+            if ($filter_project) {
+                $query .= " AND p.id = ?";
+                $params[] = $filter_project;
+            }
+            
+            if ($filter_region) {
+                $regionParts = str_split($filter_region, 2);
+                if (count($regionParts) >= 2) {
+                    $prov = $regionParts[0];
+                    $kab = $regionParts[1];
+                    $query .= " AND pc.prov = ? AND pc.kab = ?";
+                    $params[] = $prov;
+                    $params[] = $kab;
+                }
+            }
+            
+            $query .= " ORDER BY p.year DESC, p.name, pg.gate_number, pc.prov, pc.kab";
+            
+            $stmt = sqlsrv_query($conn, $query, $params);
+            if ($stmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $result = [];
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                // Convert DateTime objects to string format
+                foreach ($row as $key => $value) {
+                    if ($value instanceof DateTime) {
+                        $row[$key] = $value->format('Y-m-d');
+                    }
+                }
+                $result[] = $row;
+            }
+            
+            sqlsrv_free_stmt($stmt);
+            sqlsrv_close($conn);
+            
+            echo json_encode(["status" => true, "data" => $result]);
+            break;
+            
+        case "fetchAvailableYears":
+            $user_prov = $_POST['user_prov'];
+            $user_kab = $_POST['user_kab'];
+            
+            $query = "
+                SELECT DISTINCT p.year
+                FROM [projects] p
+                INNER JOIN [project_coverages] pc ON p.id = pc.id_project
+                WHERE p.is_deleted IS NULL
+            ";
+            
+            $params = [];
+            
+            // Filter berdasarkan role user
+            if ($user_prov === "00" && $user_kab === "00") {
+                // Pusat - bisa lihat semua
+            } else if ($user_prov !== "00" && $user_kab === "00") {
+                // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
+                $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
+                $params[] = $user_prov;
+                $params[] = $user_prov;
+            } else {
+                // Kabupaten - hanya kabupaten spesifik
+                $query .= " AND pc.prov = ? AND pc.kab = ?";
+                $params[] = $user_prov;
+                $params[] = $user_kab;
+            }
+            
+            $query .= " ORDER BY p.year DESC";
+            
+            echo executeQuery($query, $params);
+            break;
+            
+        case "fetchAvailableProjects":
+            $user_prov = $_POST['user_prov'];
+            $user_kab = $_POST['user_kab'];
+            $year = isset($_POST['year']) ? $_POST['year'] : null;
+            
+            $query = "
+                SELECT DISTINCT p.id, p.name, p.year
+                FROM [projects] p
+                INNER JOIN [project_coverages] pc ON p.id = pc.id_project
+                WHERE p.is_deleted IS NULL
+            ";
+            
+            $params = [];
+            
+            // Filter berdasarkan role user
+            if ($user_prov === "00" && $user_kab === "00") {
+                // Pusat - bisa lihat semua
+            } else if ($user_prov !== "00" && $user_kab === "00") {
+                // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
+                $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
+                $params[] = $user_prov;
+                $params[] = $user_prov;
+            } else {
+                // Kabupaten - hanya kabupaten spesifik
+                $query .= " AND pc.prov = ? AND pc.kab = ?";
+                $params[] = $user_prov;
+                $params[] = $user_kab;
+            }
+            
+            if ($year) {
+                $query .= " AND p.year = ?";
+                $params[] = $year;
+            }
+            
+            $query .= " ORDER BY p.year DESC, p.name";
+            
+            echo executeQuery($query, $params);
+            break;
+            
+        case "fetchAvailableRegions":
+            $user_prov = $_POST['user_prov'];
+            $user_kab = $_POST['user_kab'];
+            $project_id = isset($_POST['project_id']) ? $_POST['project_id'] : null;
+            
+            $query = "
+                SELECT DISTINCT pc.prov, pc.kab, pc.name
+                FROM [project_coverages] pc
+                WHERE 1=1
+            ";
+            
+            $params = [];
+            
+            // Filter berdasarkan role user
+            if ($user_prov === "00" && $user_kab === "00") {
+                // Pusat - bisa lihat semua
+            } else if ($user_prov !== "00" && $user_kab === "00") {
+                // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
+                $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
+                $params[] = $user_prov;
+                $params[] = $user_prov;
+            } else {
+                // Kabupaten - hanya kabupaten spesifik
+                $query .= " AND pc.prov = ? AND pc.kab = ?";
+                $params[] = $user_prov;
+                $params[] = $user_kab;
+            }
+            
+            if ($project_id) {
+                $query .= " AND pc.id_project = ?";
+                $params[] = $project_id;
+            }
+            
+            $query .= " ORDER BY pc.prov, pc.kab";
+            
+            echo executeQuery($query, $params);
+            break;
+            
+        case "fetchUsers":
+            // Endpoint untuk testing - menampilkan daftar user
+            $query = "SELECT id, username, name, prov, kab FROM [user] WHERE [is_deleted] IS NULL ORDER BY [prov], [kab], [username]";
+            echo executeQuery($query, []);
+            break;
+            
         default:
             echo json_encode(["status" => false, "message" => "Invalid action"]);
     }

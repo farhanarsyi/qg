@@ -348,7 +348,17 @@
 </head>
 <body>
   <div class="container-fluid">
-    <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
+      <div>
+        <a href="login.php" class="btn btn-outline-primary me-2">
+          <i class="fas fa-sign-in-alt me-2"></i>Login Dashboard
+        </a>
+        <a href="dashboard.php" class="btn btn-primary">
+          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+        </a>
+      </div>
+    </div>
     
     <!-- Input Filters -->
     <div class="card mb-4">
