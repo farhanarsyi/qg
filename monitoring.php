@@ -566,17 +566,25 @@
             return "Belum ditentukan";
           }
           
-          const prevKabResponse = await getDataFromCacheOrApi(
-            'preventivesKab',
-            'fetchPreventivesByKab',
+          // Cek upload bukti dari tabel project_doc_preventives
+          const docResponse = await getDataFromCacheOrApi(
+            'docPreventives',
+            'fetchDocPreventives',
             {
               year, id_project: selectedProject, id_gate: gate.id,
               id_measurement: measurement.id, prov, kab
             }
           );
           
-          return (prevKabResponse.status && prevKabResponse.data.length > 0 && prevKabResponse.data[0].filename)
-            ? "Sudah diunggah" : "Belum diunggah";
+          if (docResponse.status && docResponse.data.length > 0) {
+            // Cek apakah ada file yang sudah di-upload dan tidak dihapus
+            const uploadedDoc = docResponse.data.find(doc => 
+              doc.filename && doc.filename.trim() !== '' && !doc.is_deleted
+            );
+            return uploadedDoc ? "Sudah diunggah" : "Belum diunggah";
+          }
+          
+          return "Belum diunggah";
         }
         
         // Dapatkan data assessments dari cache
@@ -590,25 +598,38 @@
         const assessmentsResponse = apiCache.assessments[assessmentsKey] || { status: false };
         
         // Cek apakah measurement sudah dinilai
-        const measurementAssessment = assessmentsResponse.status
-          ? assessmentsResponse.data.find(m => m.id == measurement.id)
-          : null;
-        
+        // Assessment data adalah array dengan format [{"idm":259,"ass":"3"},{"idm":260,"ass":"1"}]
         let assessmentStatus = "Belum dinilai";
         let isAssessed = false;
         let isApproved = false;
+        let assessmentValue = null;
         
-        if (measurementAssessment && measurementAssessment.assessment != null) {
-          const val = measurementAssessment.assessment;
-          if (val === "1" || val === 1) {
-            assessmentStatus = "Sudah dinilai (merah)";
-          } else if (val === "2" || val === 2) {
-            assessmentStatus = "Sudah dinilai (kuning)";
-          } else if (val === "3" || val === 3) {
-            assessmentStatus = "Sudah dinilai (hijau)";
+        if (assessmentsResponse.status && assessmentsResponse.data.length > 0) {
+          const assessmentRecord = assessmentsResponse.data[0];
+          
+          // Parse assessment JSON array
+          if (assessmentRecord.assessment && Array.isArray(assessmentRecord.assessment)) {
+            const measurementAssessment = assessmentRecord.assessment.find(item => 
+              item.idm && item.idm == measurement.id
+            );
+            
+            if (measurementAssessment && measurementAssessment.ass) {
+              assessmentValue = measurementAssessment.ass;
+              
+              if (assessmentValue === "1" || assessmentValue === 1) {
+                assessmentStatus = "Sudah dinilai (merah)";
+              } else if (assessmentValue === "2" || assessmentValue === 2) {
+                assessmentStatus = "Sudah dinilai (kuning)";
+              } else if (assessmentValue === "3" || assessmentValue === 3) {
+                assessmentStatus = "Sudah dinilai (hijau)";
+              }
+              
+              isAssessed = assessmentStatus.startsWith("Sudah dinilai");
+            }
           }
-          isAssessed = assessmentStatus.startsWith("Sudah dinilai");
-          isApproved = measurementAssessment.state === "1";
+          
+          // Check approval status
+          isApproved = assessmentRecord.state === "1" || assessmentRecord.status === "1";
         }
         
         // Status penilaian
@@ -656,19 +677,25 @@
             return "Belum ditentukan";
           }
           
-          const corKabResponse = await getDataFromCacheOrApi(
-            'correctivesKab',
-            'fetchCorrectivesByKab',
+          // Cek upload bukti dari tabel project_doc_correctives
+          const docCorResponse = await getDataFromCacheOrApi(
+            'docCorrectives',
+            'fetchDocCorrectives',
             {
-              data: {
-                year, id_project: selectedProject, id_gate: gate.id,
-                id_measurement: measurement.id, prov, kab
-              }
+              year, id_project: selectedProject, id_gate: gate.id,
+              id_measurement: measurement.id, prov, kab
             }
           );
           
-          return (corKabResponse.status && corKabResponse.data.length > 0 && corKabResponse.data[0].filename)
-            ? "Sudah diunggah" : "Belum diunggah";
+          if (docCorResponse.status && docCorResponse.data.length > 0) {
+            // Cek apakah ada file yang sudah di-upload dan tidak dihapus
+            const uploadedDoc = docCorResponse.data.find(doc => 
+              doc.filename && doc.filename.trim() !== '' && !doc.is_deleted
+            );
+            return uploadedDoc ? "Sudah diunggah" : "Belum diunggah";
+          }
+          
+          return "Belum diunggah";
         }
         
         return "Tidak tersedia";
@@ -954,7 +981,9 @@
           assessments: {},
           correctives: {},
           correctivesKab: {},
-          allActions: {}
+          allActions: {},
+          docPreventives: {},
+          docCorrectives: {}
         };
         
         // Fungsi untuk mendapatkan data dari cache atau API

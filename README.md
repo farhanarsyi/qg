@@ -210,24 +210,70 @@ SELECT * FROM [project_coverages] WHERE [id_project] = ? ORDER BY [prov], [kab]
 
 ### 11. Need Correctives (`fetchNeedCorrectives`)
 
-**Tables**: `project_assessments`, `project_measurements`
-**Process**:
-1. Fetch assessment data for the specified project, gate, province, and kabupaten
-2. Parse the assessment JSON to identify measurements with red (1) or yellow (2) assessments
-3. Fetch the corresponding measurement details for those requiring corrective actions
+**Table**: Combination of `project_assessments` and `project_measurements`
+**Key Columns**:
+- Assessment data from JSON column with red/yellow values (1/2)
+- Related measurement details
 
-### 12. All Actions (`fetchAllActions`)
+**SQL Query**:
+```sql
+-- First get assessments
+SELECT * FROM [project_assessments] 
+WHERE [id_project] = ? AND [id_gate] = ? 
+AND [prov] = ? AND [kab] = ? AND [year] = ?
 
-**Tables**: `project_assessments`, `project_measurements`
-**Process**:
-1. Fetch assessment data for the specified project, gate, province, and kabupaten
-2. Fetch all measurements for the project and gate
-3. Parse the assessment JSON to get assessment values for each measurement
-4. For each measurement, determine the appropriate actions based on assessment value:
-   - Red (1): Fetch corrective actions
-   - Yellow (2): Fetch yellow actions
-   - Green (3): Fetch preventive actions
-5. Return all relevant actions with their corresponding measurements
+-- Then get measurements that need correctives (assessment = 1 or 2)
+SELECT * FROM [project_measurements] 
+WHERE [id_project] = ? AND [id_gate] = ? 
+AND [id] IN (...) AND [is_deleted] IS NULL
+```
+
+### 12. Document Preventives (`fetchDocPreventives`)
+
+**Table**: `project_doc_preventives`
+**Key Columns**:
+- `id` - Document ID
+- `year` - Document year
+- `id_project` - Project ID reference
+- `id_gate` - Gate ID reference
+- `id_measurement` - Measurement ID reference
+- `prov` - Province code
+- `kab` - Kabupaten code
+- `filename` - Uploaded file name
+- `is_deleted` - Deletion flag
+
+**SQL Query**:
+```sql
+SELECT * FROM [project_doc_preventives] 
+WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+AND [is_deleted] IS NULL 
+ORDER BY [index_action]
+```
+
+### 13. Document Correctives (`fetchDocCorrectives`)
+
+**Table**: `project_doc_correctives`
+**Key Columns**:
+- `id` - Document ID
+- `year` - Document year
+- `id_project` - Project ID reference
+- `id_gate` - Gate ID reference
+- `id_measurement` - Measurement ID reference
+- `assessment` - Assessment value (1=red, 2=yellow requiring correctives)
+- `prov` - Province code
+- `kab` - Kabupaten code
+- `filename` - Uploaded file name
+- `is_deleted` - Deletion flag
+
+**SQL Query**:
+```sql
+SELECT * FROM [project_doc_correctives] 
+WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+AND [is_deleted] IS NULL 
+ORDER BY [index_action]
+```
 
 ## Key Differences from API Implementation
 
@@ -261,4 +307,6 @@ For endpoints like `fetchNeedCorrectives` and `fetchAllActions`, multiple databa
 | fetchProjectSpesific | projects | year, project_id | Filter by is_deleted IS NULL |
 | fetchCoverages | project_coverages | id_project | Order by prov, kab |
 | fetchNeedCorrectives | project_assessments, project_measurements | id_project, id_gate, prov, kab, year | Complex processing for assessment data |
-| fetchAllActions | project_assessments, project_measurements | id_project, id_gate, prov, kab | Complex processing for action determination | 
+| fetchAllActions | project_assessments, project_measurements | id_project, id_gate, prov, kab | Complex processing for action determination |
+| fetchDocPreventives | project_doc_preventives | year, id_project, id_gate, id_measurement, prov, kab | Filter by is_deleted IS NULL |
+| fetchDocCorrectives | project_doc_correctives | year, id_project, id_gate, id_measurement, prov, kab | Filter by is_deleted IS NULL | 

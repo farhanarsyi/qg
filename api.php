@@ -351,6 +351,40 @@ if(isset($_POST['action'])){
             echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement]);
             break;
             
+        case "fetchDocPreventives":
+            $year = $_POST['year'];
+            $id_project = $_POST['id_project'];
+            $id_gate = $_POST['id_gate'];
+            $id_measurement = $_POST['id_measurement'];
+            $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
+            $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
+            
+            $query = "SELECT * FROM [project_doc_preventives] 
+                      WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                      AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [index_action]";
+            
+            echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement, $prov, $kab]);
+            break;
+            
+        case "fetchDocCorrectives":
+            $year = $_POST['year'];
+            $id_project = $_POST['id_project'];
+            $id_gate = $_POST['id_gate'];
+            $id_measurement = $_POST['id_measurement'];
+            $prov = isset($_POST['prov']) ? $_POST['prov'] : "00";
+            $kab = isset($_POST['kab']) ? $_POST['kab'] : "00";
+            
+            $query = "SELECT * FROM [project_doc_correctives] 
+                      WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                      AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                      AND [is_deleted] IS NULL 
+                      ORDER BY [index_action]";
+            
+            echo executeQuery($query, [$year, $id_project, $id_gate, $id_measurement, $prov, $kab]);
+            break;
+            
         case "fetchAllActions":
             $id_project = $_POST['id_project'];
             $id_gate = $_POST['id_gate'];
