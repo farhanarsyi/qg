@@ -2,149 +2,708 @@
 // monitoring.php
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monitoring Quality Gates</title>
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <!-- Google Fonts - Modern Professional -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
   <style>
     :root {
-      --primary-color: #0071e3; /* Apple blue */
-      --success-color: #34c759; /* Apple green */
-      --warning-color: #ff9f0a; /* Apple orange */
-      --danger-color: #ff3b30;  /* Apple red */
-      --neutral-color: #8e8e93; /* Apple gray */
-      --light-color: #f5f5f7;   /* Apple light gray */
-      --dark-color: #1d1d1f;    /* Apple dark */
-      --border-color: #d2d2d7;  /* Apple border */
+      /* Modern Color Palette */
+      --midnight-green: #265964;
+      --cambridge-blue: #89BDB2;
+      --white: #FFFFFF;
+      --mint-cream: #E6EEEA;
+      --emerald: #00CA90;
+      
+      /* Additional UI Colors */
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --border-light: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      /* Status Colors */
+      --status-success: var(--emerald);
+      --status-danger: #ef4444;
+      --status-warning: #f59e0b;
+      --status-neutral: #6b7280;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #f5f5f7;
-      color: #1d1d1f;
-      line-height: 1.5;
-      margin: 0;
-      padding: 0;
+      background: linear-gradient(135deg, var(--mint-cream) 0%, #f8fafc 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
     
+    /* Header Styles */
+    .main-header {
+      background: linear-gradient(135deg, var(--midnight-green) 0%, var(--cambridge-blue) 100%);
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .main-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .main-header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      color: var(--white);
+      margin: 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .main-header .header-icon {
+      background: rgba(255,255,255,0.2);
+      padding: 1rem;
+      border-radius: 50%;
+      margin-right: 1rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    /* Container */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    /* Card Styles */
+    .modern-card {
+      background: var(--white);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .modern-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .card-header-modern {
+      background: linear-gradient(135deg, var(--white) 0%, var(--mint-cream) 100%);
+      padding: 1.5rem 2rem;
+      border-bottom: 2px solid var(--mint-cream);
+      position: relative;
+    }
+    
+    .card-header-modern h5 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      color: var(--midnight-green);
+      margin: 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .card-body-modern {
+      padding: 2rem;
+    }
+    
+    /* Form Styles */
+    .form-group-modern {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label-modern {
+      font-weight: 600;
+      color: var(--midnight-green);
+      margin-bottom: 0.5rem;
+      display: block;
+      font-size: 0.95rem;
+    }
+    
+    .form-control-modern, .form-select-modern {
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 0.875rem 1.25rem;
+      font-size: 0.95rem;
+      background: var(--white);
+      transition: all 0.3s ease;
+      width: 100%;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    
+    .form-control-modern:focus, .form-select-modern:focus {
+      border-color: var(--cambridge-blue);
+      box-shadow: 0 0 0 4px rgba(137, 189, 178, 0.1);
+      outline: none;
+      background: var(--white);
+    }
+    
+    /* Button Styles */
+    .btn-modern {
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--cambridge-blue) 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 0.875rem 2rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--white);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      color: var(--white);
+    }
+    
+    .btn-modern:active {
+      transform: translateY(0);
+    }
+    
+    .btn-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-modern:hover::before {
+      left: 100%;
+    }
+    
+    /* Table Container */
+    .table-container {
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+    
+    .table-scroll-wrapper {
+      overflow: auto;
+      max-height: 70vh;
+      min-height: 500px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cambridge-blue) var(--mint-cream);
+    }
+    
+    .table-scroll-wrapper::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    .table-scroll-wrapper::-webkit-scrollbar-track {
+      background: var(--mint-cream);
+      border-radius: 4px;
+    }
+    
+    .table-scroll-wrapper::-webkit-scrollbar-thumb {
+      background: var(--cambridge-blue);
+      border-radius: 4px;
+    }
+    
+    .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+      background: var(--midnight-green);
+    }
+    
+    .table-modern {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    
+    .table-modern th {
+      background: linear-gradient(135deg, var(--midnight-green) 0%, var(--cambridge-blue) 100%);
+      color: var(--white);
+      font-weight: 600;
+      padding: 1.25rem 1rem;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 3px solid var(--emerald);
+    }
+    
+    .table-modern td {
+      padding: 1.25rem 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--white);
+      transition: all 0.3s ease;
+    }
+    
+    .table-modern tr:hover td {
+      background: var(--mint-cream);
+      transform: scale(1.01);
+    }
+    
+    .table-modern tr:last-child td {
+      border-bottom: none;
+    }
+    
+    /* Status Icons */
+    .status-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      min-width: 120px;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .status-success {
+      background: linear-gradient(135deg, var(--emerald), #10b981);
+      color: var(--white);
+    }
+    
+    .status-danger {
+      background: linear-gradient(135deg, var(--status-danger), #dc2626);
+      color: var(--white);
+    }
+    
+    .status-neutral {
+      background: linear-gradient(135deg, var(--status-neutral), #64748b);
+      color: var(--white);
+    }
+    
+    .status-warning {
+      background: linear-gradient(135deg, var(--status-warning), #d97706);
+      color: var(--white);
+    }
+    
+    /* Activity Numbers */
+    .activity-number {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--emerald), var(--cambridge-blue));
+      color: var(--white);
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-right: 1rem;
+      box-shadow: var(--shadow-md);
+    }
+    
+    /* Gate and UK Codes */
+    .gate-code, .uk-code {
+      font-weight: 700;
+      color: var(--midnight-green);
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+    
+    .gate-description, .uk-description {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    
+    /* Date Styling */
+    .date-display {
+      font-weight: 600;
+      color: var(--midnight-green);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: var(--mint-cream);
+    }
+    
+    .date-active {
+      background: linear-gradient(135deg, var(--emerald), #10b981);
+      color: var(--white);
+      animation: pulse-glow 2s infinite;
+      box-shadow: 0 0 10px rgba(0, 202, 144, 0.3);
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    
+    /* Level Indicators */
+    .level-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 80px;
+    }
+    
+    .level-pusat {
+      background: linear-gradient(135deg, var(--midnight-green), #1e5a66);
+      color: var(--white);
+    }
+    
+    .level-provinsi {
+      background: linear-gradient(135deg, var(--cambridge-blue), #7bb3a8);
+      color: var(--white);
+    }
+    
+    .level-kabupaten {
+      background: linear-gradient(135deg, var(--emerald), #10b981);
+      color: var(--white);
+    }
+    
+    /* Loading Spinner */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .loading-content {
+      text-align: center;
+      padding: 3rem;
+      background: var(--white);
+      border-radius: 24px;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-light);
+    }
+    
+    .spinner-modern {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--mint-cream);
+      border-top: 4px solid var(--emerald);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: var(--midnight-green);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .main-container {
+        padding: 0 1rem;
+      }
+      
+      .table-scroll-wrapper {
+        max-height: 60vh;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .main-header {
+        padding: 1.5rem 0;
+      }
+      
+      .card-body-modern {
+        padding: 1.5rem;
+      }
+      
+      .table-scroll-wrapper {
+        max-height: 55vh;
+      }
+      
+      .table-modern th,
+      .table-modern td {
+        padding: 1rem 0.75rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-header {
+        padding: 1rem 0;
+      }
+      
+      .main-header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .card-header-modern,
+      .card-body-modern {
+        padding: 1rem;
+      }
+      
+      .form-control-modern,
+      .form-select-modern {
+        padding: 0.75rem 1rem;
+      }
+      
+      .btn-modern {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+      }
+      
+      .table-scroll-wrapper {
+        max-height: 50vh;
+        min-height: 400px;
+      }
+      
+      .table-modern {
+        font-size: 0.8rem;
+      }
+      
+      .table-modern th,
+      .table-modern td {
+        padding: 0.75rem 0.5rem;
+      }
+      
+      .activity-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+        margin-right: 0.75rem;
+      }
+      
+      .status-icon {
+        min-width: 100px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .main-container {
+        padding: 0 0.75rem;
+      }
+      
+      .modern-card {
+        border-radius: 16px;
+        margin-bottom: 1rem;
+      }
+      
+      .table-scroll-wrapper {
+        max-height: 45vh;
+        min-height: 350px;
+      }
+      
+      .table-modern th {
+        font-size: 0.75rem;
+        padding: 0.75rem 0.4rem;
+      }
+      
+      .table-modern td {
+        padding: 0.75rem 0.4rem;
+        font-size: 0.75rem;
+      }
+    }
+    
+    /* Column specific widths */
+    .table-modern th:nth-child(1), .table-modern td:nth-child(1) {
+      min-width: 200px;
+    }
+    
+    .table-modern th:nth-child(2), .table-modern td:nth-child(2) {
+      min-width: 220px;
+    }
+    
+    .table-modern th:nth-child(3), .table-modern td:nth-child(3) {
+      min-width: 100px;
+      text-align: center;
+    }
+    
+    .table-modern th:nth-child(4), .table-modern td:nth-child(4) {
+      min-width: 280px;
+    }
+    
+    .table-modern th:nth-child(5), .table-modern td:nth-child(5),
+    .table-modern th:nth-child(6), .table-modern td:nth-child(6) {
+      min-width: 140px;
+      text-align: center;
+    }
+    
+    /* Legacy compatibility - maintaining old class names for backward compatibility */
     .container-fluid {
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem;
     }
     
-    h1 {
-      font-weight: 600;
-      margin-bottom: 2rem;
-      color: var(--dark-color);
-      font-size: 2rem;
-    }
-    
     .card {
-      border-radius: 12px;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
-      border: none;
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
       margin-bottom: 2rem;
-      background-color: #ffffff;
+      background-color: var(--white);
       overflow: hidden;
     }
     
     .card-header {
-      background-color: #fff;
-      border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 1.5rem;
-      font-weight: 500;
-      font-size: 1rem;
-      color: var(--dark-color);
+      background: linear-gradient(135deg, var(--white) 0%, var(--mint-cream) 100%);
+      border-bottom: 2px solid var(--mint-cream);
+      padding: 1.5rem 2rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--midnight-green);
     }
     
     .card-body {
-      padding: 1.5rem;
+      padding: 2rem;
     }
     
     .form-label {
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 0.5rem;
-      color: var(--dark-color);
+      color: var(--midnight-green);
     }
     
     .form-control, .form-select {
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 0.875rem 1.25rem;
       font-size: 0.95rem;
-      background-color: #fff;
-      transition: all 0.2s ease;
+      background: var(--white);
+      transition: all 0.3s ease;
+      font-weight: 500;
     }
     
     .form-control:focus, .form-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+      border-color: var(--cambridge-blue);
+      box-shadow: 0 0 0 4px rgba(137, 189, 178, 0.1);
     }
     
     .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      border-radius: 8px;
-      padding: 0.75rem 1.5rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--cambridge-blue) 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 0.875rem 2rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
     }
     
     .btn-primary:hover {
-      background-color: #005bbc;
-      border-color: #005bbc;
-      transform: translateY(-1px);
-    }
-    
-    .btn-primary:active {
-      transform: translateY(0);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, var(--emerald) 0%, var(--cambridge-blue) 100%);
+      border: none;
     }
     
     .table-wrapper {
       overflow: auto;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
       margin: 0;
-      max-height: 600px; /* Fixed height untuk tabel */
+      max-height: 70vh;
+      min-height: 500px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cambridge-blue) var(--mint-cream);
     }
     
     .table-monitoring {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      background-color: #fff;
+      background-color: var(--white);
+      font-size: 0.9rem;
     }
     
     .table-monitoring th {
-      background-color: #f5f5f7;
-      font-weight: 500;
-      padding: 1rem 1.25rem;
-      font-size: 0.9rem;
-      color: var(--dark-color);
+      background: linear-gradient(135deg, var(--midnight-green) 0%, var(--cambridge-blue) 100%);
+      color: var(--white);
+      font-weight: 600;
+      padding: 1.25rem 1rem;
+      font-size: 0.85rem;
       white-space: nowrap;
       position: sticky;
       top: 0;
-      z-index: 10; /* Lebih tinggi untuk memastikan tetap di atas */
+      z-index: 10;
       text-align: left;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 3px solid var(--emerald);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
     
     .table-monitoring td {
-      padding: 1rem 1.25rem;
+      padding: 1.25rem 1rem;
       vertical-align: middle;
       font-size: 0.9rem;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-light);
+      background: var(--white);
+      transition: all 0.3s ease;
     }
     
     .table-monitoring tr:last-child td {
@@ -152,44 +711,55 @@
     }
     
     tbody tr:hover {
-      background-color: rgba(0,113,227,0.03);
+      background-color: var(--mint-cream) !important;
     }
     
-    /* Status badges */
+    tbody tr:hover td {
+      background-color: var(--mint-cream) !important;
+      transform: scale(1.005);
+    }
+    
+    /* Status badges with modern styling */
     .status-badge {
-      padding: 0.35rem 0.75rem;
-      border-radius: 100px;
-      font-weight: 500;
-      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
       text-align: center;
       white-space: nowrap;
-      display: inline-block;
+      min-width: 120px;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
     }
     
     .status-success {
-      background-color: rgba(52,199,89,0.12);
-      color: var(--success-color);
+      background: linear-gradient(135deg, var(--emerald), #10b981);
+      color: var(--white);
     }
     
     .status-danger {
-      background-color: rgba(255,59,48,0.12);
-      color: var(--danger-color);
+      background: linear-gradient(135deg, var(--status-danger), #dc2626);
+      color: var(--white);
     }
     
     .status-warning {
-      background-color: rgba(255,159,10,0.12);
-      color: var(--warning-color);
+      background: linear-gradient(135deg, var(--status-warning), #d97706);
+      color: var(--white);
     }
     
     .status-neutral {
-      background-color: rgba(142,142,147,0.12);
-      color: var(--neutral-color);
+      background: linear-gradient(135deg, var(--status-neutral), #64748b);
+      color: var(--white);
     }
     
     /* Gate dan UK codes */
     .gate-code, .uk-code {
-      font-weight: 600;
-      color: var(--primary-color);
+      font-weight: 700;
+      color: var(--midnight-green);
       margin-right: 5px;
     }
     
@@ -198,7 +768,8 @@
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
       z-index: 9999;
       justify-content: center;
       align-items: center;
@@ -209,17 +780,25 @@
       flex-direction: column;
       align-items: center;
       gap: 1.5rem;
-      padding: 2rem;
-      border-radius: 16px;
-      background-color: rgba(255,255,255,0.8);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      padding: 3rem;
+      border-radius: 24px;
+      background: var(--white);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-light);
     }
     
     .spinner-text {
-      font-weight: 500;
-      color: var(--primary-color);
-      font-size: 1rem;
+      font-weight: 600;
+      color: var(--midnight-green);
+      font-size: 1.1rem;
+    }
+    
+    /* Modern spinner */
+    .spinner-border {
+      width: 60px !important;
+      height: 60px !important;
+      border: 4px solid var(--mint-cream) !important;
+      border-top: 4px solid var(--emerald) !important;
     }
     
     /* Region header styles */
@@ -227,138 +806,101 @@
       font-size: 0.85rem;
       font-weight: 500;
       text-align: center;
-      background-color: rgba(0,113,227,0.04);
+      background: linear-gradient(135deg, var(--midnight-green), var(--cambridge-blue));
+      color: var(--white);
     }
     
-    /* Perbaikan tampilan tabel */
-    .table-monitoring th:nth-child(1), /* Gate */
-    .table-monitoring td:nth-child(1) {
-      min-width: 200px;
-    }
-    
-    .table-monitoring th:nth-child(2), /* UK */
-    .table-monitoring td:nth-child(2) {
-      min-width: 220px;
-    }
-    
-    .table-monitoring th:nth-child(3), /* Level */
-    .table-monitoring td:nth-child(3) {
-      min-width: 100px;
-      text-align: center;
-    }
-    
-    .table-monitoring th:nth-child(4), /* Aktivitas */
-    .table-monitoring td:nth-child(4) {
-      min-width: 280px;
-    }
-    
-    /* Kolom tanggal */
-    .table-monitoring th:nth-child(5), /* Tanggal Mulai */
-    .table-monitoring td:nth-child(5),
-    .table-monitoring th:nth-child(6), /* Tanggal Selesai */
-    .table-monitoring td:nth-child(6) {
-      min-width: 160px;
-      text-align: center;
-    }
-    
-    /* Date in range (blinking effect) */
+    /* Date in range (enhanced blinking effect) */
     .date-in-range {
-      color: var(--success-color);
+      color: var(--white) !important;
       font-weight: 600;
-      animation: pulse 2s infinite;
+      background: linear-gradient(135deg, var(--emerald), #10b981);
+      padding: 0.5rem;
+      border-radius: 8px;
+      animation: pulse-glow 2s infinite;
+      box-shadow: 0 0 10px rgba(0, 202, 144, 0.3);
     }
     
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
-    
-    /* Untuk kompatibilitas */
+    /* Date column */
     .date-column {
       text-align: center;
+      font-weight: 600;
+      color: var(--midnight-green);
     }
     
-    /* Row colors alternating by UK group */
-    .table-monitoring .uk-group-even {
-      background-color: #ffffff;
-    }
-    
-    .table-monitoring .uk-group-odd {
-      background-color: rgba(245,245,247,0.4);
-    }
-    
-    /* Activity number */
+    /* Activity number with modern styling */
     .activity-number {
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
-      background-color: rgba(0,113,227,0.1);
-      color: var(--primary-color);
-      font-weight: 600;
-      margin-right: 12px;
-      font-size: 0.75rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--emerald), var(--cambridge-blue));
+      color: var(--white);
+      font-weight: 700;
+      margin-right: 1rem;
+      font-size: 0.8rem;
+      box-shadow: var(--shadow-md);
     }
     
     /* Status column */
     .status-column {
-      min-width: 120px;
+      min-width: 140px;
       text-align: center;
       white-space: nowrap;
     }
     
-    /* Row hover and focus */
-    .table-monitoring tr:hover td {
-      background-color: rgba(0,113,227,0.04);
+    /* Enhanced column specific widths */
+    .table-monitoring th:nth-child(1), .table-monitoring td:nth-child(1) {
+      min-width: 200px;
     }
     
-    /* Responsif */
-    @media (max-width: 992px) {
-      .container-fluid {
-        padding: 1.5rem;
-      }
-      
-      .card-body {
-        padding: 1.25rem;
-      }
+    .table-monitoring th:nth-child(2), .table-monitoring td:nth-child(2) {
+      min-width: 220px;
     }
     
-    @media (max-width: 768px) {
-      .container-fluid {
-        padding: 1rem;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-      
-      .card-header {
-        padding: 1rem;
-      }
-      
-      .card-body {
-        padding: 1rem;
-      }
+    .table-monitoring th:nth-child(3), .table-monitoring td:nth-child(3) {
+      min-width: 100px;
+      text-align: center;
+    }
+    
+    .table-monitoring th:nth-child(4), .table-monitoring td:nth-child(4) {
+      min-width: 280px;
+    }
+    
+    .table-monitoring th:nth-child(5), .table-monitoring td:nth-child(5),
+    .table-monitoring th:nth-child(6), .table-monitoring td:nth-child(6) {
+      min-width: 140px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="container-fluid">
+      <h1 class="d-flex align-items-center">
+        <span class="header-icon">
+          <i class="fas fa-chart-line"></i>
+        </span>
+        Monitoring Quality Gates
+      </h1>
+    </div>
+  </header>
+
   <div class="container-fluid">
-    <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
-    
     <!-- Input Filters -->
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Filter Data</span>
+        <span><i class="fas fa-filter me-3"></i>Filter Data</span>
       </div>
       <div class="card-body">
         <div class="row g-4">
           <div class="col-md-2">
-            <label for="yearSelect" class="form-label">Tahun</label>
+            <label for="yearSelect" class="form-label">
+              <i class="fas fa-calendar-alt me-2"></i>Tahun
+            </label>
             <select id="yearSelect" class="form-select">
               <option value="">Pilih Tahun</option>
               <option value="2023">2023</option>
@@ -367,11 +909,15 @@
             </select>
           </div>
           <div class="col-md-5">
-            <label for="projectSelect" class="form-label">Pilih Kegiatan</label>
+            <label for="projectSelect" class="form-label">
+              <i class="fas fa-project-diagram me-2"></i>Pilih Kegiatan
+            </label>
             <select id="projectSelect" class="form-select" disabled></select>
           </div>
           <div class="col-md-3">
-            <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
+            <label for="regionSelect" class="form-label">
+              <i class="fas fa-map-marked-alt me-2"></i>Pilih Cakupan Wilayah
+            </label>
             <select id="regionSelect" class="form-select" disabled></select>
           </div>
           <div class="col-md-2 d-flex align-items-end">
@@ -390,7 +936,7 @@
   <!-- Spinner Loading -->
   <div id="spinner">
     <div class="spinner-container">
-      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+      <div class="spinner-border text-primary" role="status"></div>
       <div class="spinner-text">Memuat data...</div>
     </div>
   </div>
@@ -425,7 +971,9 @@
           icon: 'error',
           title: 'Terjadi Kesalahan',
           text: message,
-          confirmButtonColor: '#0071e3'
+          confirmButtonColor: '#00CA90',
+          background: '#fff',
+          color: '#265964'
         });
       };
 
@@ -450,12 +998,13 @@
         });
       };
 
+      // Modern date formatting (date, month, year only)
       const formatDate = dateStr => {
         if (!dateStr || dateStr === '-') return '-';
         const parts = dateStr.split('-');
         if (parts.length === 3) {
-          const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                          'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
           return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
         return dateStr;
@@ -479,11 +1028,48 @@
         return today >= startDate && today <= endDate;
       };
 
+      // Modern status badge with icons
       const getStatusBadge = status => {
-        if (status.startsWith('Sudah')) return `<span class="status-badge status-success">${status}</span>`;
-        if (status.startsWith('Belum')) return `<span class="status-badge status-danger">${status}</span>`;
-        if (status === 'Tidak perlu') return `<span class="status-badge status-neutral">${status}</span>`;
-        return `<span class="status-badge status-warning">${status}</span>`;
+        if (status.startsWith('Sudah')) {
+          return `<span class="status-badge status-success">
+            <i class="fas fa-check-circle"></i> ${status}
+          </span>`;
+        }
+        if (status.startsWith('Belum')) {
+          return `<span class="status-badge status-danger">
+            <i class="fas fa-times-circle"></i> ${status}
+          </span>`;
+        }
+        if (status === 'Tidak perlu') {
+          return `<span class="status-badge status-neutral">
+            <i class="fas fa-stop-circle"></i> ${status}
+          </span>`;
+        }
+        return `<span class="status-badge status-warning">
+          <i class="fas fa-exclamation-circle"></i> ${status}
+        </span>`;
+      };
+
+      // Get level indicator with modern styling
+      const getLevelIndicator = (level) => {
+        if (level === "Pusat") {
+          return `<span class="level-indicator level-pusat">
+            <i class="fas fa-crown me-1"></i> ${level}
+          </span>`;
+        }
+        if (level === "Provinsi") {
+          return `<span class="level-indicator level-provinsi">
+            <i class="fas fa-map me-1"></i> ${level}
+          </span>`;
+        }
+        if (level === "Kabupaten") {
+          return `<span class="level-indicator level-kabupaten">
+            <i class="fas fa-building me-1"></i> ${level}
+          </span>`;
+        }
+        return `<span class="level-indicator">
+          <i class="fas fa-question me-1"></i> ${level}
+        </span>`;
       };
 
       // --- Fungsi untuk mengecek apakah ukuran kualitas sesuai dengan level wilayah ---
@@ -717,25 +1303,25 @@
         let tableHtml = `
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-              <span>Hasil Monitoring</span>
-              <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+              <span><i class="fas fa-table me-3"></i>Hasil Monitoring</span>
+              <span id="resultCount" class="badge" style="background: linear-gradient(135deg, var(--emerald), var(--cambridge-blue)); color: white; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600;">${Object.keys(activityData).length} aktivitas</span>
             </div>
             <div class="card-body p-0">
               <div class="table-wrapper">
                 <table class="table-monitoring">
                   <thead>
                     <tr>
-                      <th>Gate</th>
-                      <th>Ukuran Kualitas</th>
-                      <th>Level</th>
-                      <th>Aktivitas</th>
-                      <th class="date-column">Tanggal Mulai</th>
-                      <th class="date-column">Tanggal Selesai</th>
+                      <th><i class="fas fa-door-open me-2"></i>Gate</th>
+                      <th><i class="fas fa-chart-bar me-2"></i>Ukuran Kualitas</th>
+                      <th><i class="fas fa-layer-group me-2"></i>Level</th>
+                      <th><i class="fas fa-tasks me-2"></i>Aktivitas</th>
+                      <th class="date-column"><i class="fas fa-calendar-day me-2"></i>Tanggal Mulai</th>
+                      <th class="date-column"><i class="fas fa-calendar-check me-2"></i>Tanggal Selesai</th>
         `;
         
         // Tambahkan kolom status untuk setiap wilayah
         regions.forEach(region => {
-          tableHtml += `<th class="status-column region-header">${region.name}</th>`;
+          tableHtml += `<th class="status-column region-header"><i class="fas fa-map-marker-alt me-2"></i>${region.name}</th>`;
         });
         
         tableHtml += `
@@ -834,7 +1420,7 @@
               tableHtml += `
                 <td rowspan="${rowspanValue}">${data.gate}</td>
                 <td rowspan="${rowspanValue}">${data.uk}</td>
-                <td rowspan="${rowspanValue}" style="text-align: center;">${ukLevels[data.uk]}</td>
+                <td rowspan="${rowspanValue}" style="text-align: center;">${getLevelIndicator(ukLevels[data.uk])}</td>
               `;
             }
             
@@ -843,14 +1429,23 @@
             const endDate = data.end;
             const isInDateRange = isDateInRange(startDate, endDate);
             
-            // Tambahkan class untuk tanggal yang dalam rentang
-            const startDateClass = isInDateRange ? 'date-in-range' : '';
-            const endDateClass = isInDateRange ? 'date-in-range' : '';
+            // Format tanggal dengan styling modern
+            const startDateFormatted = formatDate(startDate);
+            const endDateFormatted = formatDate(endDate);
+            
+            // Buat HTML untuk tanggal dengan styling yang tepat
+            const startDateHtml = isInDateRange ? 
+              `<div class="date-display date-active">${startDateFormatted}</div>` : 
+              `<div class="date-display">${startDateFormatted}</div>`;
+              
+            const endDateHtml = isInDateRange ? 
+              `<div class="date-display date-active">${endDateFormatted}</div>` : 
+              `<div class="date-display">${endDateFormatted}</div>`;
             
             tableHtml += `
               <td><span class="activity-number">${activityNumber}</span>${data.activity}</td>
-              <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
-              <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
+              <td class="date-column">${startDateHtml}</td>
+              <td class="date-column">${endDateHtml}</td>
             `;
             
             // Tambahkan status untuk setiap wilayah
@@ -1290,8 +1885,5 @@
       $spinner.hide();
     });
   </script>
-  
-  <!-- SweetAlert2 untuk notifikasi -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>
