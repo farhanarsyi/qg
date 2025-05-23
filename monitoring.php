@@ -2,400 +2,781 @@
 // monitoring.php
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Monitoring Quality Gates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quality Gates Monitor - Dashboard</title>
+  
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  
+  <!-- Google Fonts - Modern Professional -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Feather Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+  
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  
   <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   <style>
     :root {
-      --primary-color: #0071e3; /* Apple blue */
-      --success-color: #34c759; /* Apple green */
-      --warning-color: #ff9f0a; /* Apple orange */
-      --danger-color: #ff3b30;  /* Apple red */
-      --neutral-color: #8e8e93; /* Apple gray */
-      --light-color: #f5f5f7;   /* Apple light gray */
-      --dark-color: #1d1d1f;    /* Apple dark */
-      --border-color: #d2d2d7;  /* Apple border */
+      /* Green Dominant Color Scheme */
+      --primary-green: #059669;      /* Emerald 600 */
+      --primary-green-light: #10b981; /* Emerald 500 */
+      --primary-green-dark: #047857;  /* Emerald 700 */
+      --secondary-green: #d1fae5;     /* Emerald 100 */
+      --accent-green: #34d399;        /* Emerald 400 */
+      
+      /* Supporting Colors */
+      --success-color: #22c55e;       /* Green 500 */
+      --warning-color: #f59e0b;       /* Amber 500 */
+      --danger-color: #ef4444;        /* Red 500 */
+      --info-color: #3b82f6;          /* Blue 500 */
+      
+      /* Neutral Colors */
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      
+      /* Background */
+      --bg-primary: #f0fdf4;          /* Green 50 */
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      
+      /* Border Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+    }
+    
+    * {
+      box-sizing: border-box;
     }
     
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #f5f5f7;
-      color: #1d1d1f;
-      line-height: 1.5;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--gray-50) 100%);
+      color: var(--gray-800);
+      line-height: 1.6;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
     
-    .container-fluid {
-      max-width: 1400px;
+    /* Container with adaptive width */
+    .main-container {
+      max-width: min(1600px, 95vw);
       margin: 0 auto;
-      padding: 2rem;
+      padding: clamp(1rem, 3vw, 2rem);
+      min-height: 100vh;
     }
     
-    h1 {
-      font-weight: 600;
+    /* Header Section */
+    .header-section {
+      background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+      border-radius: var(--radius-2xl);
+      padding: clamp(2rem, 4vw, 3rem);
       margin-bottom: 2rem;
-      color: var(--dark-color);
-      font-size: 2rem;
-    }
-    
-    .card {
-      border-radius: 12px;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
-      border: none;
-      margin-bottom: 2rem;
-      background-color: #ffffff;
+      box-shadow: var(--shadow-xl);
+      color: white;
+      position: relative;
       overflow: hidden;
     }
     
-    .card-header {
-      background-color: #fff;
-      border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 1.5rem;
-      font-weight: 500;
-      font-size: 1rem;
-      color: var(--dark-color);
+    .header-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
     }
     
-    .card-body {
-      padding: 1.5rem;
+    .header-content {
+      position: relative;
+      z-index: 2;
     }
     
-    .form-label {
-      font-weight: 500;
+    .header-title {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 800;
       margin-bottom: 0.5rem;
-      color: var(--dark-color);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     
-    .form-control, .form-select {
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      padding: 0.75rem 1rem;
-      font-size: 0.95rem;
-      background-color: #fff;
-      transition: all 0.2s ease;
+    .header-subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      opacity: 0.9;
+      font-weight: 400;
+      margin: 0;
     }
     
-    .form-control:focus, .form-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+    .header-icon {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 1rem;
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
     }
     
-    .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      border-radius: 8px;
-      padding: 0.75rem 1.5rem;
+    /* Card Styles */
+    .modern-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--gray-200);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .modern-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .card-header-modern {
+      background: linear-gradient(135deg, var(--secondary-green) 0%, rgba(16, 185, 129, 0.1) 100%);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .card-header-icon {
+      background: var(--primary-green);
+      color: white;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin: 0;
+    }
+    
+    .card-body-modern {
+      padding: 2rem;
+    }
+    
+    /* Form Styles */
+    .form-group-modern {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label-modern {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray-700);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .form-control-modern, .form-select-modern {
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--gray-200);
+      padding: 0.875rem 1.25rem;
+      font-size: 1rem;
       font-weight: 500;
-      transition: all 0.2s ease;
+      background: var(--bg-secondary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
     }
     
-    .btn-primary:hover {
-      background-color: #005bbc;
-      border-color: #005bbc;
+    .form-control-modern:focus, .form-select-modern:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+      outline: none;
       transform: translateY(-1px);
     }
     
-    .btn-primary:active {
+    .form-control-modern:disabled, .form-select-modern:disabled {
+      background-color: var(--gray-100);
+      color: var(--gray-400);
+      cursor: not-allowed;
+    }
+    
+    /* Button Styles */
+    .btn-modern {
+      background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 1rem 2rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      min-height: 3rem;
+      justify-content: center;
+    }
+    
+    .btn-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
+      color: white;
+    }
+    
+    .btn-modern:active {
       transform: translateY(0);
+    }
+    
+    .btn-modern:disabled {
+      background: var(--gray-300);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* Table Styles */
+    .table-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
     }
     
     .table-wrapper {
       overflow: auto;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin: 0;
-      max-height: 600px; /* Fixed height untuk tabel */
+      max-height: 70vh;
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary-green) var(--gray-200);
     }
     
-    .table-monitoring {
+    .table-wrapper::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    .table-wrapper::-webkit-scrollbar-track {
+      background: var(--gray-100);
+      border-radius: var(--radius-sm);
+    }
+    
+    .table-wrapper::-webkit-scrollbar-thumb {
+      background: var(--primary-green);
+      border-radius: var(--radius-sm);
+    }
+    
+    .table-wrapper::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-green-dark);
+    }
+    
+    .table-modern {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      background-color: #fff;
+      font-size: 0.875rem;
+      margin: 0;
     }
     
-    .table-monitoring th {
-      background-color: #f5f5f7;
-      font-weight: 500;
+    .table-modern th {
+      background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+      color: white;
+      font-weight: 600;
       padding: 1rem 1.25rem;
-      font-size: 0.9rem;
-      color: var(--dark-color);
-      white-space: nowrap;
+      text-align: left;
       position: sticky;
       top: 0;
-      z-index: 10; /* Lebih tinggi untuk memastikan tetap di atas */
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
+      z-index: 10;
+      border-bottom: 1px solid var(--primary-green-dark);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
     }
     
-    .table-monitoring td {
+    .table-modern td {
       padding: 1rem 1.25rem;
       vertical-align: middle;
-      font-size: 0.9rem;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--bg-secondary);
+      transition: all 0.2s ease;
     }
     
-    .table-monitoring tr:last-child td {
+    .table-modern tbody tr:hover td {
+      background: var(--secondary-green);
+      transform: scale(1.001);
+    }
+    
+    .table-modern tr:last-child td {
       border-bottom: none;
     }
     
-    tbody tr:hover {
-      background-color: rgba(0,113,227,0.03);
-    }
-    
-    /* Status badges */
+    /* Status Badges */
     .status-badge {
-      padding: 0.35rem 0.75rem;
-      border-radius: 100px;
-      font-weight: 500;
-      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.75rem;
       text-align: center;
       white-space: nowrap;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
     
     .status-success {
-      background-color: rgba(52,199,89,0.12);
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
       color: var(--success-color);
+      border: 1px solid #86efac;
     }
     
     .status-danger {
-      background-color: rgba(255,59,48,0.12);
+      background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
       color: var(--danger-color);
+      border: 1px solid #fca5a5;
     }
     
     .status-warning {
-      background-color: rgba(255,159,10,0.12);
+      background: linear-gradient(135deg, #fffbeb 0%, #fed7aa 100%);
       color: var(--warning-color);
+      border: 1px solid #fdba74;
+    }
+    
+    .status-info {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: var(--info-color);
+      border: 1px solid #93c5fd;
     }
     
     .status-neutral {
-      background-color: rgba(142,142,147,0.12);
-      color: var(--neutral-color);
+      background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+      color: var(--gray-600);
+      border: 1px solid var(--gray-300);
     }
     
-    /* Gate dan UK codes */
+    /* Code and ID Styles */
     .gate-code, .uk-code {
+      font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
-      color: var(--primary-color);
-      margin-right: 5px;
+      color: var(--primary-green);
+      background: var(--secondary-green);
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+      border: 1px solid var(--accent-green);
     }
     
-    /* Spinner overlay */
-    #spinner {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.9);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .spinner-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      padding: 2rem;
-      border-radius: 16px;
-      background-color: rgba(255,255,255,0.8);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    }
-    
-    .spinner-text {
-      font-weight: 500;
-      color: var(--primary-color);
-      font-size: 1rem;
-    }
-    
-    /* Region header styles */
-    .region-header {
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-align: center;
-      background-color: rgba(0,113,227,0.04);
-    }
-    
-    /* Perbaikan tampilan tabel */
-    .table-monitoring th:nth-child(1), /* Gate */
-    .table-monitoring td:nth-child(1) {
-      min-width: 200px;
-    }
-    
-    .table-monitoring th:nth-child(2), /* UK */
-    .table-monitoring td:nth-child(2) {
-      min-width: 220px;
-    }
-    
-    .table-monitoring th:nth-child(3), /* Level */
-    .table-monitoring td:nth-child(3) {
-      min-width: 100px;
-      text-align: center;
-    }
-    
-    .table-monitoring th:nth-child(4), /* Aktivitas */
-    .table-monitoring td:nth-child(4) {
-      min-width: 280px;
-    }
-    
-    /* Kolom tanggal */
-    .table-monitoring th:nth-child(5), /* Tanggal Mulai */
-    .table-monitoring td:nth-child(5),
-    .table-monitoring th:nth-child(6), /* Tanggal Selesai */
-    .table-monitoring td:nth-child(6) {
-      min-width: 160px;
-      text-align: center;
-    }
-    
-    /* Date in range (blinking effect) */
-    .date-in-range {
-      color: var(--success-color);
-      font-weight: 600;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
-    
-    /* Untuk kompatibilitas */
-    .date-column {
-      text-align: center;
-    }
-    
-    /* Row colors alternating by UK group */
-    .table-monitoring .uk-group-even {
-      background-color: #ffffff;
-    }
-    
-    .table-monitoring .uk-group-odd {
-      background-color: rgba(245,245,247,0.4);
-    }
-    
-    /* Activity number */
+    /* Activity Number */
     .activity-number {
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
-      background-color: rgba(0,113,227,0.1);
-      color: var(--primary-color);
-      font-weight: 600;
-      margin-right: 12px;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+      color: white;
+      font-weight: 700;
+      margin-right: 0.75rem;
       font-size: 0.75rem;
+      box-shadow: var(--shadow-sm);
     }
     
-    /* Status column */
-    .status-column {
-      min-width: 120px;
+    /* Date Styles */
+    .date-column {
       text-align: center;
-      white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
     }
     
-    /* Row hover and focus */
-    .table-monitoring tr:hover td {
-      background-color: rgba(0,113,227,0.04);
+    .date-in-range {
+      color: var(--success-color);
+      font-weight: 700;
+      animation: pulse 2s infinite;
     }
     
-    /* Responsif */
-    @media (max-width: 992px) {
-      .container-fluid {
-        padding: 1.5rem;
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* Loading Spinner */
+    .spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .spinner-container {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-xl);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      border: 1px solid var(--gray-200);
+    }
+    
+    .spinner-modern {
+      width: 3rem;
+      height: 3rem;
+      border: 3px solid var(--gray-200);
+      border-top: 3px solid var(--primary-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .spinner-text {
+      font-weight: 600;
+      color: var(--gray-700);
+      font-size: 1rem;
+    }
+    
+    /* Region Header */
+    .region-header {
+      background: linear-gradient(135deg, var(--info-color) 0%, #1e40af 100%);
+      color: white;
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .main-container {
+        max-width: 100%;
+        padding: 1rem;
       }
       
-      .card-body {
-        padding: 1.25rem;
+      .header-section {
+        padding: 2rem;
+      }
+      
+      .card-body-modern {
+        padding: 1.5rem;
       }
     }
     
     @media (max-width: 768px) {
-      .container-fluid {
+      .main-container {
+        padding: 0.75rem;
+      }
+      
+      .header-section {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      
+      .header-title {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+      
+      .card-header-modern {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+      
+      .card-body-modern {
         padding: 1rem;
       }
       
-      h1 {
+      .table-modern th,
+      .table-modern td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+      }
+      
+      .btn-modern {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .header-title {
         font-size: 1.5rem;
-        margin-bottom: 1.5rem;
       }
       
-      .card-header {
-        padding: 1rem;
+      .header-subtitle {
+        font-size: 1rem;
       }
       
-      .card-body {
-        padding: 1rem;
+      .form-control-modern,
+      .form-select-modern {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
       }
+      
+      .table-wrapper {
+        max-height: 60vh;
+      }
+      
+      .table-modern th,
+      .table-modern td {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+      }
+      
+      .status-badge {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.7rem;
+      }
+    }
+    
+    /* Column widths for better layout */
+    .table-modern th:nth-child(1), .table-modern td:nth-child(1) { min-width: 200px; }
+    .table-modern th:nth-child(2), .table-modern td:nth-child(2) { min-width: 220px; }
+    .table-modern th:nth-child(3), .table-modern td:nth-child(3) { min-width: 100px; text-align: center; }
+    .table-modern th:nth-child(4), .table-modern td:nth-child(4) { min-width: 280px; }
+    .table-modern th:nth-child(5), .table-modern td:nth-child(5) { min-width: 140px; }
+    .table-modern th:nth-child(6), .table-modern td:nth-child(6) { min-width: 140px; }
+    .table-modern th:nth-child(7), .table-modern td:nth-child(7) { min-width: 120px; text-align: center; }
+    
+    /* UK Group alternating colors */
+    .uk-group-even { background: var(--bg-secondary); }
+    .uk-group-odd { background: var(--gray-50); }
+    
+    /* Smooth animations */
+    * {
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                  background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* SweetAlert2 Custom Styling */
+    .modern-alert {
+      border-radius: var(--radius-xl) !important;
+      box-shadow: var(--shadow-xl) !important;
+      border: 1px solid var(--gray-200) !important;
+    }
+    
+    .modern-alert-title {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-weight: 700 !important;
+      color: var(--gray-800) !important;
+    }
+    
+    .modern-alert-content {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      color: var(--gray-600) !important;
+    }
+    
+    .swal2-icon.swal2-error {
+      border-color: var(--danger-color) !important;
+      color: var(--danger-color) !important;
+    }
+    
+    .swal2-icon.swal2-success {
+      border-color: var(--success-color) !important;
+      color: var(--success-color) !important;
+    }
+    
+    .swal2-icon.swal2-warning {
+      border-color: var(--warning-color) !important;
+      color: var(--warning-color) !important;
+    }
+    
+    .swal2-icon.swal2-info {
+      border-color: var(--info-color) !important;
+      color: var(--info-color) !important;
+    }
+    
+    /* Animation classes */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translate3d(0, -100%, 0);
+      }
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+    
+    @keyframes fadeOutUp {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+        transform: translate3d(0, -100%, 0);
+      }
+    }
+    
+    .animate__animated {
+      animation-duration: 0.3s;
+      animation-fill-mode: both;
+    }
+    
+    .animate__fadeInDown {
+      animation-name: fadeInDown;
+    }
+    
+    .animate__fadeOutUp {
+      animation-name: fadeOutUp;
     }
   </style>
 </head>
 <body>
-  <div class="container-fluid">
-    <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
-    
-    <!-- Input Filters -->
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Filter Data</span>
+  <div class="main-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="header-content">
+        <h1 class="header-title">
+          <div class="header-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <div>Quality Gates Monitor</div>
+            <p class="header-subtitle">Dashboard Monitoring & Evaluasi Sistem Kualitas</p>
+          </div>
+        </h1>
       </div>
-      <div class="card-body">
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="modern-card">
+      <div class="card-header-modern">
+        <div class="card-header-icon">
+          <i class="fas fa-filter"></i>
+        </div>
+        <h3 class="card-title">Filter & Pencarian Data</h3>
+      </div>
+      <div class="card-body-modern">
         <div class="row g-4">
-          <div class="col-md-2">
-            <label for="yearSelect" class="form-label">Tahun</label>
-            <select id="yearSelect" class="form-select">
-              <option value="">Pilih Tahun</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-            </select>
+          <div class="col-lg-3 col-md-6">
+            <div class="form-group-modern">
+              <label for="yearSelect" class="form-label-modern">
+                <i class="fas fa-calendar-alt"></i>
+                Tahun Monitoring
+              </label>
+              <select id="yearSelect" class="form-select-modern">
+                <option value="">Pilih Tahun</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+              </select>
+            </div>
           </div>
-          <div class="col-md-5">
-            <label for="projectSelect" class="form-label">Pilih Kegiatan</label>
-            <select id="projectSelect" class="form-select" disabled></select>
+          
+          <div class="col-lg-4 col-md-6">
+            <div class="form-group-modern">
+              <label for="projectSelect" class="form-label-modern">
+                <i class="fas fa-project-diagram"></i>
+                Kegiatan/Project
+              </label>
+              <select id="projectSelect" class="form-select-modern" disabled>
+                <option value="">Pilih Kegiatan</option>
+              </select>
+            </div>
           </div>
-          <div class="col-md-3">
-            <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
-            <select id="regionSelect" class="form-select" disabled></select>
+          
+          <div class="col-lg-3 col-md-6">
+            <div class="form-group-modern">
+              <label for="regionSelect" class="form-label-modern">
+                <i class="fas fa-map-marker-alt"></i>
+                Cakupan Wilayah
+              </label>
+              <select id="regionSelect" class="form-select-modern" disabled>
+                <option value="">Pilih Cakupan Wilayah</option>
+              </select>
+            </div>
           </div>
-          <div class="col-md-2 d-flex align-items-end">
-            <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-              <i class="fas fa-search me-2"></i>Tampilkan Data
-            </button>
+          
+          <div class="col-lg-2 col-md-6">
+            <div class="form-group-modern">
+              <label class="form-label-modern" style="opacity: 0;">Action</label>
+              <button id="loadData" class="btn-modern w-100">
+                <i class="fas fa-search"></i>
+                Tampilkan Data
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Results Section -->
+    <!-- Results Container -->
     <div id="resultsContainer"></div>
   </div>
 
-  <!-- Spinner Loading -->
-  <div id="spinner">
+  <!-- Loading Spinner -->
+  <div id="spinner" class="spinner-overlay" style="display: none;">
     <div class="spinner-container">
-      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-      <div class="spinner-text">Memuat data...</div>
+      <div class="spinner-modern"></div>
+      <div class="spinner-text">
+        <i class="fas fa-sync-alt me-2"></i>
+        Memuat data monitoring...
+      </div>
     </div>
   </div>
 
   <script>
+    // Initialize Feather Icons
+    feather.replace();
+    
     $(function(){
       const API_URL = "api.php";
       let selectedProject, year, selectedRegion = null;
@@ -425,7 +806,20 @@
           icon: 'error',
           title: 'Terjadi Kesalahan',
           text: message,
-          confirmButtonColor: '#0071e3'
+          confirmButtonColor: '#059669', // Green theme color
+          confirmButtonText: 'Mengerti',
+          customClass: {
+            popup: 'modern-alert',
+            title: 'modern-alert-title',
+            content: 'modern-alert-content',
+            confirmButton: 'btn-modern'
+          },
+          showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__fadeOutUp'
+          }
         });
       };
 
@@ -450,15 +844,26 @@
         });
       };
 
-      const formatDate = dateStr => {
-        if (!dateStr || dateStr === '-') return '-';
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-          const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-          return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+      const formatDate = (dateString) => {
+        if (!dateString || dateString === "0000-00-00" || dateString === "") {
+          return '<span class="text-muted">Tidak ditentukan</span>';
         }
-        return dateStr;
+        
+        try {
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) {
+            return '<span class="text-muted">Format tidak valid</span>';
+          }
+          
+          // Format: DD/MM/YYYY
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          
+          return `${day}/${month}/${year}`;
+        } catch (error) {
+          return '<span class="text-muted">Error format</span>';
+        }
       };
       
       // Function to check if date is within range
@@ -479,11 +884,45 @@
         return today >= startDate && today <= endDate;
       };
 
-      const getStatusBadge = status => {
-        if (status.startsWith('Sudah')) return `<span class="status-badge status-success">${status}</span>`;
-        if (status.startsWith('Belum')) return `<span class="status-badge status-danger">${status}</span>`;
-        if (status === 'Tidak perlu') return `<span class="status-badge status-neutral">${status}</span>`;
-        return `<span class="status-badge status-warning">${status}</span>`;
+      const getStatusBadge = (status) => {
+        const statusMap = {
+          "Sudah": {
+            class: "status-success",
+            icon: "fas fa-check-circle",
+            text: "Selesai"
+          },
+          "Belum": {
+            class: "status-danger", 
+            icon: "fas fa-times-circle",
+            text: "Belum"
+          },
+          "Sebagian": {
+            class: "status-warning",
+            icon: "fas fa-exclamation-triangle", 
+            text: "Sebagian"
+          },
+          "Tidak perlu": {
+            class: "status-neutral",
+            icon: "fas fa-minus-circle",
+            text: "Tidak Perlu"
+          },
+          "Tidak tersedia": {
+            class: "status-info",
+            icon: "fas fa-question-circle",
+            text: "Tidak Tersedia"
+          }
+        };
+        
+        const statusInfo = statusMap[status] || {
+          class: "status-neutral",
+          icon: "fas fa-question",
+          text: status
+        };
+        
+        return `<span class="status-badge ${statusInfo.class}">
+          <i class="${statusInfo.icon}"></i>
+          ${statusInfo.text}
+        </span>`;
       };
 
       // --- Fungsi untuk mengecek apakah ukuran kualitas sesuai dengan level wilayah ---
@@ -715,27 +1154,39 @@
         
         // Buat header tabel dengan kolom status untuk setiap wilayah
         let tableHtml = `
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span>Hasil Monitoring</span>
-              <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+          <div class="modern-card">
+            <div class="card-header-modern">
+              <div class="card-header-icon">
+                <i class="fas fa-table"></i>
+              </div>
+              <h3 class="card-title">Hasil Monitoring Quality Gates</h3>
+              <div class="ms-auto">
+                <span class="status-badge status-info">
+                  <i class="fas fa-list-ol"></i>
+                  ${Object.keys(activityData).length} Aktivitas
+                </span>
+              </div>
             </div>
-            <div class="card-body p-0">
+            <div class="table-container">
               <div class="table-wrapper">
-                <table class="table-monitoring">
+                <table class="table-modern">
                   <thead>
                     <tr>
-                      <th>Gate</th>
-                      <th>Ukuran Kualitas</th>
-                      <th>Level</th>
-                      <th>Aktivitas</th>
-                      <th class="date-column">Tanggal Mulai</th>
-                      <th class="date-column">Tanggal Selesai</th>
+                      <th><i class="fas fa-gate-open me-2"></i>Quality Gate</th>
+                      <th><i class="fas fa-ruler me-2"></i>Ukuran Kualitas</th>
+                      <th><i class="fas fa-layer-group me-2"></i>Level</th>
+                      <th><i class="fas fa-tasks me-2"></i>Aktivitas</th>
+                      <th class="date-column"><i class="fas fa-calendar-plus me-2"></i>Mulai</th>
+                      <th class="date-column"><i class="fas fa-calendar-check me-2"></i>Selesai</th>
         `;
         
         // Tambahkan kolom status untuk setiap wilayah
         regions.forEach(region => {
-          tableHtml += `<th class="status-column region-header">${region.name}</th>`;
+          const regionIcon = region.id === "pusat" ? "fas fa-building" : 
+                           region.kab === "00" ? "fas fa-map" : "fas fa-map-marker-alt";
+          tableHtml += `<th class="region-header">
+            <i class="${regionIcon} me-2"></i>${region.name}
+          </th>`;
         });
         
         tableHtml += `
@@ -832,9 +1283,18 @@
             // Untuk baris pertama saja, tampilkan gate dan UK dengan rowspan
             if (isFirstRow) {
               tableHtml += `
-                <td rowspan="${rowspanValue}">${data.gate}</td>
-                <td rowspan="${rowspanValue}">${data.uk}</td>
-                <td rowspan="${rowspanValue}" style="text-align: center;">${ukLevels[data.uk]}</td>
+                <td rowspan="${rowspanValue}">
+                  <span class="gate-code">${data.gate}</span>
+                </td>
+                <td rowspan="${rowspanValue}">
+                  <span class="uk-code">${data.uk}</span>
+                </td>
+                <td rowspan="${rowspanValue}" class="text-center">
+                  <span class="status-badge status-info">
+                    <i class="fas fa-layer-group"></i>
+                    ${ukLevels[data.uk]}
+                  </span>
+                </td>
               `;
             }
             
@@ -847,10 +1307,36 @@
             const startDateClass = isInDateRange ? 'date-in-range' : '';
             const endDateClass = isInDateRange ? 'date-in-range' : '';
             
+            // Icon untuk berbagai jenis aktivitas
+            const activityIcons = {
+              1: "fas fa-user-edit",      // Pengisian nama pelaksana aksi preventif
+              2: "fas fa-cloud-upload-alt", // Upload bukti pelaksanaan aksi preventif
+              3: "fas fa-chart-bar",       // Penilaian ukuran kualitas
+              4: "fas fa-check-double",    // Approval Gate oleh Sign-off
+              5: "fas fa-user-cog",        // Pengisian pelaksana aksi korektif
+              6: "fas fa-upload"           // Upload bukti pelaksanaan aksi korektif
+            };
+            
+            const activityIcon = activityIcons[activityNumber] || "fas fa-tasks";
+            
             tableHtml += `
-              <td><span class="activity-number">${activityNumber}</span>${data.activity}</td>
-              <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
-              <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="activity-number">${activityNumber}</div>
+                  <div>
+                    <i class="${activityIcon} me-2 text-muted"></i>
+                    ${data.activity}
+                  </div>
+                </div>
+              </td>
+              <td class="date-column ${startDateClass}">
+                <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                ${formatDate(startDate)}
+              </td>
+              <td class="date-column ${endDateClass}">
+                <i class="fas fa-calendar-check me-2 text-muted"></i>
+                ${formatDate(endDate)}
+              </td>
             `;
             
             // Tambahkan status untuk setiap wilayah
@@ -872,6 +1358,11 @@
         `;
         
         $resultsContainer.html(tableHtml);
+        
+        // Initialize feather icons for any new content
+        if (typeof feather !== 'undefined') {
+          feather.replace();
+        }
       };
 
       // --- Fungsi untuk Load Data (Projects & Regions) ---
