@@ -695,6 +695,7 @@ if(isset($_POST['action'])){
             $user_prov = $_POST['user_prov'];
             $user_kab = $_POST['user_kab'];
             $year = isset($_POST['year']) ? $_POST['year'] : null;
+            $region = isset($_POST['region']) ? $_POST['region'] : null;
             
             $query = "
                 SELECT DISTINCT p.id, p.name, p.year
@@ -723,6 +724,15 @@ if(isset($_POST['action'])){
             if ($year) {
                 $query .= " AND p.year = ?";
                 $params[] = $year;
+            }
+            
+            // Filter berdasarkan region jika dipilih
+            if ($region && strlen($region) >= 4) {
+                $regionProv = substr($region, 0, 2);
+                $regionKab = substr($region, 2, 2);
+                $query .= " AND pc.prov = ? AND pc.kab = ?";
+                $params[] = $regionProv;
+                $params[] = $regionKab;
             }
             
             $query .= " ORDER BY p.year DESC, p.name";
@@ -770,7 +780,7 @@ if(isset($_POST['action'])){
             
         case "fetchUsers":
             // Endpoint untuk testing - menampilkan daftar user
-            $query = "SELECT id, username, name, prov, kab FROM [user] WHERE [is_deleted] IS NULL ORDER BY [prov], [kab], [username]";
+            $query = "SELECT id, username, name, prov, kab FROM [users] ORDER BY [prov], [kab], [username]";
             echo executeQuery($query, []);
             break;
             

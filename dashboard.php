@@ -286,31 +286,6 @@
       }
     }
     
-    .stats-card {
-      background: linear-gradient(135deg, var(--primary-color), #005bbc);
-      color: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      margin-bottom: 2rem;
-    }
-    
-    .stats-title {
-      font-size: 0.9rem;
-      opacity: 0.9;
-      margin-bottom: 0.5rem;
-    }
-    
-    .stats-number {
-      font-size: 2rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-    
-    .stats-subtitle {
-      font-size: 0.8rem;
-      opacity: 0.8;
-    }
-    
     .empty-state {
       text-align: center;
       padding: 3rem 2rem;
@@ -421,50 +396,48 @@
   <div class="container-fluid">
     <!-- Header -->
     <div class="row mb-4">
-      <div class="col-md-8">
+      <div class="col-12">
         <h1 id="dashboardTitle">Dashboard Quality Gates</h1>
-        <p class="dashboard-subtitle" id="dashboardSubtitle">Pantau progress kegiatan quality gates</p>
-      </div>
-      <div class="col-md-4">
-        <div class="stats-card">
-          <div class="stats-title">Total Project-Gate</div>
-          <div class="stats-number" id="totalProjectGates">0</div>
-          <div class="stats-subtitle">dalam cakupan wilayah Anda</div>
-        </div>
+        <p class="dashboard-subtitle" id="dashboardSubtitle">Pantau progress kegiatan quality gates <span id="selectedRegionName"></span></p>
       </div>
     </div>
 
-    <!-- Filters (hanya untuk pusat dan provinsi) -->
-    <div class="card" id="filtersCard" style="display: none;">
+    <!-- Filters -->
+    <div class="card" id="filtersCard">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Filter Data</span>
-        <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
-          <i class="fas fa-times me-1"></i>Reset Filter
-        </button>
+        <div>
+          <span id="filterRequiredNote" class="text-danger me-3" style="display: none;">
+            <i class="fas fa-exclamation-triangle me-1"></i>Mohon isi filter untuk memuat data
+          </span>
+          <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
+            <i class="fas fa-times me-1"></i>Reset Filter
+          </button>
+        </div>
       </div>
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-md-3">
+          <div class="col-md-2">
             <label for="filterYear" class="form-label">Tahun</label>
             <select id="filterYear" class="form-select">
-              <option value="">Semua Tahun</option>
+              <option value="">Pilih Tahun</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="filterRegion" class="form-label">Wilayah</label>
+            <select id="filterRegion" class="form-select">
+              <option value="">Pilih Wilayah</option>
             </select>
           </div>
           <div class="col-md-4">
             <label for="filterProject" class="form-label">Kegiatan</label>
             <select id="filterProject" class="form-select">
-              <option value="">Semua Kegiatan</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label for="filterRegion" class="form-label">Wilayah</label>
-            <select id="filterRegion" class="form-select">
-              <option value="">Semua Wilayah</option>
+              <option value="">Pilih Kegiatan</option>
             </select>
           </div>
           <div class="col-md-2 d-flex align-items-end">
             <button id="applyFilters" class="btn btn-primary w-100">
-              <i class="fas fa-filter me-2"></i>Terapkan
+              <i class="fas fa-filter me-2"></i>Tampilkan Data
             </button>
           </div>
         </div>
@@ -483,9 +456,8 @@
             <thead>
               <tr>
                 <th>Kegiatan</th>
-                <th>Gate</th>
-                <th>Wilayah</th>
                 <th>Tahun</th>
+                <th>Gate</th>
                 <th>Tanggal Mulai</th>
                 <th>Tanggal Selesai</th>
                 <th>Status</th>
@@ -501,6 +473,12 @@
           <i class="fas fa-inbox"></i>
           <h5>Tidak ada data</h5>
           <p>Belum ada project-gate yang sesuai dengan filter Anda</p>
+        </div>
+        
+        <div id="initialState" class="empty-state">
+          <i class="fas fa-filter"></i>
+          <h5>Pilih Filter</h5>
+          <p>Silakan pilih filter untuk melihat data project-gate</p>
         </div>
       </div>
     </div>
@@ -526,7 +504,6 @@
       const $dashboardTableBody = $("#dashboardTableBody");
       const $emptyState = $("#emptyState");
       const $resultCount = $("#resultCount");
-      const $totalProjectGates = $("#totalProjectGates");
       const $filtersCard = $("#filtersCard");
       
       // Helper Functions
@@ -647,10 +624,27 @@
           $("#userRole").text(currentUser.role_name || 'User');
           $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
           
-          // Tampilkan filter untuk pusat dan provinsi
-          if (currentUser.role === 'pusat' || currentUser.role === 'provinsi') {
-            $filtersCard.show();
-            loadFilterOptions();
+          // Tampilkan filter untuk semua level sekarang
+          loadFilterOptions();
+          
+          // Untuk level pusat, tampilkan peringatan wajib filter
+          if (currentUser.role === 'pusat') {
+            $("#filterRequiredNote").show();
+            $("#initialState").show();
+            $("#emptyState").hide();
+          } else {
+            // Untuk provinsi dan kabupaten, langsung load data tanpa filter
+            loadDashboardData();
+            
+            // Khusus untuk kabupaten, hidden region filter karena sudah fix
+            if (currentUser.role === 'kabupaten') {
+              $("#filterRegion").closest('.col-md-4').hide();
+              // Perlebar kolom kegiatan
+              $("#filterProject").closest('.col-md-4').removeClass('col-md-4').addClass('col-md-6');
+              
+              // Load nama wilayah untuk header
+              loadRegionNameForKabupaten();
+            }
           }
           
           return true;
@@ -665,7 +659,19 @@
       const loadDashboardData = async (filters = {}) => {
         if (!currentUser) return;
         
+        // Untuk level pusat, wajibkan filter tahun dan wilayah
+        if (currentUser.role === 'pusat') {
+          if (!filters.filter_year || !filters.filter_region) {
+            $("#initialState").show();
+            $("#emptyState").hide();
+            $dashboardTableBody.empty();
+            $resultCount.text("0 data");
+            return;
+          }
+        }
+        
         $spinner.show();
+        $("#initialState").hide();
         
         try {
           const requestData = {
@@ -681,6 +687,9 @@
             dashboardData = response.data;
             filteredData = [...dashboardData];
             displayDashboardData();
+            
+            // Update nama wilayah di header jika ada filter wilayah
+            updateSelectedRegionName(filters.filter_region);
           } else {
             throw new Error(response.message || "Gagal memuat data dashboard");
           }
@@ -694,54 +703,122 @@
         }
       };
       
-      // Tampilkan data dashboard
+      // Update nama wilayah yang dipilih di header
+      const updateSelectedRegionName = (regionId) => {
+        const $selectedRegionName = $("#selectedRegionName");
+        
+        if (regionId && regionId.length >= 4) {
+          // Cari nama wilayah dari data yang tersedia
+          const $filterRegion = $("#filterRegion");
+          const selectedText = $filterRegion.find(`option[value="${regionId}"]`).text();
+          
+          if (selectedText && selectedText !== "Pilih Wilayah") {
+            $selectedRegionName.html(`- <strong>${selectedText}</strong>`);
+          } else {
+            $selectedRegionName.text("");
+          }
+        } else if (currentUser.role === 'kabupaten') {
+          // Untuk level kabupaten, tampilkan nama wilayahnya
+          loadRegionNameForKabupaten();
+        } else {
+          $selectedRegionName.text("");
+        }
+      };
+      
+      // Load nama wilayah untuk level kabupaten
+      const loadRegionNameForKabupaten = async () => {
+        try {
+          const response = await makeAjaxRequest(API_URL, {
+            action: "fetchAvailableRegions",
+            user_prov: currentUser.prov,
+            user_kab: currentUser.kab
+          });
+          
+          if (response.status && response.data && response.data.length > 0) {
+            const regionName = response.data[0].name;
+            $("#selectedRegionName").html(`- <strong>${regionName}</strong>`);
+          }
+        } catch(error) {
+          console.error("Error loading region name:", error);
+        }
+      };
+      
+      // Tampilkan data dashboard dengan merge kegiatan yang sama
       const displayDashboardData = () => {
         if (filteredData.length === 0) {
           $dashboardTableBody.empty();
           $emptyState.show();
+          $("#initialState").hide();
           $resultCount.text("0 data");
-          $totalProjectGates.text("0");
           return;
         }
         
         $emptyState.hide();
+        $("#initialState").hide();
+        
+        // Group data berdasarkan project_name dan year
+        const groupedData = {};
+        filteredData.forEach(item => {
+          const key = `${item.project_name}_${item.year}`;
+          if (!groupedData[key]) {
+            groupedData[key] = {
+              project_name: item.project_name,
+              year: item.year,
+              gates: []
+            };
+          }
+          groupedData[key].gates.push(item);
+        });
         
         let tableHtml = '';
-        filteredData.forEach(item => {
-          const dateStatus = getDateStatus(item.prev_insert_start, item.cor_upload_end);
+        let totalGates = 0;
+        
+        Object.values(groupedData).forEach(project => {
+          // Urutkan gates berdasarkan gate_number
+          project.gates.sort((a, b) => a.gate_number - b.gate_number);
           
-          tableHtml += `
-            <tr>
+          project.gates.forEach((gate, index) => {
+            const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+            const isFirstGate = index === 0;
+            const rowSpan = project.gates.length;
+            
+            tableHtml += `<tr>`;
+            
+            // Project name dan year hanya ditampilkan pada baris pertama dengan rowspan
+            if (isFirstGate) {
+              tableHtml += `
+                <td rowspan="${rowSpan}">
+                  <div class="project-name">${project.project_name}</div>
+                </td>
+                <td rowspan="${rowSpan}">${project.year}</td>
+              `;
+            }
+            
+            tableHtml += `
               <td>
-                <div class="project-name">${item.project_name}</div>
+                <div class="gate-name">GATE${gate.gate_number}: ${gate.gate_name}</div>
               </td>
-              <td>
-                <div class="gate-name">GATE${item.gate_number}: ${item.gate_name}</div>
-              </td>
-              <td>
-                <div class="region-name">${item.region_name}</div>
-              </td>
-              <td>${item.year}</td>
-              <td>${formatDate(item.prev_insert_start)}</td>
-              <td>${formatDate(item.cor_upload_end)}</td>
+              <td>${formatDate(gate.prev_insert_start)}</td>
+              <td>${formatDate(gate.cor_upload_end)}</td>
               <td>
                 <span class="${dateStatus.class}">${dateStatus.text}</span>
               </td>
-            </tr>
-          `;
+            </tr>`;
+            
+            totalGates++;
+          });
         });
         
         $dashboardTableBody.html(tableHtml);
-        $resultCount.text(`${filteredData.length} data`);
-        $totalProjectGates.text(filteredData.length);
+        $resultCount.text(`${totalGates} gate`);
       };
       
       // Load filter options
       const loadFilterOptions = async () => {
-        if (!currentUser || currentUser.role === 'kabupaten') return;
+        if (!currentUser) return;
         
         try {
-          // Load years
+          // Load years (semua level bisa akses)
           const yearsResponse = await makeAjaxRequest(API_URL, {
             action: "fetchAvailableYears",
             user_prov: currentUser.prov,
@@ -750,41 +827,28 @@
           
           if (yearsResponse.status && yearsResponse.data) {
             const $filterYear = $("#filterYear");
-            $filterYear.empty().append('<option value="">Semua Tahun</option>');
+            $filterYear.empty().append('<option value="">Pilih Tahun</option>');
             yearsResponse.data.forEach(item => {
               $filterYear.append(`<option value="${item.year}">${item.year}</option>`);
             });
           }
           
-          // Load projects
-          const projectsResponse = await makeAjaxRequest(API_URL, {
-            action: "fetchAvailableProjects",
-            user_prov: currentUser.prov,
-            user_kab: currentUser.kab
-          });
-          
-          if (projectsResponse.status && projectsResponse.data) {
-            const $filterProject = $("#filterProject");
-            $filterProject.empty().append('<option value="">Semua Kegiatan</option>');
-            projectsResponse.data.forEach(item => {
-              $filterProject.append(`<option value="${item.id}">${item.name} (${item.year})</option>`);
+          // Load regions (untuk pusat dan provinsi)
+          if (currentUser.role === 'pusat' || currentUser.role === 'provinsi') {
+            const regionsResponse = await makeAjaxRequest(API_URL, {
+              action: "fetchAvailableRegions",
+              user_prov: currentUser.prov,
+              user_kab: currentUser.kab
             });
-          }
-          
-          // Load regions
-          const regionsResponse = await makeAjaxRequest(API_URL, {
-            action: "fetchAvailableRegions",
-            user_prov: currentUser.prov,
-            user_kab: currentUser.kab
-          });
-          
-          if (regionsResponse.status && regionsResponse.data) {
-            const $filterRegion = $("#filterRegion");
-            $filterRegion.empty().append('<option value="">Semua Wilayah</option>');
-            regionsResponse.data.forEach(item => {
-              const regionId = `${item.prov}${item.kab}`;
-              $filterRegion.append(`<option value="${regionId}">${item.name}</option>`);
-            });
+            
+            if (regionsResponse.status && regionsResponse.data) {
+              const $filterRegion = $("#filterRegion");
+              $filterRegion.empty().append('<option value="">Pilih Wilayah</option>');
+              regionsResponse.data.forEach(item => {
+                const regionId = `${item.prov}${item.kab}`;
+                $filterRegion.append(`<option value="${regionId}">${item.name}</option>`);
+              });
+            }
           }
           
         } catch(error) {
@@ -806,66 +870,111 @@
         const year = $("#filterYear").val();
         if (year) filters.filter_year = year;
         
-        const project = $("#filterProject").val();
-        if (project) filters.filter_project = project;
-        
         const region = $("#filterRegion").val();
         if (region) filters.filter_region = region;
+        
+        const project = $("#filterProject").val();
+        if (project) filters.filter_project = project;
         
         loadDashboardData(filters);
       });
       
       $("#clearFilters").on('click', function(){
         $("#filterYear, #filterProject, #filterRegion").val('');
-        loadDashboardData();
+        
+        // Reset nama wilayah di header
+        if (currentUser.role === 'kabupaten') {
+          updateSelectedRegionName();
+        } else {
+          $("#selectedRegionName").text("");
+        }
+        
+        // Untuk non-pusat, load data kosong setelah clear
+        if (currentUser.role !== 'pusat') {
+          loadDashboardData();
+        } else {
+          // Untuk pusat, tampilkan initial state
+          $("#initialState").show();
+          $("#emptyState").hide();
+          $dashboardTableBody.empty();
+          $resultCount.text("0 data");
+        }
       });
       
-      // Filter project berdasarkan tahun
+      // Filter tahun mengupdate wilayah dan kegiatan
       $("#filterYear").on('change', async function(){
         const selectedYear = $(this).val();
+        
+        // Clear dependent filters
+        $("#filterProject").empty().append('<option value="">Pilih Kegiatan</option>');
+        
+        if (currentUser.role === 'pusat' || currentUser.role === 'provinsi') {
+          // Update regions berdasarkan tahun (jika diperlukan)
+          try {
+            const regionsResponse = await makeAjaxRequest(API_URL, {
+              action: "fetchAvailableRegions",
+              user_prov: currentUser.prov,
+              user_kab: currentUser.kab,
+              year: selectedYear
+            });
+            
+            if (regionsResponse.status && regionsResponse.data) {
+              const $filterRegion = $("#filterRegion");
+              $filterRegion.empty().append('<option value="">Pilih Wilayah</option>');
+              regionsResponse.data.forEach(item => {
+                const regionId = `${item.prov}${item.kab}`;
+                $filterRegion.append(`<option value="${regionId}">${item.name}</option>`);
+              });
+            }
+          } catch(error) {
+            console.error("Error loading regions:", error);
+          }
+        } else if (currentUser.role === 'kabupaten') {
+          // Untuk kabupaten, langsung load kegiatan berdasarkan tahun
+          try {
+            const projectsResponse = await makeAjaxRequest(API_URL, {
+              action: "fetchAvailableProjects",
+              user_prov: currentUser.prov,
+              user_kab: currentUser.kab,
+              year: selectedYear
+            });
+            
+            if (projectsResponse.status && projectsResponse.data) {
+              const $filterProject = $("#filterProject");
+              $filterProject.empty().append('<option value="">Pilih Kegiatan</option>');
+              projectsResponse.data.forEach(item => {
+                $filterProject.append(`<option value="${item.id}">${item.name}</option>`);
+              });
+            }
+          } catch(error) {
+            console.error("Error loading projects:", error);
+          }
+        }
+      });
+      
+      // Filter wilayah mengupdate kegiatan
+      $("#filterRegion").on('change', async function(){
+        const selectedRegion = $(this).val();
+        const selectedYear = $("#filterYear").val();
         
         try {
           const projectsResponse = await makeAjaxRequest(API_URL, {
             action: "fetchAvailableProjects",
             user_prov: currentUser.prov,
             user_kab: currentUser.kab,
-            year: selectedYear
+            year: selectedYear,
+            region: selectedRegion
           });
           
           if (projectsResponse.status && projectsResponse.data) {
             const $filterProject = $("#filterProject");
-            $filterProject.empty().append('<option value="">Semua Kegiatan</option>');
+            $filterProject.empty().append('<option value="">Pilih Kegiatan</option>');
             projectsResponse.data.forEach(item => {
-              $filterProject.append(`<option value="${item.id}">${item.name} (${item.year})</option>`);
+              $filterProject.append(`<option value="${item.id}">${item.name}</option>`);
             });
           }
         } catch(error) {
           console.error("Error loading projects:", error);
-        }
-      });
-      
-      // Filter region berdasarkan project
-      $("#filterProject").on('change', async function(){
-        const selectedProject = $(this).val();
-        
-        try {
-          const regionsResponse = await makeAjaxRequest(API_URL, {
-            action: "fetchAvailableRegions",
-            user_prov: currentUser.prov,
-            user_kab: currentUser.kab,
-            project_id: selectedProject
-          });
-          
-          if (regionsResponse.status && regionsResponse.data) {
-            const $filterRegion = $("#filterRegion");
-            $filterRegion.empty().append('<option value="">Semua Wilayah</option>');
-            regionsResponse.data.forEach(item => {
-              const regionId = `${item.prov}${item.kab}`;
-              $filterRegion.append(`<option value="${regionId}">${item.name}</option>`);
-            });
-          }
-        } catch(error) {
-          console.error("Error loading regions:", error);
         }
       });
       
