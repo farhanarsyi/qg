@@ -206,33 +206,102 @@
       margin-right: 5px;
     }
     
-    /* Spinner overlay */
+    /* Enhanced Loading Spinner */
     #spinner {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.9);
+      background: rgba(5, 150, 105, 0.1);
+      backdrop-filter: blur(8px);
       z-index: 9999;
       justify-content: center;
       align-items: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     
     .spinner-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
-      padding: 2rem;
-      border-radius: 16px;
-      background-color: rgba(255,255,255,0.8);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      gap: 2rem;
+      padding: 3rem 2.5rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+      backdrop-filter: blur(20px);
+      box-shadow: 
+        0 20px 60px rgba(5, 150, 105, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+      transform: scale(0.9);
+      animation: scaleIn 0.4s ease-out 0.1s forwards;
+    }
+    
+    @keyframes scaleIn {
+      to { transform: scale(1); }
     }
     
     .spinner-text {
-      font-weight: 500;
+      font-weight: 600;
       color: var(--primary-color);
-      font-size: 1rem;
+      font-size: 1.1rem;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Custom Loading Animation */
+    .loading-animation {
+      width: 60px;
+      height: 60px;
+      position: relative;
+    }
+    
+    .loading-dots {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-origin: center;
+      animation: rotate 2s linear infinite;
+    }
+    
+    .loading-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+      animation: bounce 1.4s ease-in-out infinite;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+    }
+    
+    .loading-dot:nth-child(1) { top: 0; left: 50%; margin-left: -6px; animation-delay: 0s; }
+    .loading-dot:nth-child(2) { top: 50%; right: 0; margin-top: -6px; animation-delay: -0.2s; }
+    .loading-dot:nth-child(3) { bottom: 0; left: 50%; margin-left: -6px; animation-delay: -0.4s; }
+    .loading-dot:nth-child(4) { top: 50%; left: 0; margin-top: -6px; animation-delay: -0.6s; }
+    .loading-dot:nth-child(5) { top: 15%; right: 15%; animation-delay: -0.8s; }
+    .loading-dot:nth-child(6) { bottom: 15%; right: 15%; animation-delay: -1s; }
+    .loading-dot:nth-child(7) { bottom: 15%; left: 15%; animation-delay: -1.2s; }
+    .loading-dot:nth-child(8) { top: 15%; left: 15%; animation-delay: -1.4s; }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { 
+        transform: scale(0.6); 
+        opacity: 0.5;
+      }
+      40% { 
+        transform: scale(1.2); 
+        opacity: 1;
+      }
     }
     
     /* Region header styles */
@@ -240,8 +309,11 @@
       font-size: 0.8rem;
       font-weight: 600;
       text-align: center;
-      background: linear-gradient(135deg, var(--success-color) 0%, var(--primary-color) 100%);
-      color: white !important;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%) !important;
+      color: var(--primary-color) !important;
+      border-bottom: 2px solid var(--primary-color) !important;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     /* Perbaikan tampilan tabel */
@@ -459,7 +531,7 @@
             </select>
           </div>
           <div id="projectSelectContainer" class="col-md-5">
-            <label for="projectSelect" class="form-label">Pilih Kegiatan</label>
+            <label for="projectSearch" class="form-label">Pilih Kegiatan</label>
             <div class="searchable-dropdown">
               <input type="text" class="form-control dropdown-search-input" id="projectSearch" placeholder="Cari kegiatan..." disabled>
               <div class="dropdown-options" id="projectOptions" style="display: none;"></div>
@@ -467,7 +539,7 @@
             </div>
           </div>
           <div class="col-md-3" id="regionSelectContainer">
-            <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
+            <label for="regionSearch" class="form-label">Pilih Cakupan Wilayah</label>
             <div class="searchable-dropdown">
               <input type="text" class="form-control dropdown-search-input" id="regionSearch" placeholder="Cari wilayah..." disabled>
               <div class="dropdown-options" id="regionOptions" style="display: none;"></div>
@@ -487,11 +559,22 @@
     <div id="resultsContainer"></div>
   </div>
 
-  <!-- Spinner Loading -->
+  <!-- Enhanced Loading Spinner -->
   <div id="spinner">
     <div class="spinner-container">
-      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-      <div class="spinner-text">Memuat data...</div>
+      <div class="loading-animation">
+        <div class="loading-dots">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+      </div>
+      <div class="spinner-text">Memuat data monitoring...</div>
     </div>
   </div>
 
@@ -515,7 +598,7 @@
       const $spinner       = $("#spinner");
       
       let projectData = [];
-      let regionData = [];
+      let regionDropdownData = []; // Renamed to avoid conflict
       
       // Initialize searchable dropdowns
       let projectDropdown, regionDropdown;
@@ -1197,9 +1280,74 @@
               coverageData = [...coverageData, ...apiData];
             }
             
+
+            
             // Filter provinsi (kab == "00" dan prov tidak "00") untuk dropdown
-            const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
-            regionData = [
+            let provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
+            
+            // Jika tidak ada provinsi tertentu tapi ada kabupatennya, buat virtual province
+            const kabupatenByProv = {};
+            coverageData.filter(cov => cov.kab !== "00" && cov.prov !== "00").forEach(kab => {
+              if (!kabupatenByProv[kab.prov]) {
+                kabupatenByProv[kab.prov] = [];
+              }
+              kabupatenByProv[kab.prov].push(kab);
+            });
+            
+            // Tambahkan virtual provinces untuk provinsi yang tidak punya entry provinsi tapi punya kabupaten
+            Object.keys(kabupatenByProv).forEach(provCode => {
+              const existingProvince = provinces.find(p => p.prov === provCode);
+              if (!existingProvince) {
+                // Buat virtual province
+                const firstKab = kabupatenByProv[provCode][0];
+                let provinceName = `Provinsi ${provCode}`;
+                
+                // Coba ekstrak nama provinsi dari nama kabupaten
+                if (firstKab && firstKab.name) {
+                  const kabName = firstKab.name;
+                  if (kabName.includes(' - ')) {
+                    // Format: "Nama Provinsi - Nama Kabupaten"
+                    provinceName = kabName.split(' - ')[0];
+                  } else {
+                    // Coba beberapa pattern umum nama kabupaten
+                    const provNames = {
+                      '11': 'ACEH', '12': 'SUMATERA UTARA', '13': 'SUMATERA BARAT', 
+                      '14': 'RIAU', '15': 'JAMBI', '16': 'SUMATERA SELATAN',
+                      '17': 'BENGKULU', '18': 'LAMPUNG', '19': 'KEPULAUAN BANGKA BELITUNG',
+                      '21': 'KEPULAUAN RIAU', '31': 'DKI JAKARTA', '32': 'JAWA BARAT',
+                      '33': 'JAWA TENGAH', '34': 'DI YOGYAKARTA', '35': 'JAWA TIMUR',
+                      '36': 'BANTEN', '51': 'BALI', '52': 'NUSA TENGGARA BARAT',
+                      '53': 'NUSA TENGGARA TIMUR', '61': 'KALIMANTAN BARAT',
+                      '62': 'KALIMANTAN TENGAH', '63': 'KALIMANTAN SELATAN',
+                      '64': 'KALIMANTAN TIMUR', '65': 'KALIMANTAN UTARA',
+                      '71': 'SULAWESI UTARA', '72': 'SULAWESI TENGAH',
+                      '73': 'SULAWESI SELATAN', '74': 'SULAWESI TENGGARA',
+                      '75': 'GORONTALO', '76': 'SULAWESI BARAT',
+                      '81': 'MALUKU', '82': 'MALUKU UTARA',
+                      '91': 'PAPUA BARAT', '94': 'PAPUA'
+                    };
+                    provinceName = provNames[provCode] || `Provinsi ${provCode}`;
+                  }
+                }
+                
+                const virtualProvince = {
+                  id: `${provCode}00`,
+                  prov: provCode,
+                  kab: "00",
+                  name: provinceName,
+                  isVirtual: true
+                };
+                
+                // Tambahkan ke coverageData dan provinces
+                coverageData.push(virtualProvince);
+                provinces.push(virtualProvince);
+              }
+            });
+            
+            // Sort provinces by code (prov) instead of alphabetically
+            provinces.sort((a, b) => a.prov.localeCompare(b.prov));
+            
+            regionDropdownData = [
               { value: "pusat", text: "Pusat - Nasional" },
               ...provinces.map(province => ({
                 value: province.id,
@@ -1207,7 +1355,7 @@
               }))
             ];
             
-            regionDropdown.setData(regionData);
+            regionDropdown.setData(regionDropdownData);
             regionDropdown.setValue("pusat", "Pusat - Nasional");
             regionDropdown.enable();
             
@@ -1639,32 +1787,59 @@
             // Level Pusat - Hanya kolom pusat
             regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
           } else {
-            const regionData = coverageData.find(r => r.id === selectedRegion);
-            if (!regionData)
-              throw new Error("Data wilayah tidak ditemukan");
+            // Cari data wilayah dengan multiple fallback methods
+            let selectedRegionData = null;
+            
+            // Method 1: Exact match (strict equality)
+            selectedRegionData = coverageData.find(r => r.id === selectedRegion);
+            
+            // Method 2: Loose equality (in case of type mismatch)
+            if (!selectedRegionData) {
+              selectedRegionData = coverageData.find(r => r.id == selectedRegion);
+            }
+            
+            // Method 3: String conversion and match
+            if (!selectedRegionData && selectedRegion) {
+              const selectedStr = String(selectedRegion);
+              selectedRegionData = coverageData.find(r => String(r.id) === selectedStr);
+            }
+            
+            // Method 4: Parse selectedRegion and match by prov+kab
+            if (!selectedRegionData && selectedRegion) {
+              const selectedStr = String(selectedRegion);
+              if (selectedStr.length === 4 && /^\d{4}$/.test(selectedStr)) {
+                const prov = selectedStr.substring(0, 2);
+                const kab = selectedStr.substring(2, 4);
+                selectedRegionData = coverageData.find(r => r.prov === prov && r.kab === kab);
+              }
+            }
+            
+            if (!selectedRegionData) {
+              throw new Error(`Data wilayah tidak ditemukan untuk: ${selectedRegion}. Available: ${coverageData.map(r => r.id).join(', ')}`);
+            }
               
-            if (regionData.kab === "00") {
+            if (selectedRegionData.kab === "00") {
             // Level Provinsi - Kolom provinsi + semua kabupaten di provinsi itu
-            const prov = regionData.prov;
+            const prov = selectedRegionData.prov;
             
             // Cek apakah ini virtual province (tidak ada data coverage untuk provinsi)
-            if (regionData.isVirtual) {
+            if (selectedRegionData.isVirtual) {
               // Untuk virtual province, hanya tampilkan kabupaten-kabupaten saja
               const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
               regionsToProcess = kabupatenList;
             } else {
               // Untuk provinsi normal, tampilkan provinsi + kabupaten
               regionsToProcess = [
-                { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
+                { id: `${prov}00`, prov: prov, kab: "00", name: selectedRegionData.name }
               ];
               
               // Tambahkan kabupaten yang ada di provinsi ini
               const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
               regionsToProcess = [...regionsToProcess, ...kabupatenList];
             }
-                      } else {
+            } else {
               // Level Kabupaten - Hanya kolom kabupaten yang dipilih
-              regionsToProcess = [regionData];
+              regionsToProcess = [selectedRegionData];
             }
           }
           
