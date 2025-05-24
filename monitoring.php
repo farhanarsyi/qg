@@ -1036,15 +1036,50 @@
               }));
               coverageData = apiData;
               
-              // Auto-select provinsi user (tidak perlu dropdown)
+              // Cek apakah ada data untuk provinsi user
               const userProvince = coverageData.find(cov => 
                 cov.prov === currentUser.prov && cov.kab === "00"
               );
               
               if (userProvince) {
+                // Jika ada data provinsi, pilih provinsi
                 selectedRegion = userProvince.id;
               } else {
-                throw new Error("Data provinsi Anda tidak ditemukan");
+                // Jika tidak ada data provinsi, buat virtual region provinsi
+                // Ambil nama provinsi dari kabupaten pertama (potong nama kabupaten)
+                const firstKabupaten = coverageData.find(cov => 
+                  cov.prov === currentUser.prov && cov.kab !== "00"
+                );
+                
+                if (firstKabupaten) {
+                  // Buat virtual provinsi entry
+                  // Ekstrak nama provinsi dari nama kabupaten
+                  let provinceName = `Prov. ${currentUser.prov}`;
+                  
+                  // Coba ekstrak dari nama kabupaten
+                  const kabName = firstKabupaten.name;
+                  if (kabName.includes(' - ')) {
+                    // Format: "Nama Provinsi - Nama Kabupaten"
+                    provinceName = kabName.split(' - ')[0];
+                  } else {
+                    // Jika tidak ada format khusus, gunakan nama generik
+                    provinceName = `Provinsi (${currentUser.prov})`;
+                  }
+                  
+                  const virtualProvince = {
+                    id: `${currentUser.prov}00`,
+                    prov: currentUser.prov,
+                    kab: "00",
+                    name: provinceName,
+                    isVirtual: true // Mark sebagai virtual untuk reference
+                  };
+                  
+                  // Tambahkan virtual provinsi ke coverageData
+                  coverageData.unshift(virtualProvince);
+                  selectedRegion = virtualProvince.id;
+                } else {
+                  throw new Error("Data provinsi Anda tidak ditemukan");
+                }
               }
             } else {
               throw new Error("Tidak ada data untuk provinsi Anda");
@@ -1423,13 +1458,22 @@
           } else if (regionData.kab === "00") {
             // Level Provinsi - Kolom provinsi + semua kabupaten di provinsi itu
             const prov = regionData.prov;
-            regionsToProcess = [
-              { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
-            ];
             
-            // Tambahkan kabupaten yang ada di provinsi ini
-            const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
-            regionsToProcess = [...regionsToProcess, ...kabupatenList];
+            // Cek apakah ini virtual province (tidak ada data coverage untuk provinsi)
+            if (regionData.isVirtual) {
+              // Untuk virtual province, hanya tampilkan kabupaten-kabupaten saja
+              const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
+              regionsToProcess = kabupatenList;
+            } else {
+              // Untuk provinsi normal, tampilkan provinsi + kabupaten
+              regionsToProcess = [
+                { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
+              ];
+              
+              // Tambahkan kabupaten yang ada di provinsi ini
+              const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
+              regionsToProcess = [...regionsToProcess, ...kabupatenList];
+            }
           } else {
             // Level Kabupaten - Hanya kolom kabupaten yang dipilih
             regionsToProcess = [regionData];
