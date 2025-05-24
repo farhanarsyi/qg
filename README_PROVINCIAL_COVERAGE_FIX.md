@@ -88,9 +88,42 @@ Fix ini berlaku untuk **semua provinsi** yang mengalami kondisi yang sama:
 - Tabel monitoring menampilkan kolom untuk kabupaten 14,01, 14,02, 14,03
 - Tidak ada kolom provinsi karena memang tidak ada data coverage
 
+---
+
+## Additional Fix: UK Level Display Bug
+
+### Problem
+Kolom "Level" pada tabel monitoring menampilkan level yang salah:
+- assessment_level 2 (Provinsi) tertulis "Pusat"  
+- assessment_level 3 (Kabupaten) tertulis "Pusat"
+
+### Root Cause
+Bug pada fungsi `displayResultTable()` dimana `ukLevel` diambil dari source yang salah.
+
+### Fix
+```javascript
+// SEBELUM (salah)
+const someActivity = Object.values(activityGroups).find(acts => 
+  acts.find(act => act.uk === data.uk)
+)[0];
+const ukLevel = someActivity.ukLevel || "Tidak diketahui";  // ❌ Salah
+
+// SESUDAH (benar)
+ukLevels[data.uk] = data.ukLevel || "Tidak diketahui";  // ✅ Benar
+```
+
+### Verification
+Level sekarang menampilkan dengan benar:
+- assessment_level 1 → "Pusat"
+- assessment_level 2 → "Provinsi"  
+- assessment_level 3 → "Kabupaten"
+
+---
+
 ## Testing
 1. Login sebagai user provinsi yang tidak memiliki coverage provinsi
 2. Pilih project yang memiliki coverage untuk kabupaten dalam provinsi
 3. Sistem harus berhasil memuat data dan menampilkan tabel dengan kolom kabupaten saja
+4. **[NEW]** Verifikasi kolom "Level" menampilkan level yang benar sesuai assessment_level
 
-Sistem sekarang dapat menangani skenario ini dengan graceful degradation. 
+Sistem sekarang dapat menangani skenario ini dengan graceful degradation dan level display yang akurat. 

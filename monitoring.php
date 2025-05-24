@@ -570,11 +570,19 @@
       
       // Fungsi untuk mendapatkan label level ukuran kualitas
       const getUkLevelLabel = (measurement) => {
-        const level = parseInt(measurement.assessment_level || 1);
-        if (level === 1) return "Pusat";
-        if (level === 2) return "Provinsi";
-        if (level === 3) return "Kabupaten";
-        return "Tidak diketahui";
+        const rawLevel = measurement.assessment_level;
+        const level = parseInt(rawLevel || 1);
+        
+        let result;
+        if (level === 1) result = "Pusat";
+        else if (level === 2) result = "Provinsi";
+        else if (level === 3) result = "Kabupaten";
+        else result = "Tidak diketahui";
+        
+        // LOG KONVERSI DI getUkLevelLabel
+        console.log(`   🔄 getUkLevelLabel: "${rawLevel}" (${typeof rawLevel}) -> parseInt: ${level} -> result: "${result}"`);
+        
+        return result;
       };
 
       // --- Fungsi untuk menentukan status suatu aktivitas ---
@@ -860,6 +868,7 @@
         const ukLevels = {};
         
         // 4. Proses setiap kelompok dan buat baris tabel
+        console.log(`🔍 STARTING TABLE DISPLAY - Total groups: ${sortedGroupKeys.length}`);
         for (let groupIndex = 0; groupIndex < sortedGroupKeys.length; groupIndex++) {
           const groupKey = sortedGroupKeys[groupIndex];
           const activities = activityGroups[groupKey];
@@ -867,6 +876,7 @@
           
           // Dapatkan level UK dari aktivitas pertama
           const ukKey = activities[0].uk;
+          console.log(`📋 PROCESSING GROUP ${groupIndex + 1}: ${ukKey}`);
           
           // Urutkan aktivitas berdasarkan urutan proses
           activities.sort((a, b) => {
@@ -882,24 +892,48 @@
             // Ambil nomor aktivitas (1-6) berdasarkan activityOrder
             const activityNumber = activityOrder[data.activity];
             
-            // Simpan UK Level jika belum ada
-            if (!ukLevels[data.uk]) {
-              // Ekstrak measurement_id dari salah satu status key untuk mendapatkan level
-              const someActivity = Object.values(activityGroups).find(acts => 
-                acts.find(act => act.uk === data.uk)
-              )[0];
-              const ukLevel = someActivity.ukLevel || "Tidak diketahui";
-              ukLevels[data.uk] = ukLevel;
+            // LOG DATA YANG DIPROSES
+            if (isFirstRow) {
+              console.log(`   📊 FIRST ROW DATA:`);
+              console.log(`      • UK: ${data.uk}`);
+              console.log(`      • Stored assessmentLevel: ${data.assessmentLevel}`);
+              console.log(`      • Stored ukLevel: "${data.ukLevel}"`);
+              console.log(`      • Current ukLevels[${data.uk}]: "${ukLevels[data.uk] || 'NOT SET'}"`);
             }
+            
+            // SELALU konversi ulang dari assessment_level untuk memastikan akurasi (tidak peduli sudah ada atau belum)
+            const rawLevel = data.assessmentLevel || 1;
+            let levelLabel;
+            if (rawLevel === 1) levelLabel = "Pusat";
+            else if (rawLevel === 2) levelLabel = "Provinsi";
+            else if (rawLevel === 3) levelLabel = "Kabupaten";
+            else levelLabel = "Tidak diketahui";
+            
+            // FORCE OVERRIDE - pastikan selalu menggunakan level yang benar
+            ukLevels[data.uk] = levelLabel;
+            
+            // LOG DETAIL KONVERSI DISPLAY
+            console.log(`🖥️ DISPLAY CONVERSION (FORCED):`);
+            console.log(`   • UK: ${data.uk}`);
+            console.log(`   • Raw assessmentLevel from data: ${rawLevel}`);
+            console.log(`   • Converted to label: "${levelLabel}"`);
+            console.log(`   • FORCED ukLevels[${data.uk}] = "${levelLabel}"`);
+            console.log(`   ===`);
             
             tableHtml += `<tr class="${groupClass}">`;
             
             // Untuk baris pertama saja, tampilkan gate dan UK dengan rowspan
             if (isFirstRow) {
+              const levelToDisplay = ukLevels[data.uk];
+              console.log(`   🖥️ DISPLAYING IN TABLE:`);
+              console.log(`      • UK: ${data.uk}`);
+              console.log(`      • Level to display: "${levelToDisplay}"`);
+              console.log(`      • Should be: "${data.ukLevel}" (from stored data)`);
+              
               tableHtml += `
                 <td rowspan="${rowspanValue}">${data.gate}</td>
                 <td rowspan="${rowspanValue}">${data.uk}</td>
-                <td rowspan="${rowspanValue}" style="text-align: center;">${ukLevels[data.uk]}</td>
+                <td rowspan="${rowspanValue}" style="text-align: center;">${levelToDisplay}</td>
               `;
             }
             
@@ -1184,11 +1218,22 @@
           const gateName = `GATE${gateNumber}: ${gate.gate_name}`;
           
           // 2. Untuk setiap ukuran kualitas, tentukan region yang sesuai berdasarkan assessment_level
+          console.log(`=== PROCESSING GATE: ${gateName} ===`);
           for (let j = 0; j < measurements.length; j++) {
             const measurement = measurements[j];
             const ukNumber = j + 1;
             const ukName = `UK${ukNumber}: ${measurement.measurement_name}`;
+            
+            // LOG DETAIL SETIAP MEASUREMENT
+            console.log(`📊 MEASUREMENT ${ukNumber}:`);
+            console.log(`   • ID: ${measurement.id}`);
+            console.log(`   • Name: ${measurement.measurement_name}`);
+            console.log(`   • Raw assessment_level: "${measurement.assessment_level}"`);
+            console.log(`   • Type of assessment_level: ${typeof measurement.assessment_level}`);
+            
             const ukLevel = getUkLevelLabel(measurement);
+            console.log(`   • Converted to: "${ukLevel}"`);
+            console.log(`   • UK Name: ${ukName}`);
             
             // Tentukan assessment_level (default ke 1 jika tidak ada)
             const assessmentLevel = parseInt(measurement.assessment_level || 1);
@@ -1344,17 +1389,26 @@
             for (const activity of activities) {
               const activityKey = `${gateName}|${ukName}|${activity.name}`;
               
-              // Simpan info aktivitas
+                            // Simpan info aktivitas
               if (!activityData[activityKey]) {
+                const rawAssessmentLevel = parseInt(measurement.assessment_level || 1);
                 activityData[activityKey] = {
                   gate: gateName,
                   uk: ukName,
                   ukLevel: ukLevel,
+                  assessmentLevel: rawAssessmentLevel, // Simpan level mentah juga
                   activity: activity.name,
                   start: activity.start,
                   end: activity.end,
                   statuses: {}
                 };
+                
+                // LOG PENYIMPANAN ACTIVITY DATA
+                console.log(`💾 SAVED ACTIVITY: ${activity.name}`);
+                console.log(`   • For UK: ${ukName}`);
+                console.log(`   • Stored assessmentLevel: ${rawAssessmentLevel}`);
+                console.log(`   • Stored ukLevel: "${ukLevel}"`);
+                console.log(`   ---`);
               }
               
               // 5. Untuk setiap wilayah, isi status
