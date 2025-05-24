@@ -228,7 +228,7 @@ if(isset($_POST['action'])){
             if ($assessStmt === false) {
                 $errors = sqlsrv_errors();
                 $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
-                sqlsrv_close($conn);
+                    rv_close($conn);
                 echo json_encode(["status" => false, "message" => $errorMsg]);
                 break;
             }
@@ -562,7 +562,6 @@ if(isset($_POST['action'])){
             $user_kab = $_POST['user_kab'];
             $filter_year = isset($_POST['filter_year']) ? $_POST['filter_year'] : null;
             $filter_project = isset($_POST['filter_project']) ? $_POST['filter_project'] : null;
-            $filter_region = isset($_POST['filter_region']) ? $_POST['filter_region'] : null;
             
             $conn = getConnection();
             if ($conn === null) {
@@ -570,7 +569,7 @@ if(isset($_POST['action'])){
                 break;
             }
             
-            // Query untuk mendapatkan data dashboard
+            // Query untuk mendapatkan data dashboard tanpa menampilkan data wilayah
             $query = "
                 SELECT DISTINCT
                     p.id as project_id,
@@ -580,10 +579,7 @@ if(isset($_POST['action'])){
                     pg.gate_number,
                     pg.gate_name,
                     pg.prev_insert_start,
-                    pg.cor_upload_end,
-                    pc.prov,
-                    pc.kab,
-                    pc.name as region_name
+                    pg.cor_upload_end
                 FROM [projects] p
                 INNER JOIN [project_gates] pg ON p.id = pg.id_project
                 INNER JOIN [project_coverages] pc ON p.id = pc.id_project
@@ -593,44 +589,34 @@ if(isset($_POST['action'])){
             
             $params = [];
             
-            // Filter berdasarkan role user
+            // Filter berdasarkan role user untuk menentukan scope project
             if ($user_prov === "00" && $user_kab === "00") {
-                // Pusat - bisa lihat semua
+                // Pusat - bisa lihat semua project
             } else if ($user_prov !== "00" && $user_kab === "00") {
-                // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
+                // Provinsi - hanya project yang menjadi tugas provinsi dan kabupaten dalam provinsinya
                 $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
                 $params[] = $user_prov;
                 $params[] = $user_prov;
             } else {
-                // Kabupaten - hanya kabupaten spesifik
+                // Kabupaten - hanya project yang menjadi tugas kabupaten spesifik
                 $query .= " AND pc.prov = ? AND pc.kab = ?";
                 $params[] = $user_prov;
                 $params[] = $user_kab;
             }
             
-            // Tambahan filter
+            // Filter tahun (hardcode ke 2025)
             if ($filter_year) {
                 $query .= " AND p.year = ?";
                 $params[] = $filter_year;
             }
             
+            // Filter project jika dipilih
             if ($filter_project) {
                 $query .= " AND p.id = ?";
                 $params[] = $filter_project;
             }
             
-            if ($filter_region) {
-                $regionParts = str_split($filter_region, 2);
-                if (count($regionParts) >= 2) {
-                    $prov = $regionParts[0];
-                    $kab = $regionParts[1];
-                    $query .= " AND pc.prov = ? AND pc.kab = ?";
-                    $params[] = $prov;
-                    $params[] = $kab;
-                }
-            }
-            
-            $query .= " ORDER BY p.year DESC, p.name, pg.gate_number, pc.prov, pc.kab";
+            $query .= " ORDER BY p.name, pg.gate_number";
             
             $stmt = sqlsrv_query($conn, $query, $params);
             if ($stmt === false) {
@@ -695,7 +681,6 @@ if(isset($_POST['action'])){
             $user_prov = $_POST['user_prov'];
             $user_kab = $_POST['user_kab'];
             $year = isset($_POST['year']) ? $_POST['year'] : null;
-            $region = isset($_POST['region']) ? $_POST['region'] : null;
             
             $query = "
                 SELECT DISTINCT p.id, p.name, p.year
@@ -706,36 +691,28 @@ if(isset($_POST['action'])){
             
             $params = [];
             
-            // Filter berdasarkan role user
+            // Filter berdasarkan role user untuk menentukan scope project
             if ($user_prov === "00" && $user_kab === "00") {
-                // Pusat - bisa lihat semua
+                // Pusat - bisa lihat semua project
             } else if ($user_prov !== "00" && $user_kab === "00") {
-                // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
+                // Provinsi - hanya project yang menjadi tugas provinsi dan kabupaten dalam provinsinya
                 $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
                 $params[] = $user_prov;
                 $params[] = $user_prov;
             } else {
-                // Kabupaten - hanya kabupaten spesifik
+                // Kabupaten - hanya project yang menjadi tugas kabupaten spesifik
                 $query .= " AND pc.prov = ? AND pc.kab = ?";
                 $params[] = $user_prov;
                 $params[] = $user_kab;
             }
             
+            // Filter tahun
             if ($year) {
                 $query .= " AND p.year = ?";
                 $params[] = $year;
             }
             
-            // Filter berdasarkan region jika dipilih
-            if ($region && strlen($region) >= 4) {
-                $regionProv = substr($region, 0, 2);
-                $regionKab = substr($region, 2, 2);
-                $query .= " AND pc.prov = ? AND pc.kab = ?";
-                $params[] = $regionProv;
-                $params[] = $regionKab;
-            }
-            
-            $query .= " ORDER BY p.year DESC, p.name";
+            $query .= " ORDER BY p.name";
             
             echo executeQuery($query, $params);
             break;
