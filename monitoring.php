@@ -18,29 +18,33 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     :root {
-      --primary-color: #0071e3; /* Apple blue */
-      --success-color: #34c759; /* Apple green */
-      --warning-color: #ff9f0a; /* Apple orange */
-      --danger-color: #ff3b30;  /* Apple red */
-      --neutral-color: #8e8e93; /* Apple gray */
-      --light-color: #f5f5f7;   /* Apple light gray */
-      --dark-color: #1d1d1f;    /* Apple dark */
-      --border-color: #d2d2d7;  /* Apple border */
+      --primary-color: #059669;   /* Emerald green */
+      --primary-hover: #047857;   /* Darker emerald */
+      --primary-light: #d1fae5;   /* Light emerald */
+      --success-color: #10b981;   /* Success green */
+      --warning-color: #f59e0b;   /* Amber */
+      --danger-color: #ef4444;    /* Red */
+      --neutral-color: #6b7280;   /* Gray */
+      --light-color: #f9fafb;     /* Light gray */
+      --dark-color: #111827;      /* Dark gray */
+      --border-color: #e5e7eb;    /* Border gray */
+      --text-secondary: #374151;  /* Secondary text */
     }
     
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: #f5f5f7;
-      color: #1d1d1f;
-      line-height: 1.5;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      color: var(--dark-color);
+      line-height: 1.6;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
     }
     
     .container-fluid {
-      max-width: 1400px;
+      max-width: 1600px; /* Wider container */
       margin: 0 auto;
-      padding: 2rem;
+      padding: 1.5rem;
     }
     
     h1 {
@@ -56,7 +60,11 @@
       border: none;
       margin-bottom: 2rem;
       background-color: #ffffff;
-      overflow: hidden;
+      overflow: visible;
+    }
+    
+    .card-body {
+      overflow: visible;
     }
     
     .card-header {
@@ -89,7 +97,8 @@
     
     .form-control:focus, .form-select:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+      outline: none;
     }
     
     .btn-primary {
@@ -102,9 +111,10 @@
     }
     
     .btn-primary:hover {
-      background-color: #005bbc;
-      border-color: #005bbc;
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
     }
     
     .btn-primary:active {
@@ -116,7 +126,8 @@
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       margin: 0;
-      max-height: 600px; /* Fixed height untuk tabel */
+      max-height: calc(100vh - 280px); /* Dynamic height based on viewport */
+      min-height: 500px;
     }
     
     .table-monitoring {
@@ -127,17 +138,19 @@
     }
     
     .table-monitoring th {
-      background-color: #f5f5f7;
-      font-weight: 500;
+      background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%);
+      font-weight: 600;
       padding: 1rem 1.25rem;
-      font-size: 0.9rem;
-      color: var(--dark-color);
+      font-size: 0.85rem;
+      color: var(--primary-color);
       white-space: nowrap;
       position: sticky;
       top: 0;
-      z-index: 10; /* Lebih tinggi untuk memastikan tetap di atas */
+      z-index: 10;
       text-align: left;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 2px solid var(--primary-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .table-monitoring td {
@@ -152,7 +165,7 @@
     }
     
     tbody tr:hover {
-      background-color: rgba(0,113,227,0.03);
+      background-color: rgba(5, 150, 105, 0.04);
     }
     
     /* Status badges */
@@ -224,10 +237,11 @@
     
     /* Region header styles */
     .region-header {
-      font-size: 0.85rem;
-      font-weight: 500;
+      font-size: 0.8rem;
+      font-weight: 600;
       text-align: center;
-      background-color: rgba(0,113,227,0.04);
+      background: linear-gradient(135deg, var(--success-color) 0%, var(--primary-color) 100%);
+      color: white !important;
     }
     
     /* Perbaikan tampilan tabel */
@@ -257,8 +271,9 @@
     .table-monitoring td:nth-child(5),
     .table-monitoring th:nth-child(6), /* Tanggal Selesai */
     .table-monitoring td:nth-child(6) {
-      min-width: 160px;
+      min-width: 120px; /* Smaller since no time */
       text-align: center;
+      white-space: nowrap;
     }
     
     /* Date in range (blinking effect) */
@@ -293,14 +308,15 @@
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
-      background-color: rgba(0,113,227,0.1);
-      color: var(--primary-color);
-      font-weight: 600;
+      width: 26px;
+      height: 26px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+      color: white;
+      font-weight: 700;
       margin-right: 12px;
       font-size: 0.75rem;
+      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
     }
     
     /* Status column */
@@ -312,9 +328,61 @@
     
     /* Row hover and focus */
     .table-monitoring tr:hover td {
-      background-color: rgba(0,113,227,0.04);
+      background-color: rgba(5, 150, 105, 0.04);
     }
     
+    /* Searchable Dropdown Styles */
+    .searchable-dropdown {
+      position: relative;
+    }
+    
+    .dropdown-search-input {
+      border-radius: 8px 8px 0 0 !important;
+      border-bottom: 1px solid var(--border-color) !important;
+    }
+    
+    .dropdown-options {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      z-index: 99999;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    }
+    
+    .dropdown-option {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s ease;
+    }
+    
+    .dropdown-option:last-child {
+      border-bottom: none;
+    }
+    
+    .dropdown-option:hover {
+      background-color: var(--primary-light);
+    }
+    
+    .dropdown-option.selected {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .dropdown-no-results {
+      padding: 0.75rem 1rem;
+      color: var(--neutral-color);
+      text-align: center;
+      font-style: italic;
+    }
+
     /* Responsif */
     @media (max-width: 992px) {
       .container-fluid {
@@ -348,24 +416,24 @@
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg" style="background: #ffffff; box-shadow: 0 2px 20px rgba(0,0,0,0.04); border-bottom: 1px solid var(--border-color); padding: 1rem 0; margin-bottom: 2rem;">
+  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 1rem 0; margin-bottom: 1.5rem;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#" style="font-weight: 600; font-size: 1.25rem; color: var(--primary-color) !important;">
-        <i class="fas fa-chart-line me-2"></i>Quality Gates Monitoring
+      <a class="navbar-brand" href="#" style="font-weight: 600; font-size: 1.25rem; color: white !important;">
+        <i class="fas fa-chart-line me-2" style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;"></i>Quality Gates Monitoring
       </a>
       
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <a href="dashboard.php" class="btn btn-outline-secondary me-3">
+        <a href="dashboard.php" class="btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; transition: all 0.2s ease; backdrop-filter: blur(10px);">
           <i class="fas fa-tachometer-alt me-1"></i>Dashboard
         </a>
-        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), #005bbc); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;" id="userAvatar">
+        <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px);" id="userAvatar">
           <i class="fas fa-user"></i>
         </div>
         <div style="display: flex; flex-direction: column;">
-          <div style="font-weight: 500; color: var(--dark-color); font-size: 0.9rem;" id="userName">Loading...</div>
-          <div style="font-size: 0.8rem; color: var(--neutral-color);" id="userRole">Loading...</div>
+          <div style="font-weight: 600; color: white; font-size: 0.9rem;" id="userName">Loading...</div>
+          <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8);" id="userRole">Loading...</div>
         </div>
-        <button class="btn" style="background: none; border: 1px solid var(--border-color); color: var(--neutral-color); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; transition: all 0.2s ease;" id="logoutBtn">
+        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
           <i class="fas fa-sign-out-alt me-1"></i>Logout
         </button>
       </div>
@@ -392,11 +460,19 @@
           </div>
           <div id="projectSelectContainer" class="col-md-5">
             <label for="projectSelect" class="form-label">Pilih Kegiatan</label>
-            <select id="projectSelect" class="form-select" disabled></select>
+            <div class="searchable-dropdown">
+              <input type="text" class="form-control dropdown-search-input" id="projectSearch" placeholder="Cari kegiatan..." disabled>
+              <div class="dropdown-options" id="projectOptions" style="display: none;"></div>
+              <input type="hidden" id="projectSelect">
+            </div>
           </div>
           <div class="col-md-3" id="regionSelectContainer">
             <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
-            <select id="regionSelect" class="form-select" disabled></select>
+            <div class="searchable-dropdown">
+              <input type="text" class="form-control dropdown-search-input" id="regionSearch" placeholder="Cari wilayah..." disabled>
+              <div class="dropdown-options" id="regionOptions" style="display: none;"></div>
+              <input type="hidden" id="regionSelect">
+            </div>
           </div>
           <div id="loadButtonContainer" class="col-md-2 d-flex align-items-end">
             <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
@@ -431,10 +507,98 @@
       const $yearSelect    = $("#yearSelect");
       const $projectSelect = $("#projectSelect");
       const $regionSelect  = $("#regionSelect");
+      const $projectSearch = $("#projectSearch");
+      const $regionSearch  = $("#regionSearch");
+      const $projectOptions = $("#projectOptions");
+      const $regionOptions = $("#regionOptions");
       const $resultsContainer = $("#resultsContainer");
       const $spinner       = $("#spinner");
+      
+      let projectData = [];
+      let regionData = [];
+      
+      // Initialize searchable dropdowns
+      let projectDropdown, regionDropdown;
 
       // --- Helper Functions ---
+
+      // Searchable Dropdown Implementation
+      const createSearchableDropdown = (searchInput, optionsContainer, hiddenInput, data, valueKey, textKey, onSelect) => {
+        const $search = $(searchInput);
+        const $options = $(optionsContainer);
+        const $hidden = $(hiddenInput);
+        
+        // Show options on focus and clear text
+        $search.on('focus', function() {
+          $(this).select(); // Select all text so user can type over it
+          renderOptions(data);
+          $options.show();
+        });
+        
+        // Hide options when clicking outside
+        $(document).on('click', function(e) {
+          if (!$(e.target).closest($search.parent()).length) {
+            $options.hide();
+          }
+        });
+        
+        // Filter options on input
+        $search.on('input', function() {
+          const query = $(this).val().toLowerCase();
+          const filtered = data.filter(item => 
+            item[textKey].toLowerCase().includes(query)
+          );
+          renderOptions(filtered);
+        });
+        
+        // Render options
+        const renderOptions = (items) => {
+          $options.empty();
+          
+          if (items.length === 0) {
+            $options.append('<div class="dropdown-no-results">Tidak ada hasil ditemukan</div>');
+            return;
+          }
+          
+          items.forEach(item => {
+            const $option = $(`<div class="dropdown-option" data-value="${item[valueKey]}">${item[textKey]}</div>`);
+            $option.on('click', function() {
+              const value = $(this).data('value');
+              const text = $(this).text();
+              
+              $search.val(text);
+              $hidden.val(value);
+              $options.hide();
+              
+              if (onSelect) onSelect(value, text);
+            });
+            $options.append($option);
+          });
+        };
+        
+        // Public methods
+        return {
+          setData: (newData) => {
+            data = newData;
+          },
+          setValue: (value, text) => {
+            $search.val(text || '');
+            $hidden.val(value || '');
+          },
+          enable: () => {
+            $search.prop('disabled', false);
+          },
+          disable: () => {
+            $search.prop('disabled', true);
+            $options.hide();
+          },
+          clear: () => {
+            $search.val('');
+            $hidden.val('');
+            $options.hide();
+          }
+        };
+      };
 
       // Inisialisasi user
       const initUser = () => {
@@ -517,13 +681,20 @@
 
       const formatDate = dateStr => {
         if (!dateStr || dateStr === '-') return '-';
-        const parts = dateStr.split('-');
+        
+        // Handle both date-only and datetime formats
+        let datePart = dateStr;
+        if (dateStr.includes(' ')) {
+          datePart = dateStr.split(' ')[0]; // Remove time part
+        }
+        
+        const parts = datePart.split('-');
         if (parts.length === 3) {
-          const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                          'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
           return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
         }
-        return dateStr;
+        return datePart;
       };
       
       // Function to check if date is within range
@@ -578,9 +749,6 @@
         else if (level === 2) result = "Provinsi";
         else if (level === 3) result = "Kabupaten";
         else result = "Tidak diketahui";
-        
-        // LOG KONVERSI DI getUkLevelLabel
-        console.log(`   🔄 getUkLevelLabel: "${rawLevel}" (${typeof rawLevel}) -> parseInt: ${level} -> result: "${result}"`);
         
         return result;
       };
@@ -868,7 +1036,7 @@
         const ukLevels = {};
         
         // 4. Proses setiap kelompok dan buat baris tabel
-        console.log(`🔍 STARTING TABLE DISPLAY - Total groups: ${sortedGroupKeys.length}`);
+
         for (let groupIndex = 0; groupIndex < sortedGroupKeys.length; groupIndex++) {
           const groupKey = sortedGroupKeys[groupIndex];
           const activities = activityGroups[groupKey];
@@ -876,7 +1044,7 @@
           
           // Dapatkan level UK dari aktivitas pertama
           const ukKey = activities[0].uk;
-          console.log(`📋 PROCESSING GROUP ${groupIndex + 1}: ${ukKey}`);
+
           
           // Urutkan aktivitas berdasarkan urutan proses
           activities.sort((a, b) => {
@@ -892,14 +1060,7 @@
             // Ambil nomor aktivitas (1-6) berdasarkan activityOrder
             const activityNumber = activityOrder[data.activity];
             
-            // LOG DATA YANG DIPROSES
-            if (isFirstRow) {
-              console.log(`   📊 FIRST ROW DATA:`);
-              console.log(`      • UK: ${data.uk}`);
-              console.log(`      • Stored assessmentLevel: ${data.assessmentLevel}`);
-              console.log(`      • Stored ukLevel: "${data.ukLevel}"`);
-              console.log(`      • Current ukLevels[${data.uk}]: "${ukLevels[data.uk] || 'NOT SET'}"`);
-            }
+
             
             // SELALU konversi ulang dari assessment_level untuk memastikan akurasi (tidak peduli sudah ada atau belum)
             const rawLevel = data.assessmentLevel || 1;
@@ -912,23 +1073,13 @@
             // FORCE OVERRIDE - pastikan selalu menggunakan level yang benar
             ukLevels[data.uk] = levelLabel;
             
-            // LOG DETAIL KONVERSI DISPLAY
-            console.log(`🖥️ DISPLAY CONVERSION (FORCED):`);
-            console.log(`   • UK: ${data.uk}`);
-            console.log(`   • Raw assessmentLevel from data: ${rawLevel}`);
-            console.log(`   • Converted to label: "${levelLabel}"`);
-            console.log(`   • FORCED ukLevels[${data.uk}] = "${levelLabel}"`);
-            console.log(`   ===`);
+
             
             tableHtml += `<tr class="${groupClass}">`;
             
             // Untuk baris pertama saja, tampilkan gate dan UK dengan rowspan
             if (isFirstRow) {
               const levelToDisplay = ukLevels[data.uk];
-              console.log(`   🖥️ DISPLAYING IN TABLE:`);
-              console.log(`      • UK: ${data.uk}`);
-              console.log(`      • Level to display: "${levelToDisplay}"`);
-              console.log(`      • Should be: "${data.ukLevel}" (from stored data)`);
               
               tableHtml += `
                 <td rowspan="${rowspanValue}">${data.gate}</td>
@@ -978,31 +1129,36 @@
       const loadProjects = async () => {
         if (!currentUser || !year) return;
         
-        $projectSelect.empty().append('<option value="">Memuat data...</option>');
+        projectDropdown.setValue('', 'Memuat data...');
+        projectDropdown.disable();
+        
         try {
-          // Gunakan tahun yang dipilih, bukan hardcode 2025
           const response = await makeAjaxRequest(API_URL, { 
             action: "fetchAvailableProjects", 
             user_prov: currentUser.prov,
             user_kab: currentUser.kab,
-            year: year // Gunakan tahun yang dipilih
+            year: year
           });
           
-          $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
           if (response.status && response.data.length) {
-            response.data.forEach(project => {
-              $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
-            });
-            // Enable dropdown project setelah data berhasil dimuat
-            $projectSelect.prop('disabled', false);
+            projectData = response.data.map(project => ({
+              value: project.id,
+              text: project.name
+            }));
+            
+            projectDropdown.setData(projectData);
+            projectDropdown.setValue('', 'Pilih Kegiatan');
+            projectDropdown.enable();
           } else {
-            $projectSelect.append('<option value="" disabled>Tidak ada kegiatan ditemukan</option>');
-            $projectSelect.prop('disabled', false);
+            projectData = [];
+            projectDropdown.setValue('', 'Tidak ada kegiatan ditemukan');
+            projectDropdown.disable();
           }
         } catch (error) {
           showError("Gagal memuat daftar kegiatan");
-          $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
-          $projectSelect.prop('disabled', false);
+          projectData = [];
+          projectDropdown.setValue('', 'Pilih Kegiatan');
+          projectDropdown.enable();
         }
       };
 
@@ -1021,18 +1177,15 @@
           
           if (currentUser.prov === "00" && currentUser.kab === "00") {
             // Pusat - bisa lihat semua, dan perlu dropdown
-            $regionSelect.empty().append('<option value="">Memuat data...</option>');
             filteredData = response.data || [];
             
             // Tambahkan opsi Pusat untuk user pusat
-            $regionSelect.empty();
-            $regionSelect.append(`<option value="pusat">Pusat - Nasional</option>`);
-            coverageData.push({
+            coverageData = [{
               id: "pusat",
               prov: "00", 
               kab: "00",
               name: "Pusat - Nasional"
-            });
+            }];
             
             if (filteredData.length > 0) {
               const apiData = filteredData.map(cov => ({
@@ -1042,18 +1195,24 @@
                 name: cov.name
               }));
               coverageData = [...coverageData, ...apiData];
-              
-              // Filter provinsi (kab == "00" dan prov tidak "00")
-              const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
-              provinces.forEach(province => {
-                $regionSelect.append(`<option value="${province.id}">${province.name}</option>`);
-              });
             }
+            
+            // Filter provinsi (kab == "00" dan prov tidak "00") untuk dropdown
+            const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
+            regionData = [
+              { value: "pusat", text: "Pusat - Nasional" },
+              ...provinces.map(province => ({
+                value: province.id,
+                text: province.name
+              }))
+            ];
+            
+            regionDropdown.setData(regionData);
+            regionDropdown.setValue("pusat", "Pusat - Nasional");
+            regionDropdown.enable();
             
             // Set default ke pusat
             selectedRegion = "pusat";
-            $regionSelect.val(selectedRegion);
-            $regionSelect.prop('disabled', false);
             
           } else if (currentUser.prov !== "00" && currentUser.kab === "00") {
             // User provinsi - otomatis pilih provinsi + kabupaten di dalamnya
@@ -1218,22 +1377,13 @@
           const gateName = `GATE${gateNumber}: ${gate.gate_name}`;
           
           // 2. Untuk setiap ukuran kualitas, tentukan region yang sesuai berdasarkan assessment_level
-          console.log(`=== PROCESSING GATE: ${gateName} ===`);
+
           for (let j = 0; j < measurements.length; j++) {
             const measurement = measurements[j];
             const ukNumber = j + 1;
             const ukName = `UK${ukNumber}: ${measurement.measurement_name}`;
             
-            // LOG DETAIL SETIAP MEASUREMENT
-            console.log(`📊 MEASUREMENT ${ukNumber}:`);
-            console.log(`   • ID: ${measurement.id}`);
-            console.log(`   • Name: ${measurement.measurement_name}`);
-            console.log(`   • Raw assessment_level: "${measurement.assessment_level}"`);
-            console.log(`   • Type of assessment_level: ${typeof measurement.assessment_level}`);
-            
             const ukLevel = getUkLevelLabel(measurement);
-            console.log(`   • Converted to: "${ukLevel}"`);
-            console.log(`   • UK Name: ${ukName}`);
             
             // Tentukan assessment_level (default ke 1 jika tidak ada)
             const assessmentLevel = parseInt(measurement.assessment_level || 1);
@@ -1403,12 +1553,7 @@
                   statuses: {}
                 };
                 
-                // LOG PENYIMPANAN ACTIVITY DATA
-                console.log(`💾 SAVED ACTIVITY: ${activity.name}`);
-                console.log(`   • For UK: ${ukName}`);
-                console.log(`   • Stored assessmentLevel: ${rawAssessmentLevel}`);
-                console.log(`   • Stored ukLevel: "${ukLevel}"`);
-                console.log(`   ---`);
+
               }
               
               // 5. Untuk setiap wilayah, isi status
@@ -1448,11 +1593,13 @@
         year = $(this).val();
         
         // Reset dropdowns
-        $projectSelect.prop('disabled', true).empty().append('<option value="">Pilih Kegiatan</option>');
+        projectDropdown.clear();
+        projectDropdown.disable();
         
         // Reset dropdown region hanya untuk user pusat
         if (currentUser.prov === "00" && currentUser.kab === "00") {
-          $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+          regionDropdown.clear();
+          regionDropdown.disable();
         }
         
         selectedProject = null;
@@ -1464,23 +1611,9 @@
         }
       });
 
-      $projectSelect.on('change', async function(){
-        selectedProject = $(this).val();
-        
-        // Reset dropdown dan selected region
-        selectedRegion = null;
-        
-        if (currentUser.prov === "00" && currentUser.kab === "00") {
-          // User pusat - reset dropdown wilayah
-          $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
-        }
-        
-        if (selectedProject) await loadRegions();
-      });
-
-      $regionSelect.on('change', function(){
-        selectedRegion = $(this).val();
-      });
+      // Project selection handler akan diatur saat inisialisasi dropdown
+      
+      // Region selection handler akan diatur saat inisialisasi dropdown
 
       $("#loadData").on('click', async function(){
         if (!selectedProject) {
@@ -1499,17 +1632,18 @@
         $spinner.fadeIn(200);
         $resultsContainer.empty();
         try {
-          const regionData = coverageData.find(r => r.id === selectedRegion);
-          if (!regionData)
-            throw new Error("Data wilayah tidak ditemukan");
-          
           // Tentukan daftar wilayah yang akan diproses
           let regionsToProcess = [];
           
           if (selectedRegion === "pusat") {
             // Level Pusat - Hanya kolom pusat
             regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
-          } else if (regionData.kab === "00") {
+          } else {
+            const regionData = coverageData.find(r => r.id === selectedRegion);
+            if (!regionData)
+              throw new Error("Data wilayah tidak ditemukan");
+              
+            if (regionData.kab === "00") {
             // Level Provinsi - Kolom provinsi + semua kabupaten di provinsi itu
             const prov = regionData.prov;
             
@@ -1528,9 +1662,10 @@
               const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
               regionsToProcess = [...regionsToProcess, ...kabupatenList];
             }
-          } else {
-            // Level Kabupaten - Hanya kolom kabupaten yang dipilih
-            regionsToProcess = [regionData];
+                      } else {
+              // Level Kabupaten - Hanya kolom kabupaten yang dipilih
+              regionsToProcess = [regionData];
+            }
           }
           
           // Proses data untuk semua wilayah terpilih
@@ -1548,6 +1683,39 @@
 
       // Inisialisasi
       if (initUser()) {
+        // Initialize searchable dropdowns
+        projectDropdown = createSearchableDropdown(
+          '#projectSearch', 
+          '#projectOptions', 
+          '#projectSelect',
+          [],
+          'value',
+          'text',
+          async (value, text) => {
+            selectedProject = value;
+            selectedRegion = null;
+            
+            if (currentUser.prov === "00" && currentUser.kab === "00") {
+              regionDropdown.clear();
+              regionDropdown.disable();
+            }
+            
+            if (selectedProject) await loadRegions();
+          }
+        );
+        
+        regionDropdown = createSearchableDropdown(
+          '#regionSearch',
+          '#regionOptions', 
+          '#regionSelect',
+          [],
+          'value',
+          'text',
+          (value, text) => {
+            selectedRegion = value;
+          }
+        );
+        
         year = $yearSelect.val() || "2025";
         
         // Load projects untuk tahun yang sudah terpilih (default 2025)

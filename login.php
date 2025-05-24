@@ -18,21 +18,24 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     :root {
-      --primary-color: #0071e3; /* Apple blue */
-      --success-color: #34c759; /* Apple green */
-      --warning-color: #ff9f0a; /* Apple orange */
-      --danger-color: #ff3b30;  /* Apple red */
-      --neutral-color: #8e8e93; /* Apple gray */
-      --light-color: #f5f5f7;   /* Apple light gray */
-      --dark-color: #1d1d1f;    /* Apple dark */
-      --border-color: #d2d2d7;  /* Apple border */
+      --primary-color: #059669;   /* Emerald green */
+      --primary-hover: #047857;   /* Darker emerald */
+      --primary-light: #d1fae5;   /* Light emerald */
+      --success-color: #10b981;   /* Success green */
+      --warning-color: #f59e0b;   /* Amber */
+      --danger-color: #ef4444;    /* Red */
+      --neutral-color: #6b7280;   /* Gray */
+      --light-color: #f9fafb;     /* Light gray */
+      --dark-color: #111827;      /* Dark gray */
+      --border-color: #e5e7eb;    /* Border gray */
+      --text-secondary: #374151;  /* Secondary text */
     }
     
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
-      color: #1d1d1f;
-      line-height: 1.5;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      color: var(--dark-color);
+      line-height: 1.6;
       margin: 0;
       padding: 0;
       min-height: 100vh;
@@ -42,7 +45,7 @@
     }
     
     .login-container {
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       margin: 2rem;
     }
@@ -50,7 +53,7 @@
     .login-card {
       background: #ffffff;
       border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      box-shadow: 0 20px 40px rgba(5, 150, 105, 0.08);
       padding: 3rem 2.5rem;
       border: none;
       overflow: hidden;
@@ -77,13 +80,13 @@
     .login-icon {
       width: 80px;
       height: 80px;
-      background: linear-gradient(135deg, var(--primary-color), #005bbc);
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 1.5rem;
-      box-shadow: 0 8px 20px rgba(0,113,227,0.3);
+      box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
     }
     
     .login-icon i {
@@ -114,7 +117,8 @@
     
     .form-control:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+      box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+      outline: none;
     }
     
     .input-group {
@@ -138,7 +142,7 @@
     }
     
     .btn-login {
-      background: linear-gradient(135deg, var(--primary-color), #005bbc);
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
       border: none;
       border-radius: 12px;
       padding: 1rem 2rem;
@@ -151,8 +155,9 @@
     }
     
     .btn-login:hover {
+      background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,113,227,0.3);
+      box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
       color: white;
     }
     
@@ -175,39 +180,13 @@
     }
     
     .alert-danger {
-      background-color: rgba(255,59,48,0.12);
+      background-color: rgba(239, 68, 68, 0.12);
       color: var(--danger-color);
     }
     
     .spinner-border-sm {
       width: 1rem;
       height: 1rem;
-    }
-    
-    .demo-info {
-      background: rgba(52,199,89,0.12);
-      color: var(--success-color);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-top: 1.5rem;
-      font-size: 0.85rem;
-      text-align: center;
-    }
-    
-    .back-to-monitoring {
-      text-align: center;
-      margin-top: 2rem;
-    }
-    
-    .back-to-monitoring a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-    
-    .back-to-monitoring a:hover {
-      text-decoration: underline;
     }
     
     @media (max-width: 480px) {
@@ -269,23 +248,6 @@
           </span>
         </button>
       </form>
-      
-      <div class="demo-info">
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>Info Demo:</strong> Password untuk semua akun adalah <code>password123</code>
-        <br><small class="mt-1 d-block">
-          <a href="test_users.php" class="text-decoration-none">
-            <i class="fas fa-users me-1"></i>Lihat daftar username yang tersedia
-          </a>
-        </small>
-      </div>
-      
-      <div class="back-to-monitoring">
-        <a href="monitoring.php">
-          <i class="fas fa-arrow-left me-2"></i>
-          Kembali ke Monitoring
-        </a>
-      </div>
     </div>
   </div>
 
@@ -398,7 +360,7 @@
       if (quickLoginUsername) {
         $("#username").val(quickLoginUsername);
         $("#password").focus();
-        localStorage.removeItem('quick_login_username');
+        localStorage.removeItem('quick_login_username'); // Hapus setelah digunakan
       }
     });
   </script>
