@@ -347,18 +347,33 @@
   </style>
 </head>
 <body>
-  <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1><i class="fas fa-tasks me-3"></i>Monitoring Quality Gates</h1>
-      <div>
-        <a href="login.php" class="btn btn-outline-primary me-2">
-          <i class="fas fa-sign-in-alt me-2"></i>Login Dashboard
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg" style="background: #ffffff; box-shadow: 0 2px 20px rgba(0,0,0,0.04); border-bottom: 1px solid var(--border-color); padding: 1rem 0; margin-bottom: 2rem;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#" style="font-weight: 600; font-size: 1.25rem; color: var(--primary-color) !important;">
+        <i class="fas fa-chart-line me-2"></i>Quality Gates Monitoring
+      </a>
+      
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="dashboard.php" class="btn btn-outline-secondary me-3">
+          <i class="fas fa-tachometer-alt me-1"></i>Dashboard
         </a>
-        <a href="dashboard.php" class="btn btn-primary">
-          <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-        </a>
+        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), #005bbc); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;" id="userAvatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <div style="font-weight: 500; color: var(--dark-color); font-size: 0.9rem;" id="userName">Loading...</div>
+          <div style="font-size: 0.8rem; color: var(--neutral-color);" id="userRole">Loading...</div>
+        </div>
+        <button class="btn" style="background: none; border: 1px solid var(--border-color); color: var(--neutral-color); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; transition: all 0.2s ease;" id="logoutBtn">
+          <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </button>
       </div>
     </div>
+  </nav>
+
+  <div class="container-fluid">
+
     
     <!-- Input Filters -->
     <div class="card mb-4">
@@ -370,21 +385,20 @@
           <div class="col-md-2">
             <label for="yearSelect" class="form-label">Tahun</label>
             <select id="yearSelect" class="form-select">
-              <option value="">Pilih Tahun</option>
               <option value="2023">2023</option>
               <option value="2024">2024</option>
-              <option value="2025">2025</option>
+              <option value="2025" selected>2025</option>
             </select>
           </div>
-          <div class="col-md-5">
+          <div id="projectSelectContainer" class="col-md-5">
             <label for="projectSelect" class="form-label">Pilih Kegiatan</label>
             <select id="projectSelect" class="form-select" disabled></select>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3" id="regionSelectContainer">
             <label for="regionSelect" class="form-label">Pilih Cakupan Wilayah</label>
             <select id="regionSelect" class="form-select" disabled></select>
           </div>
-          <div class="col-md-2 d-flex align-items-end">
+          <div id="loadButtonContainer" class="col-md-2 d-flex align-items-end">
             <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
               <i class="fas fa-search me-2"></i>Tampilkan Data
             </button>
@@ -411,6 +425,7 @@
       let selectedProject, year, selectedRegion = null;
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
+      let currentUser = null; // User yang sedang login
 
       // Cache selector DOM
       const $yearSelect    = $("#yearSelect");
@@ -420,6 +435,46 @@
       const $spinner       = $("#spinner");
 
       // --- Helper Functions ---
+
+      // Inisialisasi user
+      const initUser = () => {
+        const userData = localStorage.getItem('qg_user');
+        if (!userData) {
+          window.location.href = 'login.php';
+          return false;
+        }
+        
+        try {
+          currentUser = JSON.parse(userData);
+          if (!currentUser || !currentUser.username) {
+            throw new Error('Invalid user data');
+          }
+          
+          // Update UI dengan info user
+          $("#userName").text(currentUser.name || currentUser.username);
+          $("#userRole").text(currentUser.role_name || 'User');
+          $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
+          
+          // Atur layout berdasarkan role user
+          if (currentUser.prov === "00" && currentUser.kab === "00") {
+            // User pusat - tampilkan dropdown wilayah
+            $("#regionSelectContainer").show();
+            $("#projectSelectContainer").removeClass("col-md-7").addClass("col-md-5");
+            $("#loadButtonContainer").removeClass("col-md-3").addClass("col-md-2");
+          } else {
+            // User provinsi/kabupaten - sembunyikan dropdown wilayah
+            $("#regionSelectContainer").hide();
+            $("#projectSelectContainer").removeClass("col-md-5").addClass("col-md-7");
+            $("#loadButtonContainer").removeClass("col-md-2").addClass("col-md-3");
+          }
+          
+          return true;
+        } catch(e) {
+          localStorage.removeItem('qg_user');
+          window.location.href = 'login.php';
+          return false;
+        }
+      };
 
       const extractJson = response => {
         const start = response.indexOf('{');
@@ -887,82 +942,143 @@
       // --- Fungsi untuk Load Data (Projects & Regions) ---
 
       const loadProjects = async () => {
+        if (!currentUser || !year) return;
+        
         $projectSelect.empty().append('<option value="">Memuat data...</option>');
         try {
-          const response = await makeAjaxRequest(API_URL, { action: "fetchProjects", year });
+          // Gunakan tahun yang dipilih, bukan hardcode 2025
+          const response = await makeAjaxRequest(API_URL, { 
+            action: "fetchAvailableProjects", 
+            user_prov: currentUser.prov,
+            user_kab: currentUser.kab,
+            year: year // Gunakan tahun yang dipilih
+          });
+          
           $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
           if (response.status && response.data.length) {
             response.data.forEach(project => {
               $projectSelect.append(`<option value="${project.id}">${project.name}</option>`);
             });
+            // Enable dropdown project setelah data berhasil dimuat
+            $projectSelect.prop('disabled', false);
           } else {
             $projectSelect.append('<option value="" disabled>Tidak ada kegiatan ditemukan</option>');
+            $projectSelect.prop('disabled', false);
           }
         } catch (error) {
           showError("Gagal memuat daftar kegiatan");
           $projectSelect.empty().append('<option value="">Pilih Kegiatan</option>');
+          $projectSelect.prop('disabled', false);
         }
       };
 
       const loadRegions = async () => {
-        $regionSelect.empty().append('<option value="">Memuat data...</option>');
+        if (!currentUser) return;
+        
         try {
           const response = await makeAjaxRequest(API_URL, { action: "fetchCoverages", id_project: selectedProject });
-          $regionSelect.empty();
           coverageData = [];
+          
           if (!response.status)
             throw new Error("Gagal memuat data wilayah");
           
-          // Tambahkan opsi Pusat
-          $regionSelect.append(`<option value="pusat">Pusat - Nasional</option>`);
-          coverageData.push({
-            id: "pusat",
-            prov: "00",
-            kab: "00",
-            name: "Pusat - Nasional"
-          });
+          // Filter berdasarkan role user
+          let filteredData = [];
           
-          if (response.data && response.data.length) {
-            const apiData = response.data.map(cov => ({
-              id: `${cov.prov}${cov.kab}`,
-              prov: cov.prov,
-              kab: cov.kab,
-              name: cov.name
-            }));
-            coverageData = [...coverageData, ...apiData];
+          if (currentUser.prov === "00" && currentUser.kab === "00") {
+            // Pusat - bisa lihat semua, dan perlu dropdown
+            $regionSelect.empty().append('<option value="">Memuat data...</option>');
+            filteredData = response.data || [];
             
-            // Filter provinsi (kab == "00" dan prov tidak "00")
-            const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
-            provinces.forEach(province => {
-              $regionSelect.append(`<option value="${province.id}">${province.name}</option>`);
+            // Tambahkan opsi Pusat untuk user pusat
+            $regionSelect.empty();
+            $regionSelect.append(`<option value="pusat">Pusat - Nasional</option>`);
+            coverageData.push({
+              id: "pusat",
+              prov: "00", 
+              kab: "00",
+              name: "Pusat - Nasional"
             });
             
-            // Jika tidak ada provinsi, tampilkan semua kabupaten/kota
-            if (provinces.length === 0) {
-              // Filter kabupaten/kota (kab != "00")
-              const kabupatens = coverageData.filter(cov => cov.kab !== "00");
-              kabupatens.forEach(kabupaten => {
-                $regionSelect.append(`<option value="${kabupaten.id}">${kabupaten.name}</option>`);
+            if (filteredData.length > 0) {
+              const apiData = filteredData.map(cov => ({
+                id: `${cov.prov}${cov.kab}`,
+                prov: cov.prov,
+                kab: cov.kab,
+                name: cov.name
+              }));
+              coverageData = [...coverageData, ...apiData];
+              
+              // Filter provinsi (kab == "00" dan prov tidak "00")
+              const provinces = coverageData.filter(cov => cov.kab === "00" && cov.prov !== "00");
+              provinces.forEach(province => {
+                $regionSelect.append(`<option value="${province.id}">${province.name}</option>`);
               });
+            }
+            
+            // Set default ke pusat
+            selectedRegion = "pusat";
+            $regionSelect.val(selectedRegion);
+            $regionSelect.prop('disabled', false);
+            
+          } else if (currentUser.prov !== "00" && currentUser.kab === "00") {
+            // User provinsi - otomatis pilih provinsi + kabupaten di dalamnya
+            filteredData = (response.data || []).filter(cov => 
+              cov.prov === currentUser.prov
+            );
+            
+            if (filteredData.length > 0) {
+              const apiData = filteredData.map(cov => ({
+                id: `${cov.prov}${cov.kab}`,
+                prov: cov.prov,
+                kab: cov.kab,
+                name: cov.name
+              }));
+              coverageData = apiData;
+              
+              // Auto-select provinsi user (tidak perlu dropdown)
+              const userProvince = coverageData.find(cov => 
+                cov.prov === currentUser.prov && cov.kab === "00"
+              );
+              
+              if (userProvince) {
+                selectedRegion = userProvince.id;
+              } else {
+                throw new Error("Data provinsi Anda tidak ditemukan");
+              }
+            } else {
+              throw new Error("Tidak ada data untuk provinsi Anda");
+            }
+            
+          } else {
+            // User kabupaten - otomatis pilih kabupaten spesifik
+            filteredData = (response.data || []).filter(cov => 
+              cov.prov === currentUser.prov && cov.kab === currentUser.kab
+            );
+            
+            if (filteredData.length > 0) {
+              const apiData = filteredData.map(cov => ({
+                id: `${cov.prov}${cov.kab}`,
+                prov: cov.prov,
+                kab: cov.kab,
+                name: cov.name
+              }));
+              coverageData = apiData;
+              
+              // Auto-select kabupaten user (tidak perlu dropdown)
+              selectedRegion = coverageData[0].id;
+            } else {
+              throw new Error("Tidak ada data untuk kabupaten/kota Anda");
             }
           }
           
-          // Selalu pilih Pusat sebagai default jika ada
-          if ($regionSelect.find('option[value="pusat"]').length > 0) {
-            selectedRegion = "pusat";
-            $regionSelect.val(selectedRegion);
-          } else if ($regionSelect.find('option').length > 0) {
-            // Jika tidak ada pusat, pilih opsi pertama yang tersedia
-            selectedRegion = $regionSelect.find('option:first').val();
-            $regionSelect.val(selectedRegion);
-          }
-          
-          if (coverageData.length === 0)
-            throw new Error("Tidak ada data wilayah yang tersedia");
         } catch (error) {
           showError(error.message || "Gagal memuat daftar wilayah");
-          $regionSelect.empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+          if (currentUser.prov === "00" && currentUser.kab === "00") {
+            $regionSelect.empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+          }
           coverageData = [];
+          selectedRegion = null;
         }
       };
 
@@ -1231,19 +1347,45 @@
 
       // --- Event Handlers ---
 
+      // Logout handler
+      $("#logoutBtn").on('click', function(){
+        if (confirm('Apakah Anda yakin ingin logout?')) {
+          localStorage.removeItem('qg_user');
+          window.location.href = 'login.php';
+        }
+      });
+
       $yearSelect.on('change', async function(){
         year = $(this).val();
-        $projectSelect.prop('disabled', false).empty().append('<option value="">Pilih Kegiatan</option>');
-        $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+        
+        // Reset dropdowns
+        $projectSelect.prop('disabled', true).empty().append('<option value="">Pilih Kegiatan</option>');
+        
+        // Reset dropdown region hanya untuk user pusat
+        if (currentUser.prov === "00" && currentUser.kab === "00") {
+          $regionSelect.prop('disabled', true).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+        }
+        
         selectedProject = null;
         selectedRegion  = null;
-        await loadProjects();
+        
+        // Load projects jika tahun dipilih
+        if (year && currentUser) {
+          await loadProjects();
+        }
       });
 
       $projectSelect.on('change', async function(){
         selectedProject = $(this).val();
-        $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
-        selectedRegion  = null;
+        
+        // Reset dropdown dan selected region
+        selectedRegion = null;
+        
+        if (currentUser.prov === "00" && currentUser.kab === "00") {
+          // User pusat - reset dropdown wilayah
+          $regionSelect.prop('disabled', !selectedProject).empty().append('<option value="">Pilih Cakupan Wilayah</option>');
+        }
+        
         if (selectedProject) await loadRegions();
       });
 
@@ -1252,8 +1394,17 @@
       });
 
       $("#loadData").on('click', async function(){
-        if (!year || !selectedProject || !selectedRegion) {
-          showError("Silakan pilih tahun, kegiatan, dan cakupan wilayah terlebih dahulu");
+        if (!selectedProject) {
+          showError("Silakan pilih kegiatan terlebih dahulu");
+          return;
+        }
+        
+        if (!selectedRegion) {
+          if (currentUser.prov === "00" && currentUser.kab === "00") {
+            showError("Silakan pilih cakupan wilayah terlebih dahulu");
+          } else {
+            showError("Gagal memuat data wilayah Anda. Silakan refresh halaman.");
+          }
           return;
         }
         $spinner.fadeIn(200);
@@ -1267,18 +1418,21 @@
           let regionsToProcess = [];
           
           if (selectedRegion === "pusat") {
-            // Hanya pusat
+            // Level Pusat - Hanya kolom pusat
             regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
-          } else {
+          } else if (regionData.kab === "00") {
+            // Level Provinsi - Kolom provinsi + semua kabupaten di provinsi itu
             const prov = regionData.prov;
-            // Provinsi dan semua kabupaten di dalamnya
             regionsToProcess = [
               { id: `${prov}00`, prov: prov, kab: "00", name: regionData.name }
             ];
             
-            // Tambahkan kabupaten
+            // Tambahkan kabupaten yang ada di provinsi ini
             const kabupatenList = coverageData.filter(r => r.prov === prov && r.kab !== "00");
             regionsToProcess = [...regionsToProcess, ...kabupatenList];
+          } else {
+            // Level Kabupaten - Hanya kolom kabupaten yang dipilih
+            regionsToProcess = [regionData];
           }
           
           // Proses data untuk semua wilayah terpilih
@@ -1295,8 +1449,14 @@
       });
 
       // Inisialisasi
-      year = $yearSelect.val();
-      loadProjects();
+      if (initUser()) {
+        year = $yearSelect.val() || "2025";
+        
+        // Load projects untuk tahun yang sudah terpilih (default 2025)
+        if (year) {
+          loadProjects();
+        }
+      }
       $spinner.hide();
     });
   </script>
