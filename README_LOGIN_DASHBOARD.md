@@ -12,7 +12,7 @@ Sistem ini menambahkan fitur login dan dashboard per wilayah untuk aplikasi Qual
 - Simpan session menggunakan localStorage
 - Redirect otomatis ke dashboard setelah login berhasil
 
-### 2. Dashboard Per Wilayah (`dashboard.php`)
+### 2. Dashboard Per Wilayah (`index.php`)
 - **Dashboard berfokus pada perspektif wilayah** dengan nama wilayah ditampilkan di header
 - Tampilan berbeda berdasarkan role user:
   - **Pusat**: Akses ke seluruh data, **WAJIB** mengisi filter tahun dan wilayah sebelum melihat data
@@ -131,7 +131,7 @@ Sistem ini menambahkan fitur login dan dashboard per wilayah untuk aplikasi Qual
 ## File yang Dimodifikasi
 
 ### Major Changes:
-1. `dashboard.php` - **Complete revamp** interface dan logika
+1. `index.php` (dashboard) - **Complete revamp** interface dan logika
 2. `api.php` - Enhanced `fetchAvailableProjects` dengan region parameter
 
 ### Previous Files:
@@ -149,5 +149,5 @@ php -S localhost:8000
 
 Akses:
 - Login: `http://localhost:8000/login.php`
-- Dashboard: `http://localhost:8000/dashboard.php`
+- Dashboard: `http://localhost:8000/index.php` atau `http://localhost:8000/`
 - Test Users: `http://localhost:8000/test_users.php` 

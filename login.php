@@ -309,7 +309,7 @@
                 localStorage.setItem('qg_user', JSON.stringify(jsonData.data));
                 
                 // Redirect ke dashboard
-                window.location.href = 'dashboard.php';
+                window.location.href = 'index.php';
               } else {
                 showError(jsonData.message || "Login gagal");
               }
@@ -347,7 +347,7 @@
           const user = JSON.parse(userData);
           if (user && user.username) {
             // Sudah login, redirect ke dashboard
-            window.location.href = 'dashboard.php';
+            window.location.href = 'index.php';
           }
         } catch(e) {
           // Data tidak valid, hapus dari localStorage

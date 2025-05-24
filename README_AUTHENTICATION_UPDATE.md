@@ -6,7 +6,7 @@ Implementasi sistem autentikasi lengkap dan filter coverage berdasarkan role use
 
 ## 1. Sistem Autentikasi Universal
 
-### Dashboard (dashboard.php)
+### Dashboard (index.php)
 - ✅ **Login Required**: Semua akses harus login terlebih dahulu
 - ✅ **Auto Redirect**: User yang tidak login otomatis diarahkan ke `login.php`
 - ✅ **Session Management**: Menggunakan localStorage untuk menyimpan data user
@@ -46,7 +46,7 @@ Implementasi sistem autentikasi lengkap dan filter coverage berdasarkan role use
 
 ### Frontend Updates
 
-#### Dashboard (dashboard.php)
+#### Dashboard (index.php)
 ```javascript
 // Filter otomatis berdasarkan user coverage
 const loadFilterOptions = async () => {
@@ -110,7 +110,7 @@ const loadRegions = async () => {
 ## 6. Testing Scenarios
 
 ### Test Login Required
-1. Akses `dashboard.php` tanpa login → Redirect ke `login.php`
+1. Akses `index.php` tanpa login → Redirect ke `login.php`
 2. Akses `monitoring.php` tanpa login → Redirect ke `login.php`
 3. Login dengan user valid → Bisa akses kedua halaman
 

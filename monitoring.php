@@ -495,7 +495,7 @@
       </a>
       
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <a href="dashboard.php" class="btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; transition: all 0.2s ease; backdrop-filter: blur(10px);">
+        <a href="index.php" class="btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; transition: all 0.2s ease; backdrop-filter: blur(10px);">
           <i class="fas fa-tachometer-alt me-1"></i>Dashboard
         </a>
         <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px);" id="userAvatar">
