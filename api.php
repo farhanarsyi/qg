@@ -582,7 +582,7 @@ if(isset($_POST['action'])){
                     pg.cor_upload_end
                 FROM [projects] p
                 INNER JOIN [project_gates] pg ON p.id = pg.id_project
-                INNER JOIN [project_coverages] pc ON p.id = pc.id_project
+                LEFT JOIN [project_coverages] pc ON p.id = pc.id_project
                 WHERE p.is_deleted IS NULL 
                 AND pg.is_deleted IS NULL
             ";
@@ -591,7 +591,7 @@ if(isset($_POST['action'])){
             
             // Filter berdasarkan role user untuk menentukan scope project
             if ($user_prov === "00" && $user_kab === "00") {
-                // Pusat - bisa lihat semua project
+                // Pusat - bisa lihat semua project (termasuk yang tidak ada coverage)
             } else if ($user_prov !== "00" && $user_kab === "00") {
                 // Provinsi - hanya project yang menjadi tugas provinsi dan kabupaten dalam provinsinya
                 $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
@@ -651,7 +651,7 @@ if(isset($_POST['action'])){
             $query = "
                 SELECT DISTINCT p.year
                 FROM [projects] p
-                INNER JOIN [project_coverages] pc ON p.id = pc.id_project
+                LEFT JOIN [project_coverages] pc ON p.id = pc.id_project
                 WHERE p.is_deleted IS NULL
             ";
             
@@ -659,7 +659,7 @@ if(isset($_POST['action'])){
             
             // Filter berdasarkan role user
             if ($user_prov === "00" && $user_kab === "00") {
-                // Pusat - bisa lihat semua
+                // Pusat - bisa lihat semua (termasuk yang tidak ada coverage)
             } else if ($user_prov !== "00" && $user_kab === "00") {
                 // Provinsi - hanya provinsi dan kabupaten dalam provinsinya
                 $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
@@ -685,7 +685,7 @@ if(isset($_POST['action'])){
             $query = "
                 SELECT DISTINCT p.id, p.name, p.year
                 FROM [projects] p
-                INNER JOIN [project_coverages] pc ON p.id = pc.id_project
+                LEFT JOIN [project_coverages] pc ON p.id = pc.id_project
                 WHERE p.is_deleted IS NULL
             ";
             
@@ -693,7 +693,7 @@ if(isset($_POST['action'])){
             
             // Filter berdasarkan role user untuk menentukan scope project
             if ($user_prov === "00" && $user_kab === "00") {
-                // Pusat - bisa lihat semua project
+                // Pusat - bisa lihat semua project (termasuk yang tidak ada coverage)
             } else if ($user_prov !== "00" && $user_kab === "00") {
                 // Provinsi - hanya project yang menjadi tugas provinsi dan kabupaten dalam provinsinya
                 $query .= " AND (pc.prov = ? OR (pc.prov = ? AND pc.kab != '00'))";
