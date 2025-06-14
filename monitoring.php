@@ -54,6 +54,46 @@
       font-size: 2rem;
     }
     
+    /* Compact Navigation Tabs - Integrated into navbar */
+    .navbar-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: 2rem;
+    }
+    
+    .navbar-nav-tabs .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 0.85rem;
+      backdrop-filter: blur(10px);
+    }
+    
+    .navbar-nav-tabs .nav-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .navbar-nav-tabs .nav-link.active {
+      background: white;
+      color: var(--primary-color);
+      border-color: white;
+      font-weight: 600;
+    }
+
+    .navbar-nav-tabs .nav-link i {
+      margin-right: 0.4rem;
+      font-size: 0.8rem;
+    }
+
     .card {
       border-radius: 12px;
       box-shadow: 0 2px 20px rgba(0,0,0,0.04);
@@ -488,24 +528,31 @@
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 1rem 0; margin-bottom: 1.5rem;">
+  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 0.5rem 0; margin-bottom: 1rem;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#" style="font-weight: 600; font-size: 1.25rem; color: white !important;">
-        <i class="fas fa-chart-line me-2" style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;"></i>Quality Gates Monitoring
+      <a class="navbar-brand" href="index.php" style="font-weight: 600; font-size: 1.1rem; color: white !important;">
+        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; font-size: 0.9rem;"></i>Quality Gates
       </a>
       
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <a href="index.php" class="btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; transition: all 0.2s ease; backdrop-filter: blur(10px);">
-          <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+      <!-- Navigation Tabs - Integrated into navbar -->
+      <div class="navbar-nav-tabs">
+        <a class="nav-link" href="index.php">
+          <i class="fas fa-chart-bar"></i>Dashboard
         </a>
-        <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px);" id="userAvatar">
+        <a class="nav-link active" href="monitoring.php">
+          <i class="fas fa-chart-line"></i>Monitoring
+        </a>
+      </div>
+      
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.8rem;" id="userAvatar">
           <i class="fas fa-user"></i>
         </div>
         <div style="display: flex; flex-direction: column;">
-          <div style="font-weight: 600; color: white; font-size: 0.9rem;" id="userName">Loading...</div>
-          <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8);" id="userRole">Loading...</div>
+          <div style="font-weight: 600; color: white; font-size: 0.8rem; line-height: 1.1;" id="userName">Loading...</div>
+          <div style="font-size: 0.7rem; color: rgba(255,255,255,0.8); line-height: 1.1;" id="userRole">Loading...</div>
         </div>
-        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
+        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 0.35rem 0.75rem; font-size: 0.75rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
           <i class="fas fa-sign-out-alt me-1"></i>Logout
         </button>
       </div>

@@ -45,33 +45,34 @@
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
       box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
       border-bottom: none;
-      padding: 1rem 0;
-      margin-bottom: 1.5rem;
+      padding: 0.5rem 0;
+      margin-bottom: 1rem;
     }
     
     .navbar-brand {
       font-weight: 600;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       color: white !important;
     }
     
     .user-info {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
     }
     
     .user-avatar {
-      width: 42px;
-      height: 42px;
+      width: 32px;
+      height: 32px;
       background: rgba(255,255,255,0.2);
-      border-radius: 12px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 600;
       backdrop-filter: blur(10px);
+      font-size: 0.8rem;
     }
     
     .user-details {
@@ -82,21 +83,23 @@
     .user-name {
       font-weight: 600;
       color: white;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
+      line-height: 1.1;
     }
     
     .user-role {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       color: rgba(255,255,255,0.8);
+      line-height: 1.1;
     }
     
     .btn-logout {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.3);
       color: white;
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
       transition: all 0.2s ease;
       backdrop-filter: blur(10px);
     }
@@ -105,6 +108,46 @@
       background: var(--danger-color);
       border-color: var(--danger-color);
       color: white;
+    }
+
+    /* Compact Navigation Tabs - Integrated into navbar */
+    .navbar-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: 2rem;
+    }
+    
+    .navbar-nav-tabs .nav-link {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      position: relative;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 0.85rem;
+      backdrop-filter: blur(10px);
+    }
+    
+    .navbar-nav-tabs .nav-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .navbar-nav-tabs .nav-link.active {
+      background: white;
+      color: var(--primary-color);
+      border-color: white;
+      font-weight: 600;
+    }
+
+    .navbar-nav-tabs .nav-link i {
+      margin-right: 0.4rem;
+      font-size: 0.8rem;
     }
     
     .container-fluid {
@@ -526,13 +569,20 @@
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
       <a class="navbar-brand" href="index.php">
-        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px;"></i>Quality Gates Dashboard
+        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; font-size: 0.9rem;"></i>Quality Gates
       </a>
       
-      <div class="user-info">
-        <a href="monitoring.php" class="btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; padding: 0.5rem 1rem; transition: all 0.2s ease; backdrop-filter: blur(10px); margin-right: 1rem;">
-          <i class="fas fa-chart-line me-1"></i>Monitoring
+      <!-- Navigation Tabs - Integrated into navbar -->
+      <div class="navbar-nav-tabs">
+        <a class="nav-link active" href="index.php">
+          <i class="fas fa-chart-bar"></i>Dashboard
         </a>
+        <a class="nav-link" href="monitoring.php">
+          <i class="fas fa-chart-line"></i>Monitoring
+        </a>
+      </div>
+      
+      <div class="user-info">
         <div class="user-avatar" id="userAvatar">
           <i class="fas fa-user"></i>
         </div>
