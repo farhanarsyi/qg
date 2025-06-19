@@ -67,12 +67,12 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
-      padding: 0.4rem 1rem;
+      padding: 0.3rem 0.8rem;
       border-radius: 6px;
       position: relative;
       transition: all 0.3s ease;
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       backdrop-filter: blur(10px);
     }
     
@@ -90,15 +90,15 @@
     }
 
     .navbar-nav-tabs .nav-link i {
-      margin-right: 0.4rem;
-      font-size: 0.8rem;
+      margin-right: 0.3rem;
+      font-size: 0.75rem;
     }
 
     .card {
       border-radius: 12px;
       box-shadow: 0 2px 20px rgba(0,0,0,0.04);
       border: none;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       background-color: #ffffff;
       overflow: visible;
     }
@@ -110,14 +110,14 @@
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 1.5rem;
+      padding: 0.75rem 1rem;
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: var(--dark-color);
     }
     
     .card-body {
-      padding: 1.5rem;
+      padding: 1rem;
     }
     
     .form-label {
@@ -129,8 +129,8 @@
     .form-control, .form-select {
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      padding: 0.75rem 1rem;
-      font-size: 0.95rem;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.9rem;
       background-color: #fff;
       transition: all 0.2s ease;
     }
@@ -145,8 +145,9 @@
       background-color: var(--primary-color);
       border-color: var(--primary-color);
       border-radius: 8px;
-      padding: 0.75rem 1.5rem;
+      padding: 0.6rem 1.2rem;
       font-weight: 500;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
     }
     
@@ -495,6 +496,44 @@
       font-style: italic;
     }
 
+    /* Statistics Cards - Ultra Compact */
+    #statsCards .card {
+      transition: all 0.2s ease;
+      height: 100%;
+    }
+    
+    #statsCards .card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    #statsCards .card-body {
+      padding: 0.5rem 0.4rem;
+    }
+    
+    #statsCards h6 {
+      font-size: 0.65rem;
+      margin-bottom: 0.15rem;
+      line-height: 1.1;
+      font-weight: 600;
+    }
+    
+    #statsCards h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0;
+      font-weight: 700;
+    }
+    
+    #statsCards .d-flex {
+      margin-bottom: 0.3rem;
+      align-items: center;
+    }
+    
+    #statsCards i {
+      font-size: 0.8rem;
+      margin-right: 0.3rem !important;
+    }
+
     /* Responsif */
     @media (max-width: 992px) {
       .container-fluid {
@@ -503,6 +542,10 @@
       
       .card-body {
         padding: 1.25rem;
+      }
+      
+      #statsCards .col-md-2 {
+        margin-bottom: 0.5rem;
       }
     }
     
@@ -523,14 +566,27 @@
       .card-body {
         padding: 1rem;
       }
+      
+      #statsCards .col-md-2 {
+        width: 50%;
+        margin-bottom: 0.5rem;
+      }
+      
+      #statsCards h6 {
+        font-size: 0.6rem;
+      }
+      
+      #statsCards h3 {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 0.5rem 0; margin-bottom: 1rem;">
+  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 0.25rem 0; margin-bottom: 0.75rem;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.php" style="font-weight: 600; font-size: 1.1rem; color: white !important;">
+              <a class="navbar-brand" href="index.php" style="font-weight: 600; font-size: 1rem; color: white !important; padding-top: 0.25rem; padding-bottom: 0.25rem;">
         <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; font-size: 0.9rem;"></i>Quality Gates
       </a>
       
@@ -544,15 +600,15 @@
         </a>
       </div>
       
-      <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.8rem;" id="userAvatar">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.75rem;" id="userAvatar">
           <i class="fas fa-user"></i>
         </div>
         <div style="display: flex; flex-direction: column;">
-          <div style="font-weight: 600; color: white; font-size: 0.8rem; line-height: 1.1;" id="userName">Loading...</div>
-          <div style="font-size: 0.7rem; color: rgba(255,255,255,0.8); line-height: 1.1;" id="userRole">Loading...</div>
+          <div style="font-weight: 600; color: white; font-size: 0.75rem; line-height: 1;" id="userName">Loading...</div>
+          <div style="font-size: 0.65rem; color: rgba(255,255,255,0.8); line-height: 1;" id="userRole">Loading...</div>
         </div>
-        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 0.35rem 0.75rem; font-size: 0.75rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
+        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 0.25rem 0.6rem; font-size: 0.7rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
           <i class="fas fa-sign-out-alt me-1"></i>Logout
         </button>
       </div>
@@ -560,7 +616,75 @@
   </nav>
 
   <div class="container-fluid">
-
+    <!-- Statistics Cards -->
+    <div class="row mb-2" id="statsCards" style="display: none;">
+      <div class="col-md-2">
+        <div class="card border-0 bg-success bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-check-circle text-success me-2"></i>
+              <h6 class="mb-0 text-success fw-semibold">Sudah</h6>
+            </div>
+            <h3 class="mb-0 text-success fw-bold" id="statSudah">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-danger bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-times-circle text-danger me-2"></i>
+              <h6 class="mb-0 text-danger fw-semibold">Belum</h6>
+            </div>
+            <h3 class="mb-0 text-danger fw-bold" id="statBelum">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-secondary bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-minus-circle text-secondary me-2"></i>
+              <h6 class="mb-0 text-secondary fw-semibold">Tidak Perlu</h6>
+            </div>
+            <h3 class="mb-0 text-secondary fw-bold" id="statTidakPerlu">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-warning bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-clock text-warning me-2"></i>
+              <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
+            </div>
+            <h3 class="mb-0 text-warning fw-bold" id="statAkanDatang">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-primary bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-play-circle text-primary me-2"></i>
+              <h6 class="mb-0 text-primary fw-semibold">Berlangsung</h6>
+            </div>
+            <h3 class="mb-0 text-primary fw-bold" id="statBerlangsung">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-info bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-list text-info me-2"></i>
+              <h6 class="mb-0 text-info fw-semibold">Total</h6>
+            </div>
+            <h3 class="mb-0 text-info fw-bold" id="statTotal">0</h3>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <!-- Input Filters -->
     <div class="card mb-4">
@@ -1072,6 +1196,72 @@
         return "Tidak tersedia";
       };
 
+      // Calculate and display statistics for monitoring
+      const calculateMonitoringStatistics = (regions) => {
+        const stats = {
+          sudah: 0,
+          belum: 0,
+          tidakPerlu: 0,
+          akanDatang: 0,
+          berlangsung: 0,
+          total: 0
+        };
+        
+        // Count statuses from all activities and regions
+        for (const key in activityData) {
+          const activity = activityData[key];
+          
+          // Check if activity dates are in range for "berlangsung"
+          const isInDateRange = isDateInRange(activity.start, activity.end);
+          if (isInDateRange) {
+            stats.akanDatang++; // Will be corrected below
+          }
+          
+          // Count statuses for each region
+          regions.forEach(region => {
+            const status = activity.statuses[region.id] || "Tidak tersedia";
+            stats.total++;
+            
+            if (status.startsWith('Sudah')) {
+              stats.sudah++;
+            } else if (status.startsWith('Belum')) {
+              stats.belum++;
+            } else if (status === 'Tidak perlu') {
+              stats.tidakPerlu++;
+            } else if (isInDateRange) {
+              stats.berlangsung++;
+            }
+          });
+        }
+        
+        // Count activities that are "akan datang" (future dates)
+        for (const key in activityData) {
+          const activity = activityData[key];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (activity.start) {
+            const startDate = new Date(activity.start);
+            startDate.setHours(0, 0, 0, 0);
+            
+            if (today < startDate) {
+              stats.akanDatang += regions.length; // Multiply by regions count
+            }
+          }
+        }
+        
+        // Update UI
+        $("#statSudah").text(stats.sudah);
+        $("#statBelum").text(stats.belum);
+        $("#statTidakPerlu").text(stats.tidakPerlu);
+        $("#statAkanDatang").text(stats.akanDatang);
+        $("#statBerlangsung").text(stats.berlangsung);
+        $("#statTotal").text(stats.total);
+        
+        // Show stats cards
+        $("#statsCards").show();
+      };
+
       // --- Fungsi untuk membuat dan menampilkan tabel hasil ---
       const displayResultTable = (regions) => {
         // Urutkan regions berdasarkan kode, bukan nama
@@ -1252,6 +1442,9 @@
         `;
         
         $resultsContainer.html(tableHtml);
+        
+        // Calculate and display statistics
+        calculateMonitoringStatistics(regions);
       };
 
       // --- Fungsi untuk Load Data (Projects & Regions) ---

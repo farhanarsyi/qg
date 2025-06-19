@@ -45,34 +45,36 @@
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
       box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
       border-bottom: none;
-      padding: 0.5rem 0;
-      margin-bottom: 1rem;
+      padding: 0.25rem 0;
+      margin-bottom: 0.75rem;
     }
     
     .navbar-brand {
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: white !important;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
     }
     
     .user-info {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
     
     .user-avatar {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       background: rgba(255,255,255,0.2);
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 600;
       backdrop-filter: blur(10px);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
     
     .user-details {
@@ -83,14 +85,14 @@
     .user-name {
       font-weight: 600;
       color: white;
-      font-size: 0.8rem;
-      line-height: 1.1;
+      font-size: 0.75rem;
+      line-height: 1;
     }
     
     .user-role {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       color: rgba(255,255,255,0.8);
-      line-height: 1.1;
+      line-height: 1;
     }
     
     .btn-logout {
@@ -98,8 +100,8 @@
       border: 1px solid rgba(255,255,255,0.3);
       color: white;
       border-radius: 6px;
-      padding: 0.35rem 0.75rem;
-      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.7rem;
       transition: all 0.2s ease;
       backdrop-filter: blur(10px);
     }
@@ -123,12 +125,12 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
-      padding: 0.4rem 1rem;
+      padding: 0.3rem 0.8rem;
       border-radius: 6px;
       position: relative;
       transition: all 0.3s ease;
       text-decoration: none;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       backdrop-filter: blur(10px);
     }
     
@@ -146,8 +148,8 @@
     }
 
     .navbar-nav-tabs .nav-link i {
-      margin-right: 0.4rem;
-      font-size: 0.8rem;
+      margin-right: 0.3rem;
+      font-size: 0.75rem;
     }
     
     .container-fluid {
@@ -169,34 +171,38 @@
       font-size: 1rem;
     }
     
-    .card {      border-radius: 12px;      box-shadow: 0 2px 20px rgba(0,0,0,0.04);      border: none;      margin-bottom: 2rem;      background-color: #ffffff;      overflow: visible;    }        .card-body {      overflow: visible;    }
+    .card {      border-radius: 12px;      box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);      border: none;      margin-bottom: 1rem;      background-color: #ffffff;      overflow: visible;      transform: translateY(0);      transition: all 0.3s ease;    }        .card:hover {      transform: translateY(-2px);      box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.08);    }        .card-body {      overflow: visible;    }
     
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid var(--border-color);
-      padding: 1.25rem 1.5rem;
+      padding: 0.5rem 0.75rem;
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 0.85rem;
       color: var(--dark-color);
+      line-height: 1.2;
     }
     
     .card-body {
-      padding: 1.5rem;
+      padding: 0.75rem;
     }
     
     .form-label {
       font-weight: 500;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       color: var(--dark-color);
+      font-size: 0.85rem;
+      line-height: 1.2;
     }
     
     .form-control, .form-select {
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      padding: 0.75rem 1rem;
-      font-size: 0.95rem;
+      padding: 0.5rem 0.7rem;
+      font-size: 0.85rem;
       background-color: #fff;
       transition: all 0.2s ease;
+      line-height: 1.3;
     }
     
     .form-control:focus, .form-select:focus {
@@ -209,8 +215,9 @@
       background-color: var(--primary-color);
       border-color: var(--primary-color);
       border-radius: 8px;
-      padding: 0.75rem 1.5rem;
+      padding: 0.6rem 1.2rem;
       font-weight: 500;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
     }
     
@@ -523,6 +530,44 @@
       font-style: italic;
     }
 
+    /* Statistics Cards - Ultra Compact */
+    #statsCards .card {
+      transition: all 0.2s ease;
+      height: 100%;
+    }
+    
+    #statsCards .card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    #statsCards .card-body {
+      padding: 0.5rem 0.4rem;
+    }
+    
+    #statsCards h6 {
+      font-size: 0.65rem;
+      margin-bottom: 0.15rem;
+      line-height: 1.1;
+      font-weight: 600;
+    }
+    
+    #statsCards h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0;
+      font-weight: 700;
+    }
+    
+    #statsCards .d-flex {
+      margin-bottom: 0.3rem;
+      align-items: center;
+    }
+    
+    #statsCards i {
+      font-size: 0.8rem;
+      margin-right: 0.3rem !important;
+    }
+
     /* Responsif */
     @media (max-width: 992px) {
       .container-fluid {
@@ -535,6 +580,10 @@
       
       .user-details {
         display: none;
+      }
+      
+      #statsCards .col-md-2 {
+        margin-bottom: 0.5rem;
       }
     }
     
@@ -560,6 +609,19 @@
       .table-dashboard td {
         padding: 0.75rem;
         font-size: 0.8rem;
+      }
+      
+      #statsCards .col-md-2 {
+        width: 50%;
+        margin-bottom: 0.5rem;
+      }
+      
+      #statsCards h6 {
+        font-size: 0.6rem;
+      }
+      
+      #statsCards h3 {
+        font-size: 1rem;
       }
     }
   </style>
@@ -598,6 +660,76 @@
   </nav>
 
   <div class="container-fluid">
+    <!-- Statistics Cards -->
+    <div class="row mb-2" id="statsCards" style="display: none;">
+      <div class="col-md-2">
+        <div class="card border-0 bg-success bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-play-circle text-success me-2"></i>
+              <h6 class="mb-0 text-success fw-semibold">Sedang Berlangsung</h6>
+            </div>
+            <h3 class="mb-0 text-success fw-bold" id="statActive">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-warning bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-clock text-warning me-2"></i>
+              <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
+            </div>
+            <h3 class="mb-0 text-warning fw-bold" id="statUpcoming">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-secondary bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-check-circle text-secondary me-2"></i>
+              <h6 class="mb-0 text-secondary fw-semibold">Selesai</h6>
+            </div>
+            <h3 class="mb-0 text-secondary fw-bold" id="statCompleted">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-info bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-list text-info me-2"></i>
+              <h6 class="mb-0 text-info fw-semibold">Total Gate</h6>
+            </div>
+            <h3 class="mb-0 text-info fw-bold" id="statTotal">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-primary bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-percentage text-primary me-2"></i>
+              <h6 class="mb-0 text-primary fw-semibold">Progress</h6>
+            </div>
+            <h3 class="mb-0 text-primary fw-bold" id="statProgress">0%</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-dark bg-opacity-10">
+          <div class="card-body text-center p-3">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-project-diagram text-dark me-2"></i>
+              <h6 class="mb-0 text-dark fw-semibold">Kegiatan</h6>
+            </div>
+            <h3 class="mb-0 text-dark fw-bold" id="statProjects">0</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Filters -->
     <div class="card" id="filtersCard">
       <div class="card-header d-flex justify-content-between align-items-center">
@@ -1039,6 +1171,51 @@
         $resultCount.text(`${filteredData.length} gate`);
       };
       
+      // Calculate and display statistics
+      const calculateStatistics = () => {
+        const stats = {
+          active: 0,
+          upcoming: 0,
+          completed: 0,
+          total: filteredData.length,
+          projects: new Set()
+        };
+        
+        filteredData.forEach(gate => {
+          // Add project to set for unique count
+          stats.projects.add(gate.project_id);
+          
+          // Get date status
+          const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+          
+          switch(dateStatus.status) {
+            case 'active':
+              stats.active++;
+              break;
+            case 'upcoming':
+              stats.upcoming++;
+              break;
+            case 'completed':
+              stats.completed++;
+              break;
+          }
+        });
+        
+        // Calculate progress (completed / total * 100)
+        const progress = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+        
+        // Update UI
+        $("#statActive").text(stats.active);
+        $("#statUpcoming").text(stats.upcoming);
+        $("#statCompleted").text(stats.completed);
+        $("#statTotal").text(stats.total);
+        $("#statProgress").text(progress + '%');
+        $("#statProjects").text(stats.projects.size);
+        
+        // Show stats cards
+        $("#statsCards").show();
+      };
+
       // Tampilkan data dashboard
       const displayDashboardData = () => {
         if (filteredData.length === 0) {
@@ -1046,11 +1223,15 @@
           $emptyState.show();
           $("#initialState").hide();
           $resultCount.text("0 data");
+          $("#statsCards").hide();
           return;
         }
         
         $emptyState.hide();
         $("#initialState").hide();
+        
+        // Calculate statistics
+        calculateStatistics();
         
         // Default sort by project name
         if (!sortColumn) {
