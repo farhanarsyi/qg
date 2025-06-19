@@ -164,130 +164,168 @@
     
     .table-wrapper {
       overflow: auto;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       margin: 0;
-      max-height: calc(100vh - 280px); /* Dynamic height based on viewport */
+      max-height: calc(100vh - 280px);
       min-height: 500px;
     }
     
     .table-monitoring {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      background-color: #fff;
+      border-collapse: collapse;
+      border: 1px solid #000;
+    }
+    
+    /* Fix gap between sticky columns */
+    .table-monitoring th:nth-child(1),
+    .table-monitoring td:nth-child(1),
+    .table-monitoring th:nth-child(2),
+    .table-monitoring td:nth-child(2),
+    .table-monitoring th:nth-child(3),
+    .table-monitoring td:nth-child(3),
+    .table-monitoring th:nth-child(4),
+    .table-monitoring td:nth-child(4),
+    .table-monitoring th:nth-child(5),
+    .table-monitoring td:nth-child(5),
+    .table-monitoring th:nth-child(6),
+    .table-monitoring td:nth-child(6) {
+      box-shadow: 2px 0 0 0 #fff, -1px 0 0 0 #fff;
+      z-index: 10;
+      box-sizing: border-box;
+      position: relative;
+    }
+    
+    /* Add vertical lines using pseudo-elements that stay in place */
+    .table-monitoring th:nth-child(1)::after,
+    .table-monitoring td:nth-child(1)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #000;
+      z-index: 15;
+    }
+    
+    .table-monitoring th:nth-child(2)::after,
+    .table-monitoring td:nth-child(2)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #000;
+      z-index: 15;
+    }
+    
+    .table-monitoring th:nth-child(3)::after,
+    .table-monitoring td:nth-child(3)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #000;
+      z-index: 15;
+    }
+    
+    .table-monitoring th:nth-child(4)::after,
+    .table-monitoring td:nth-child(4)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #000;
+      z-index: 15;
+    }
+    
+    .table-monitoring th:nth-child(5)::after,
+    .table-monitoring td:nth-child(5)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #000;
+      z-index: 15;
+    }
+    
+    .table-monitoring th:nth-child(6)::after,
+    .table-monitoring td:nth-child(6)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #000;
+      z-index: 15;
     }
     
     .table-monitoring th {
-      background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%);
-      font-weight: 600;
-      padding: 0.75rem 0.5rem;
-      font-size: 0.75rem;
-      color: var(--primary-color);
-      white-space: nowrap;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      border: 1px solid #000;
+      padding: 8px;
       text-align: center;
-      border-bottom: 2px solid var(--primary-color);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-weight: normal;
+      background-color: #fff;
     }
     
     .table-monitoring td {
-      padding: 0.75rem 0.5rem;
+      border: 1px solid #000;
+      padding: 8px;
       vertical-align: middle;
-      font-size: 0.8rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .table-monitoring tr:last-child td {
-      border-bottom: none;
-    }
-    
-    tbody tr:hover {
-      background-color: rgba(5, 150, 105, 0.04);
     }
     
     /* Status badges */
     .status-badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 100px;
-      font-weight: 500;
-      font-size: 0.7rem;
-      text-align: center;
-      white-space: nowrap;
       display: inline-block;
-    }
-    
-    .status-success {
-      background-color: rgba(52,199,89,0.12);
-      color: var(--success-color);
-    }
-    
-    .status-danger {
-      background-color: rgba(255,59,48,0.12);
-      color: var(--danger-color);
-    }
-    
-    .status-warning {
-      background-color: rgba(255,159,10,0.12);
-      color: var(--warning-color);
-    }
-    
-    .status-neutral {
-      background-color: rgba(142,142,147,0.12);
-      color: var(--neutral-color);
     }
     
     /* Gate dan UK codes */
     .gate-code, .uk-code {
-      font-weight: 600;
-      color: var(--primary-color);
+      font-weight: normal;
+      color: #000;
       margin-right: 5px;
     }
     
-    /* Kolom-kolom yang lebih rapat */
+    /* Kolom-kolom */
     .date-column {
-      width: 110px;
       text-align: center;
     }
     
     .status-column {
-      width: 90px;
       text-align: center;
     }
     
-    /* Header tetap center */
+    /* Header */
     .table-monitoring th:first-child,
     .table-monitoring th:nth-child(2) {
-      width: 80px;
       text-align: center;
     }
     
-    /* Konten Gate dan UK rata kiri dengan warna hijau tebal */
+    /* Konten Gate dan UK */
     .table-monitoring td:first-child,
     .table-monitoring td:nth-child(2) {
-      width: 80px;
       text-align: left;
-      font-weight: 700;
-      color: var(--primary-color);
+      font-weight: normal;
+      color: #000;
     }
     
     .table-monitoring th:nth-child(3),
     .table-monitoring td:nth-child(3) {
-      width: 80px;
       text-align: center;
     }
     
     .activity-number {
-      background: var(--primary-color);
+      background: #000;
       color: white;
-      padding: 0.1rem 0.3rem;
-      border-radius: 4px;
-      font-size: 0.65rem;
-      font-weight: 600;
-      margin-right: 0.5rem;
+      padding: 2px 6px;
+      margin-right: 8px;
     }
     
     /* Enhanced Loading Spinner */
@@ -390,59 +428,92 @@
     
     /* Region header styles */
     .region-header {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: normal;
       text-align: center;
-      background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%) !important;
-      color: var(--primary-color) !important;
-      border-bottom: 2px solid var(--primary-color) !important;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      background: #fff !important;
+      color: #000 !important;
     }
     
-    /* Perbaikan tampilan tabel */
+    /* Frozen columns */
     .table-monitoring th:nth-child(1), /* Gate */
     .table-monitoring td:nth-child(1) {
-      min-width: 200px;
+      position: sticky;
+      left: 0;
+      background-color: #fff;
+      z-index: 10;
+      width: 201px;
+      min-width: 201px;
+      max-width: 201px;
+      margin-right: -1px;
     }
     
-    .table-monitoring th:nth-child(2), /* UK */
+    .table-monitoring th:nth-child(2), /* Ukuran Kualitas */
     .table-monitoring td:nth-child(2) {
-      min-width: 220px;
+      position: sticky;
+      left: 200px;
+      background-color: #fff;
+      z-index: 10;
+      width: 221px;
+      min-width: 221px;
+      max-width: 221px;
+      margin-right: -1px;
     }
     
     .table-monitoring th:nth-child(3), /* Level */
     .table-monitoring td:nth-child(3) {
-      min-width: 100px;
+      position: sticky;
+      left: 420px;
+      background-color: #fff;
+      z-index: 10;
+      width: 101px;
+      min-width: 101px;
+      max-width: 101px;
       text-align: center;
+      margin-right: -1px;
     }
     
     .table-monitoring th:nth-child(4), /* Aktivitas */
     .table-monitoring td:nth-child(4) {
-      min-width: 280px;
+      position: sticky;
+      left: 520px;
+      background-color: #fff;
+      z-index: 10;
+      width: 281px;
+      min-width: 281px;
+      max-width: 281px;
+      margin-right: -1px;
     }
     
-    /* Kolom tanggal */
     .table-monitoring th:nth-child(5), /* Tanggal Mulai */
-    .table-monitoring td:nth-child(5),
+    .table-monitoring td:nth-child(5) {
+      position: sticky;
+      left: 800px;
+      background-color: #fff;
+      z-index: 10;
+      width: 121px;
+      min-width: 121px;
+      max-width: 121px;
+      text-align: center;
+      margin-right: -1px;
+    }
+    
     .table-monitoring th:nth-child(6), /* Tanggal Selesai */
     .table-monitoring td:nth-child(6) {
-      min-width: 120px; /* Smaller since no time */
+      position: sticky;
+      left: 920px;
+      background-color: #fff;
+      z-index: 10;
+      width: 121px;
+      min-width: 121px;
+      max-width: 121px;
       text-align: center;
-      white-space: nowrap;
+      margin-right: -1px;
     }
     
-    /* Date in range (blinking effect) */
+    /* Date in range */
     .date-in-range {
-      color: var(--success-color);
-      font-weight: 600;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
+      color: #000;
+      font-weight: normal;
     }
     
     /* Untuk kompatibilitas */
@@ -450,41 +521,18 @@
       text-align: center;
     }
     
-    /* Row colors alternating by UK group */
-    .table-monitoring .uk-group-even {
-      background-color: #ffffff;
-    }
-    
-    .table-monitoring .uk-group-odd {
-      background-color: rgba(245,245,247,0.4);
-    }
-    
     /* Activity number */
     .activity-number {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 13px;
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+      display: inline-block;
+      background: #000;
       color: white;
-      font-weight: 700;
-      margin-right: 12px;
-      font-size: 0.75rem;
-      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+      padding: 2px 6px;
+      margin-right: 8px;
     }
     
     /* Status column */
     .status-column {
-      min-width: 120px;
       text-align: center;
-      white-space: nowrap;
-    }
-    
-    /* Row hover and focus */
-    .table-monitoring tr:hover td {
-      background-color: rgba(5, 150, 105, 0.04);
     }
     
     /* Searchable Dropdown Styles */
