@@ -181,23 +181,23 @@
     .table-monitoring th {
       background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%);
       font-weight: 600;
-      padding: 1rem 1.25rem;
-      font-size: 0.85rem;
+      padding: 0.75rem 0.5rem;
+      font-size: 0.75rem;
       color: var(--primary-color);
       white-space: nowrap;
       position: sticky;
       top: 0;
       z-index: 10;
-      text-align: left;
+      text-align: center;
       border-bottom: 2px solid var(--primary-color);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     
     .table-monitoring td {
-      padding: 1rem 1.25rem;
+      padding: 0.75rem 0.5rem;
       vertical-align: middle;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       border-bottom: 1px solid var(--border-color);
     }
     
@@ -211,10 +211,10 @@
     
     /* Status badges */
     .status-badge {
-      padding: 0.35rem 0.75rem;
+      padding: 0.25rem 0.5rem;
       border-radius: 100px;
       font-weight: 500;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       text-align: center;
       white-space: nowrap;
       display: inline-block;
@@ -245,6 +245,49 @@
       font-weight: 600;
       color: var(--primary-color);
       margin-right: 5px;
+    }
+    
+    /* Kolom-kolom yang lebih rapat */
+    .date-column {
+      width: 110px;
+      text-align: center;
+    }
+    
+    .status-column {
+      width: 90px;
+      text-align: center;
+    }
+    
+    /* Header tetap center */
+    .table-monitoring th:first-child,
+    .table-monitoring th:nth-child(2) {
+      width: 80px;
+      text-align: center;
+    }
+    
+    /* Konten Gate dan UK rata kiri dengan warna hijau tebal */
+    .table-monitoring td:first-child,
+    .table-monitoring td:nth-child(2) {
+      width: 80px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    .table-monitoring th:nth-child(3),
+    .table-monitoring td:nth-child(3) {
+      width: 80px;
+      text-align: center;
+    }
+    
+    .activity-number {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
     }
     
     /* Enhanced Loading Spinner */
@@ -1305,24 +1348,16 @@
                   <tbody>
         `;
         
-        // Urutkan dan kelompokkan aktivitas berdasarkan gate dan UK
-        // Implementasi merge cell yang benar menggunakan rowspan
+        // Versi tabel tanpa merge - setiap baris menampilkan semua data lengkap
         const orderedActivities = [];
         
-        // 1. Kelompokkan berdasarkan gate dan UK
-        const activityGroups = {};
+        // 1. Ambil semua aktivitas dan urutkan berdasarkan gate, UK, dan proses
         for (const key in activityData) {
           const data = activityData[key];
-          const gateUkKey = `${data.gate}|${data.uk}`;
-          
-          if (!activityGroups[gateUkKey]) {
-            activityGroups[gateUkKey] = [];
-          }
-          
-          activityGroups[gateUkKey].push(data);
+          orderedActivities.push(data);
         }
         
-        // 2. Urutkan aktivitas dalam setiap group berdasarkan proses, bukan abjad
+        // 2. Urutkan aktivitas berdasarkan proses
         const activityOrder = {
           "Pengisian nama pelaksana aksi preventif": 1,
           "Upload bukti pelaksanaan aksi preventif": 2,
@@ -1332,105 +1367,75 @@
           "Upload bukti pelaksanaan aksi korektif": 6
         };
         
-        // 3. Urutkan gate dan UK berdasarkan nomor
-        const sortedGroupKeys = Object.keys(activityGroups).sort((a, b) => {
-          const [gateA, ukA] = a.split('|');
-          const [gateB, ukB] = b.split('|');
-          
+        // 3. Urutkan seluruh aktivitas berdasarkan gate, UK, dan proses
+        orderedActivities.sort((a, b) => {
           // Ekstrak nomor gate
-          const gateNumA = parseInt(gateA.match(/GATE(\d+)/)[1]);
-          const gateNumB = parseInt(gateB.match(/GATE(\d+)/)[1]);
+          const gateNumA = parseInt(a.gate.match(/GATE(\d+)/)[1]);
+          const gateNumB = parseInt(b.gate.match(/GATE(\d+)/)[1]);
           
           if (gateNumA !== gateNumB) {
             return gateNumA - gateNumB;
           }
           
           // Ekstrak nomor UK
-          const ukNumA = parseInt(ukA.match(/UK(\d+)/)[1]);
-          const ukNumB = parseInt(ukB.match(/UK(\d+)/)[1]);
+          const ukNumA = parseInt(a.uk.match(/UK(\d+)/)[1]);
+          const ukNumB = parseInt(b.uk.match(/UK(\d+)/)[1]);
           
-          return ukNumA - ukNumB;
+          if (ukNumA !== ukNumB) {
+            return ukNumA - ukNumB;
+          }
+          
+          // Urutkan berdasarkan proses
+          return activityOrder[a.activity] - activityOrder[b.activity];
         });
         
-        // Untuk menyimpan level UK
-        const ukLevels = {};
-        
-        // 4. Proses setiap kelompok dan buat baris tabel
-
-        for (let groupIndex = 0; groupIndex < sortedGroupKeys.length; groupIndex++) {
-          const groupKey = sortedGroupKeys[groupIndex];
-          const activities = activityGroups[groupKey];
-          const groupClass = groupIndex % 2 === 0 ? 'uk-group-even' : 'uk-group-odd';
+        // 4. Buat baris untuk setiap aktivitas (tanpa merge)
+        for (let i = 0; i < orderedActivities.length; i++) {
+          const data = orderedActivities[i];
+          const rowClass = i % 2 === 0 ? 'uk-group-even' : 'uk-group-odd';
           
-          // Dapatkan level UK dari aktivitas pertama
-          const ukKey = activities[0].uk;
-
+          // Ambil nomor aktivitas (1-6) berdasarkan activityOrder
+          const activityNumber = activityOrder[data.activity];
           
-          // Urutkan aktivitas berdasarkan urutan proses
-          activities.sort((a, b) => {
-            return activityOrder[a.activity] - activityOrder[b.activity];
+          // Konversi level assessment
+          const rawLevel = data.assessmentLevel || 1;
+          let levelLabel;
+          if (rawLevel === 1) levelLabel = "Pusat";
+          else if (rawLevel === 2) levelLabel = "Provinsi";
+          else if (rawLevel === 3) levelLabel = "Kabupaten";
+          else levelLabel = "Tidak diketahui";
+          
+          tableHtml += `<tr class="${rowClass}">`;
+          
+          // Tampilkan semua kolom untuk setiap baris (tanpa rowspan)
+          tableHtml += `
+            <td>${data.gate}</td>
+            <td>${data.uk}</td>
+            <td style="text-align: center;">${levelLabel}</td>
+          `;
+          
+          // Tentukan apakah tanggal dalam rentang aktif
+          const startDate = data.start;
+          const endDate = data.end;
+          const isInDateRange = isDateInRange(startDate, endDate);
+          
+          // Tambahkan class untuk tanggal yang dalam rentang
+          const startDateClass = isInDateRange ? 'date-in-range' : '';
+          const endDateClass = isInDateRange ? 'date-in-range' : '';
+          
+          tableHtml += `
+            <td><span class="activity-number">${activityNumber}</span>${data.activity}</td>
+            <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
+            <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
+          `;
+          
+          // Tambahkan status untuk setiap wilayah
+          regions.forEach(region => {
+            const status = data.statuses[region.id] || "Tidak tersedia";
+            tableHtml += `<td class="status-column">${getStatusBadge(status)}</td>`;
           });
           
-          // Buat baris untuk setiap kelompok
-          for (let i = 0; i < activities.length; i++) {
-            const data = activities[i];
-            const isFirstRow = i === 0;
-            const rowspanValue = activities.length;
-            
-            // Ambil nomor aktivitas (1-6) berdasarkan activityOrder
-            const activityNumber = activityOrder[data.activity];
-            
-
-            
-            // SELALU konversi ulang dari assessment_level untuk memastikan akurasi (tidak peduli sudah ada atau belum)
-            const rawLevel = data.assessmentLevel || 1;
-            let levelLabel;
-            if (rawLevel === 1) levelLabel = "Pusat";
-            else if (rawLevel === 2) levelLabel = "Provinsi";
-            else if (rawLevel === 3) levelLabel = "Kabupaten";
-            else levelLabel = "Tidak diketahui";
-            
-            // FORCE OVERRIDE - pastikan selalu menggunakan level yang benar
-            ukLevels[data.uk] = levelLabel;
-            
-
-            
-            tableHtml += `<tr class="${groupClass}">`;
-            
-            // Untuk baris pertama saja, tampilkan gate dan UK dengan rowspan
-            if (isFirstRow) {
-              const levelToDisplay = ukLevels[data.uk];
-              
-              tableHtml += `
-                <td rowspan="${rowspanValue}">${data.gate}</td>
-                <td rowspan="${rowspanValue}">${data.uk}</td>
-                <td rowspan="${rowspanValue}" style="text-align: center;">${levelToDisplay}</td>
-              `;
-            }
-            
-            // Tentukan apakah tanggal dalam rentang aktif
-            const startDate = data.start;
-            const endDate = data.end;
-            const isInDateRange = isDateInRange(startDate, endDate);
-            
-            // Tambahkan class untuk tanggal yang dalam rentang
-            const startDateClass = isInDateRange ? 'date-in-range' : '';
-            const endDateClass = isInDateRange ? 'date-in-range' : '';
-            
-            tableHtml += `
-              <td><span class="activity-number">${activityNumber}</span>${data.activity}</td>
-              <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
-              <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
-            `;
-            
-            // Tambahkan status untuk setiap wilayah
-            regions.forEach(region => {
-              const status = data.statuses[region.id] || "Tidak tersedia";
-              tableHtml += `<td class="status-column">${getStatusBadge(status)}</td>`;
-            });
-            
-            tableHtml += `</tr>`;
-          }
+          tableHtml += `</tr>`;
         }
         
         tableHtml += `
