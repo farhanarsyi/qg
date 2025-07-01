@@ -64,17 +64,17 @@
     }
     
     .user-avatar {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       background: rgba(255,255,255,0.2);
-      border-radius: 6px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 600;
       backdrop-filter: blur(10px);
-      font-size: 0.75rem;
+      font-size: 0.65rem;
     }
     
     .user-details {
@@ -85,12 +85,12 @@
     .user-name {
       font-weight: 600;
       color: white;
-      font-size: 0.75rem;
+      font-size: 0.65rem;
       line-height: 1;
     }
     
     .user-role {
-      font-size: 0.65rem;
+      font-size: 0.55rem;
       color: rgba(255,255,255,0.8);
       line-height: 1;
     }
@@ -99,9 +99,9 @@
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.3);
       color: white;
-      border-radius: 6px;
-      padding: 0.25rem 0.6rem;
-      font-size: 0.7rem;
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.65rem;
       transition: all 0.2s ease;
       backdrop-filter: blur(10px);
     }
@@ -125,12 +125,12 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
-      padding: 0.3rem 0.8rem;
-      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
       position: relative;
       transition: all 0.3s ease;
       text-decoration: none;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       backdrop-filter: blur(10px);
     }
     
@@ -148,21 +148,21 @@
     }
 
     .navbar-nav-tabs .nav-link i {
-      margin-right: 0.3rem;
-      font-size: 0.75rem;
+      margin-right: 0.25rem;
+      font-size: 0.65rem;
     }
     
     .container-fluid {
-      max-width: 1600px;
+      max-width: 95vw;
       margin: 0 auto;
-      padding: 1.5rem;
+      padding: 1rem;
     }
     
     h1 {
       font-weight: 600;
       margin-bottom: 0.5rem;
       color: var(--dark-color);
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
     
     .dashboard-subtitle {
@@ -176,33 +176,33 @@
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 0.6rem;
       font-weight: 500;
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       color: var(--dark-color);
       line-height: 1.2;
     }
     
     .card-body {
-      padding: 0.75rem;
+      padding: 0.6rem;
     }
     
     .form-label {
       font-weight: 500;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.25rem;
       color: var(--dark-color);
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       line-height: 1.2;
     }
     
     .form-control, .form-select {
-      border-radius: 8px;
+      border-radius: 4px;
       border: 1px solid var(--border-color);
-      padding: 0.5rem 0.7rem;
-      font-size: 0.85rem;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.7rem;
       background-color: #fff;
       transition: all 0.2s ease;
-      line-height: 1.3;
+      line-height: 1.2;
     }
     
     .form-control:focus, .form-select:focus {
@@ -214,10 +214,10 @@
     .btn-primary {
       background-color: var(--primary-color);
       border-color: var(--primary-color);
-      border-radius: 8px;
-      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      padding: 0.4rem 0.8rem;
       font-weight: 500;
-      font-size: 0.9rem;
+      font-size: 0.7rem;
       transition: all 0.2s ease;
     }
     
@@ -233,8 +233,8 @@
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       margin: 0;
-      max-height: calc(100vh - 280px);
-      min-height: 500px;
+      max-height: calc(100vh - 220px);
+      min-height: 400px;
     }
     
     .table-dashboard {
@@ -248,8 +248,8 @@
     .table-dashboard th {
       background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%);
       font-weight: 600;
-      padding: 1rem 1.25rem;
-      font-size: 0.85rem;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.75rem;
       color: var(--primary-color);
       white-space: nowrap;
       position: sticky;
@@ -258,16 +258,16 @@
       text-align: left;
       border-bottom: 2px solid var(--primary-color);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
     }
     
     .table-dashboard td {
-      padding: 1rem 1.25rem;
+      padding: 0.7rem 0.9rem;
       vertical-align: middle;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       border-bottom: 1px solid var(--border-color);
     }
     
@@ -496,18 +496,19 @@
       background: white;
       border: 1px solid var(--border-color);
       border-top: none;
-      border-radius: 0 0 8px 8px;
-      max-height: 250px;
+      border-radius: 0 0 4px 4px;
+      max-height: 200px;
       overflow-y: auto;
       z-index: 99999;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     }
     
     .dropdown-option {
-      padding: 0.75rem 1rem;
+      padding: 0.4rem 0.6rem;
       cursor: pointer;
       border-bottom: 1px solid var(--border-color);
       transition: background-color 0.2s ease;
+      font-size: 0.7rem;
     }
     
     .dropdown-option:last-child {
@@ -524,10 +525,11 @@
     }
     
     .dropdown-no-results {
-      padding: 0.75rem 1rem;
+      padding: 0.4rem 0.6rem;
       color: var(--neutral-color);
       text-align: center;
       font-style: italic;
+      font-size: 0.7rem;
     }
 
     /* Statistics Cards - Ultra Compact */
@@ -542,40 +544,86 @@
     }
     
     #statsCards .card-body {
-      padding: 0.5rem 0.4rem;
+      padding: 0.3rem 0.25rem;
     }
     
     #statsCards h6 {
-      font-size: 0.65rem;
-      margin-bottom: 0.15rem;
+      font-size: 0.55rem;
+      margin-bottom: 0.05rem;
       line-height: 1.1;
       font-weight: 600;
     }
     
     #statsCards h3 {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       margin-bottom: 0;
       font-weight: 700;
     }
     
     #statsCards .d-flex {
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.1rem;
       align-items: center;
     }
     
     #statsCards i {
-      font-size: 0.8rem;
-      margin-right: 0.3rem !important;
+      font-size: 0.6rem;
+      margin-right: 0.15rem !important;
     }
 
-    /* Responsif */
+    /* Zoom and Resolution optimizations */
+    @media screen {
+      html {
+        zoom: 1;
+        width: 100%;
+        overflow-x: auto;
+      }
+      
+      body {
+        min-width: 1200px;
+        width: auto !important;
+        overflow-x: auto;
+      }
+      
+      .container-fluid {
+        width: 95vw !important;
+        min-width: 1150px;
+      }
+      
+      .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+    }
+
+    /* Responsif untuk resolusi kecil */
+    @media (max-width: 1400px) {
+      .container-fluid {
+        max-width: 98vw;
+        padding: 0.8rem;
+      }
+      
+      #statsCards .card-body {
+        padding: 0.3rem 0.2rem;
+      }
+      
+      #statsCards h6 {
+        font-size: 0.55rem;
+      }
+      
+      #statsCards h3 {
+        font-size: 0.9rem;
+      }
+    }
+    
     @media (max-width: 992px) {
       .container-fluid {
-        padding: 1.5rem;
+        padding: 0.8rem;
+        min-width: 1000px;
       }
       
       .card-body {
-        padding: 1.25rem;
+        padding: 0.6rem;
       }
       
       .user-details {
@@ -583,45 +631,46 @@
       }
       
       #statsCards .col-md-2 {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
       }
     }
     
     @media (max-width: 768px) {
       .container-fluid {
-        padding: 1rem;
+        padding: 0.5rem;
+        min-width: 900px;
       }
       
       h1 {
-        font-size: 1.5rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.3rem;
+        margin-bottom: 0.2rem;
       }
       
       .card-header {
-        padding: 1rem;
+        padding: 0.5rem 0.6rem;
       }
       
       .card-body {
-        padding: 1rem;
+        padding: 0.6rem;
       }
       
       .table-dashboard th,
       .table-dashboard td {
-        padding: 0.75rem;
-        font-size: 0.8rem;
+        padding: 0.5rem;
+        font-size: 0.7rem;
       }
       
       #statsCards .col-md-2 {
         width: 50%;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
       }
       
       #statsCards h6 {
-        font-size: 0.6rem;
+        font-size: 0.5rem;
       }
       
       #statsCards h3 {
-        font-size: 1rem;
+        font-size: 0.85rem;
       }
     }
   </style>
@@ -630,8 +679,8 @@
   <!-- Navigation -->
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.php">
-        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; font-size: 0.9rem;"></i>Quality Gates
+      <a class="navbar-brand" href="index.php" style="font-size: 0.75rem;">
+        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 3px; border-radius: 3px; font-size: 0.65rem;"></i>Quality Gates
       </a>
       
       <!-- Navigation Tabs - Integrated into navbar -->

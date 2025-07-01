@@ -204,11 +204,6 @@ Contoh provinsi dengan 20 kabupaten, 5 gates, 3 measurements:
 - Application-level caching untuk static data
 - Redis integration untuk session data
 
-### 3. Database Indexing
-- Composite indexes untuk multi-column filters
-- Covering indexes untuk SELECT-only fields
-- Partial indexes untuk conditional queries
-
 ## Kesimpulan
 
 Optimasi query ini memberikan improvement signifikan:

@@ -42,16 +42,16 @@
     }
     
     .container-fluid {
-      max-width: 1600px; /* Wider container */
+      max-width: 95vw; /* Much wider container, responsive to viewport */
       margin: 0 auto;
-      padding: 1.5rem;
+      padding: 1rem;
     }
     
     h1 {
       font-weight: 600;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       color: var(--dark-color);
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
     
     /* Compact Navigation Tabs - Integrated into navbar */
@@ -67,12 +67,12 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: rgba(255, 255, 255, 0.9);
       font-weight: 500;
-      padding: 0.3rem 0.8rem;
-      border-radius: 6px;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
       position: relative;
       transition: all 0.3s ease;
       text-decoration: none;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       backdrop-filter: blur(10px);
     }
     
@@ -90,8 +90,8 @@
     }
 
     .navbar-nav-tabs .nav-link i {
-      margin-right: 0.3rem;
-      font-size: 0.75rem;
+      margin-right: 0.25rem;
+      font-size: 0.65rem;
     }
 
     .card {
@@ -110,27 +110,28 @@
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1rem;
+      padding: 0.5rem 0.6rem;
       font-weight: 500;
-      font-size: 0.9rem;
+      font-size: 0.7rem;
       color: var(--dark-color);
     }
     
     .card-body {
-      padding: 1rem;
+      padding: 0.6rem;
     }
     
     .form-label {
       font-weight: 500;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
       color: var(--dark-color);
+      font-size: 0.7rem;
     }
     
     .form-control, .form-select {
-      border-radius: 8px;
+      border-radius: 4px;
       border: 1px solid var(--border-color);
-      padding: 0.6rem 0.8rem;
-      font-size: 0.9rem;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.7rem;
       background-color: #fff;
       transition: all 0.2s ease;
     }
@@ -144,10 +145,10 @@
     .btn-primary {
       background-color: var(--primary-color);
       border-color: var(--primary-color);
-      border-radius: 8px;
-      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      padding: 0.4rem 0.8rem;
       font-weight: 500;
-      font-size: 0.9rem;
+      font-size: 0.7rem;
       transition: all 0.2s ease;
     }
     
@@ -165,125 +166,105 @@
     .table-wrapper {
       overflow: auto;
       margin: 0;
-      max-height: calc(100vh - 280px);
-      min-height: 500px;
+      max-height: calc(100vh - 220px);
+      min-height: 400px;
     }
     
     .table-monitoring {
       width: 100%;
-      border-collapse: collapse;
+      border-spacing: 0;
       border: 1px solid #000;
     }
     
-    /* Fix gap between sticky columns */
-    .table-monitoring th:nth-child(1),
-    .table-monitoring td:nth-child(1),
-    .table-monitoring th:nth-child(2),
-    .table-monitoring td:nth-child(2),
-    .table-monitoring th:nth-child(3),
-    .table-monitoring td:nth-child(3),
-    .table-monitoring th:nth-child(4),
-    .table-monitoring td:nth-child(4),
-    .table-monitoring th:nth-child(5),
-    .table-monitoring td:nth-child(5),
-    .table-monitoring th:nth-child(6),
-    .table-monitoring td:nth-child(6) {
-      box-shadow: 2px 0 0 0 #fff, -1px 0 0 0 #fff;
-      z-index: 10;
-      box-sizing: border-box;
-      position: relative;
-    }
-    
-    /* Add vertical lines using pseudo-elements that stay in place */
-    .table-monitoring th:nth-child(1)::after,
-    .table-monitoring td:nth-child(1)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #000;
-      z-index: 15;
-    }
-    
-    .table-monitoring th:nth-child(2)::after,
-    .table-monitoring td:nth-child(2)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #000;
-      z-index: 15;
-    }
-    
-    .table-monitoring th:nth-child(3)::after,
-    .table-monitoring td:nth-child(3)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #000;
-      z-index: 15;
-    }
-    
-    .table-monitoring th:nth-child(4)::after,
-    .table-monitoring td:nth-child(4)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #000;
-      z-index: 15;
-    }
-    
-    .table-monitoring th:nth-child(5)::after,
-    .table-monitoring td:nth-child(5)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 1px;
-      background-color: #000;
-      z-index: 15;
-    }
-    
-    .table-monitoring th:nth-child(6)::after,
-    .table-monitoring td:nth-child(6)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background-color: #000;
-      z-index: 15;
+    /* Basic border styling for consistency */
+    .table-monitoring th,
+    .table-monitoring td {
+      border-left: none;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
     }
     
     .table-monitoring th {
       border: 1px solid #000;
-      padding: 8px;
+      padding: 4px;
       text-align: center;
       font-weight: normal;
       background-color: #fff;
+      font-size: 0.7rem;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
     
     .table-monitoring td {
       border: 1px solid #000;
-      padding: 8px;
+      padding: 4px;
       vertical-align: middle;
+      font-size: 0.7rem;
     }
     
-    /* Status badges */
-    .status-badge {
-      display: inline-block;
+    /* Status icons */
+    .status-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .status-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      border: 2px solid;
+    }
+    
+    .status-success .status-circle {
+      background-color: #10b981;
+      border-color: #059669;
+    }
+    
+    .status-danger .status-circle {
+      background-color: #ef4444;
+      border-color: #dc2626;
+    }
+    
+    .status-neutral .status-circle {
+      background-color: #6b7280;
+      border-color: #4b5563;
+    }
+    
+    .status-warning .status-circle {
+      background-color: #f59e0b;
+      border-color: #d97706;
+    }
+    
+    /* Hover effects */
+    .status-icon:hover .status-circle {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .status-success:hover .status-circle {
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    }
+    
+    .status-danger:hover .status-circle {
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    }
+    
+    .status-neutral:hover .status-circle {
+      box-shadow: 0 2px 8px rgba(107, 114, 128, 0.4);
+    }
+    
+    .status-warning:hover .status-circle {
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
     }
     
     /* Gate dan UK codes */
@@ -432,6 +413,13 @@
       text-align: center;
       background: #fff !important;
       color: #000 !important;
+      white-space: normal;
+      word-wrap: break-word;
+      font-size: 0.65rem;
+      line-height: 1.1;
+      padding: 3px 5px;
+      min-width: 90px;
+      max-width: 120px;
     }
     
     /* Frozen columns */
@@ -441,73 +429,127 @@
       left: 0;
       background-color: #fff;
       z-index: 10;
-      width: 201px;
-      min-width: 201px;
-      max-width: 201px;
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
       margin-right: -1px;
+      font-size: 0.7rem;
+      padding: 4px;
     }
     
-    .table-monitoring th:nth-child(2), /* Ukuran Kualitas */
+    /* Freeze Column 1: Gate */
+    .table-monitoring th:nth-child(1),
+    .table-monitoring td:nth-child(1) {
+      position: sticky !important;
+      left: 0 !important;
+      width: 140px;
+      min-width: 140px;
+      background-color: #fff !important;
+      z-index: 3;
+    }
+    
+    /* Freeze Column 2: Ukuran Kualitas */
+    .table-monitoring th:nth-child(2),
     .table-monitoring td:nth-child(2) {
       position: sticky;
-      left: 200px;
+      left: 141px; /* 140px + 1px border */
+      width: 160px;
+      min-width: 160px;
       background-color: #fff;
-      z-index: 10;
-      width: 221px;
-      min-width: 221px;
-      max-width: 221px;
-      margin-right: -1px;
     }
     
-    .table-monitoring th:nth-child(3), /* Level */
+    /* Freeze Column 3: Level */
+    .table-monitoring th:nth-child(3),
     .table-monitoring td:nth-child(3) {
       position: sticky;
-      left: 420px;
+      left: 302px; /* 141px + 160px + 1px border */
+      width: 60px;
+      min-width: 60px;
       background-color: #fff;
-      z-index: 10;
-      width: 101px;
-      min-width: 101px;
-      max-width: 101px;
       text-align: center;
-      margin-right: -1px;
     }
     
-    .table-monitoring th:nth-child(4), /* Aktivitas */
+    /* Freeze Column 4: Aktivitas */
+    .table-monitoring th:nth-child(4),
     .table-monitoring td:nth-child(4) {
       position: sticky;
-      left: 520px;
+      left: 363px; /* 302px + 60px + 1px border */
+      width: 180px;
+      min-width: 180px;
       background-color: #fff;
-      z-index: 10;
-      width: 281px;
-      min-width: 281px;
-      max-width: 281px;
-      margin-right: -1px;
+      word-wrap: break-word;
+      white-space: normal;
+      line-height: 1.2;
     }
     
-    .table-monitoring th:nth-child(5), /* Tanggal Mulai */
+    /* Freeze Column 5: Tanggal Mulai */
+    .table-monitoring th:nth-child(5),
     .table-monitoring td:nth-child(5) {
       position: sticky;
-      left: 800px;
+      left: 544px; /* 363px + 180px + 1px border */
+      width: 42px;
+      min-width: 42px;
       background-color: #fff;
-      z-index: 10;
-      width: 121px;
-      min-width: 121px;
-      max-width: 121px;
       text-align: center;
-      margin-right: -1px;
+      font-size: 0.65rem;
     }
     
-    .table-monitoring th:nth-child(6), /* Tanggal Selesai */
+    /* Freeze Column 6: Tanggal Selesai */
+    .table-monitoring th:nth-child(6),
     .table-monitoring td:nth-child(6) {
       position: sticky;
-      left: 920px;
+      left: 587px; /* 544px + 42px + 1px border */
+      width: 48px;
+      min-width: 48px;
       background-color: #fff;
-      z-index: 10;
-      width: 121px;
-      min-width: 121px;
-      max-width: 121px;
       text-align: center;
-      margin-right: -1px;
+      font-size: 0.65rem;
+    }
+    
+    /* Background color for frozen cells to prevent overlap */
+    .table-monitoring td:nth-child(1) {
+      background-color: #fff;
+      z-index: 5 !important;
+    }
+    
+    .table-monitoring td:nth-child(2),
+    .table-monitoring td:nth-child(3),
+    .table-monitoring td:nth-child(4),
+    .table-monitoring td:nth-child(5),
+    .table-monitoring td:nth-child(6) {
+      background-color: #fff;
+    }
+    
+    /* Higher z-index for frozen column headers to stay on top */
+    .table-monitoring th:nth-child(1) {
+      z-index: 50 !important;
+      position: sticky !important;
+      top: 0 !important;
+      left: 0 !important;
+    }
+    
+    .table-monitoring th:nth-child(2),
+    .table-monitoring th:nth-child(3),
+    .table-monitoring th:nth-child(4),
+    .table-monitoring th:nth-child(5),
+    .table-monitoring th:nth-child(6) {
+      z-index: 2;
+    }
+    
+    /* Force sticky for first column - additional safety */
+    .table-wrapper .table-monitoring th:first-child {
+      position: sticky !important;
+      left: 0 !important;
+      top: 0 !important;
+      z-index: 100 !important;
+      background: #fff !important;
+    }
+    
+    .table-wrapper .table-monitoring td:first-child {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 5 !important;
+      background: #fff !important;
     }
     
     /* Date in range */
@@ -519,6 +561,7 @@
     /* Untuk kompatibilitas */
     .date-column {
       text-align: center;
+      font-size: 0.65rem;
     }
     
     /* Activity number */
@@ -526,13 +569,29 @@
       display: inline-block;
       background: #000;
       color: white;
-      padding: 2px 6px;
-      margin-right: 8px;
+      padding: 1px 3px;
+      margin-right: 4px;
+      font-size: 0.6rem;
+      border-radius: 2px;
+      font-weight: bold;
+      min-width: 14px;
+      text-align: center;
+    }
+    
+    /* Activity text */
+    .activity-text {
+      font-size: 0.7rem;
+      line-height: 1.2;
     }
     
     /* Status column */
     .status-column {
       text-align: center;
+      width: auto;
+      min-width: 80px;
+      padding: 3px;
+      font-size: 0.65rem;
+      white-space: nowrap;
     }
     
     /* Searchable Dropdown Styles */
@@ -553,18 +612,19 @@
       background: white;
       border: 1px solid var(--border-color);
       border-top: none;
-      border-radius: 0 0 8px 8px;
-      max-height: 250px;
+      border-radius: 0 0 6px 6px;
+      max-height: 200px;
       overflow-y: auto;
       z-index: 99999;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     }
     
     .dropdown-option {
-      padding: 0.75rem 1rem;
+      padding: 0.4rem 0.6rem;
       cursor: pointer;
       border-bottom: 1px solid var(--border-color);
       transition: background-color 0.2s ease;
+      font-size: 0.7rem;
     }
     
     .dropdown-option:last-child {
@@ -581,10 +641,11 @@
     }
     
     .dropdown-no-results {
-      padding: 0.75rem 1rem;
+      padding: 0.4rem 0.6rem;
       color: var(--neutral-color);
       text-align: center;
       font-style: italic;
+      font-size: 0.7rem;
     }
 
     /* Statistics Cards - Ultra Compact */
@@ -599,86 +660,133 @@
     }
     
     #statsCards .card-body {
-      padding: 0.5rem 0.4rem;
+      padding: 0.3rem 0.25rem;
     }
     
     #statsCards h6 {
-      font-size: 0.65rem;
-      margin-bottom: 0.15rem;
+      font-size: 0.55rem;
+      margin-bottom: 0.05rem;
       line-height: 1.1;
       font-weight: 600;
     }
     
     #statsCards h3 {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       margin-bottom: 0;
       font-weight: 700;
     }
     
     #statsCards .d-flex {
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.1rem;
       align-items: center;
     }
     
     #statsCards i {
-      font-size: 0.8rem;
-      margin-right: 0.3rem !important;
+      font-size: 0.6rem;
+      margin-right: 0.15rem !important;
     }
 
-    /* Responsif */
+    /* Zoom and Resolution optimizations */
+    @media screen {
+      html {
+        zoom: 1;
+        width: 100%;
+        overflow-x: auto;
+      }
+      
+      body {
+        min-width: 1200px;
+        width: auto !important;
+        overflow-x: auto;
+      }
+      
+      .container-fluid {
+        width: 95vw !important;
+        min-width: 1150px;
+      }
+      
+      .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+      }
+    }
+
+    /* Responsif untuk resolusi kecil */
+    @media (max-width: 1400px) {
+      .container-fluid {
+        max-width: 98vw;
+        padding: 0.8rem;
+      }
+      
+      #statsCards .card-body {
+        padding: 0.3rem 0.2rem;
+      }
+      
+      #statsCards h6 {
+        font-size: 0.55rem;
+      }
+      
+      #statsCards h3 {
+        font-size: 0.9rem;
+      }
+    }
+    
     @media (max-width: 992px) {
       .container-fluid {
-        padding: 1.5rem;
+        padding: 0.8rem;
+        min-width: 1000px;
       }
       
       .card-body {
-        padding: 1.25rem;
+        padding: 0.6rem;
       }
       
       #statsCards .col-md-2 {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
       }
     }
     
     @media (max-width: 768px) {
       .container-fluid {
-        padding: 1rem;
+        padding: 0.5rem;
+        min-width: 900px;
       }
       
       h1 {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
       }
       
       .card-header {
-        padding: 1rem;
+        padding: 0.5rem 0.6rem;
       }
       
       .card-body {
-        padding: 1rem;
+        padding: 0.6rem;
       }
       
       #statsCards .col-md-2 {
         width: 50%;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
       }
       
       #statsCards h6 {
-        font-size: 0.6rem;
+        font-size: 0.5rem;
       }
       
       #statsCards h3 {
-        font-size: 1rem;
+        font-size: 0.85rem;
       }
     }
   </style>
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 0.25rem 0; margin-bottom: 0.75rem;">
+  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 0.2rem 0; margin-bottom: 0.5rem;">
     <div class="container-fluid">
-              <a class="navbar-brand" href="index.php" style="font-weight: 600; font-size: 1rem; color: white !important; padding-top: 0.25rem; padding-bottom: 0.25rem;">
-        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; font-size: 0.9rem;"></i>Quality Gates
+              <a class="navbar-brand" href="index.php" style="font-weight: 600; font-size: 0.75rem; color: white !important; padding-top: 0.2rem; padding-bottom: 0.2rem;">
+        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 3px; border-radius: 3px; font-size: 0.65rem;"></i>Quality Gates
       </a>
       
       <!-- Navigation Tabs - Integrated into navbar -->
@@ -691,16 +799,16 @@
         </a>
       </div>
       
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.75rem;" id="userAvatar">
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.65rem;" id="userAvatar">
           <i class="fas fa-user"></i>
         </div>
         <div style="display: flex; flex-direction: column;">
-          <div style="font-weight: 600; color: white; font-size: 0.75rem; line-height: 1;" id="userName">Loading...</div>
-          <div style="font-size: 0.65rem; color: rgba(255,255,255,0.8); line-height: 1;" id="userRole">Loading...</div>
+          <div style="font-weight: 600; color: white; font-size: 0.65rem; line-height: 1;" id="userName">Loading...</div>
+          <div style="font-size: 0.55rem; color: rgba(255,255,255,0.8); line-height: 1;" id="userRole">Loading...</div>
         </div>
-        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 6px; padding: 0.25rem 0.6rem; font-size: 0.7rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
-          <i class="fas fa-sign-out-alt me-1"></i>Logout
+        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.65rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
+          <i class="fas fa-sign-out-alt me-1" style="font-size: 0.6rem;"></i>Logout
         </button>
       </div>
     </div>
@@ -1035,9 +1143,8 @@
         
         const parts = datePart.split('-');
         if (parts.length === 3) {
-          const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-                          'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-          return `${parts[2]} ${months[parseInt(parts[1]) - 1]} ${parts[0]}`;
+          // Format: dd/mm (tanpa tahun untuk hemat space)
+          return `${parts[2]}/${parts[1]}`;
         }
         return datePart;
       };
@@ -1061,10 +1168,32 @@
       };
 
       const getStatusBadge = status => {
-        if (status.startsWith('Sudah')) return `<span class="status-badge status-success">${status}</span>`;
-        if (status.startsWith('Belum')) return `<span class="status-badge status-danger">${status}</span>`;
-        if (status === 'Tidak perlu') return `<span class="status-badge status-neutral">${status}</span>`;
-        return `<span class="status-badge status-warning">${status}</span>`;
+        if (status.startsWith('Sudah')) {
+          return `<div class="status-icon status-success" title="${status}">
+                    <div class="status-circle">
+                      <i class="fas fa-check"></i>
+                    </div>
+                  </div>`;
+        }
+        if (status.startsWith('Belum')) {
+          return `<div class="status-icon status-danger" title="${status}">
+                    <div class="status-circle">
+                      <i class="fas fa-minus"></i>
+                    </div>
+                  </div>`;
+        }
+        if (status === 'Tidak perlu') {
+          return `<div class="status-icon status-neutral" title="${status}">
+                    <div class="status-circle">
+                      <i class="fas fa-ban"></i>
+                    </div>
+                  </div>`;
+        }
+        return `<div class="status-icon status-warning" title="${status}">
+                  <div class="status-circle">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                </div>`;
       };
 
       // --- Fungsi untuk mengecek apakah ukuran kualitas sesuai dengan level wilayah ---
@@ -1194,8 +1323,8 @@
                       <th>Ukuran Kualitas</th>
                       <th>Level</th>
                       <th>Aktivitas</th>
-                      <th class="date-column">Tanggal Mulai</th>
-                      <th class="date-column">Tanggal Selesai</th>
+                      <th class="date-column">Mulai</th>
+                      <th class="date-column">Selesai</th>
         `;
         
         // Tambahkan kolom status untuk setiap wilayah
@@ -1285,7 +1414,7 @@
           const endDateClass = isInDateRange ? 'date-in-range' : '';
           
           tableHtml += `
-            <td><span class="activity-number">${activityNumber}</span>${data.activity}</td>
+            <td><span class="activity-number">${activityNumber}</span><span class="activity-text">${data.activity}</span></td>
             <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
             <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
           `;
