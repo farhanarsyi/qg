@@ -20,6 +20,8 @@ $user_data = getUserData();
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Navbar CSS -->
+  <link rel="stylesheet" href="navbar.css">
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Bootstrap JS Bundle -->
@@ -49,116 +51,7 @@ $user_data = getUserData();
       min-height: 100vh;
     }
     
-    .navbar {
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
-      box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
-      border-bottom: none;
-      padding: 0.25rem 0;
-      margin-bottom: 0.75rem;
-    }
-    
-    .navbar-brand {
-      font-weight: 600;
-      font-size: 1rem;
-      color: white !important;
-      padding-top: 0.25rem;
-      padding-bottom: 0.25rem;
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .user-avatar {
-      width: 24px;
-      height: 24px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-      font-size: 0.65rem;
-    }
-    
-    .user-details {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .user-name {
-      font-weight: 600;
-      color: white;
-      font-size: 0.65rem;
-      line-height: 1;
-    }
-    
-    .user-role {
-      font-size: 0.55rem;
-      color: rgba(255,255,255,0.8);
-      line-height: 1;
-    }
-    
-    .btn-logout {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-      border-radius: 4px;
-      padding: 0.2rem 0.5rem;
-      font-size: 0.65rem;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(10px);
-    }
-    
-    .btn-logout:hover {
-      background: var(--danger-color);
-      border-color: var(--danger-color);
-      color: white;
-    }
 
-    /* Compact Navigation Tabs - Integrated into navbar */
-    .navbar-nav-tabs {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-left: 2rem;
-    }
-    
-    .navbar-nav-tabs .nav-link {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: rgba(255, 255, 255, 0.9);
-      font-weight: 500;
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      position: relative;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      font-size: 0.7rem;
-      backdrop-filter: blur(10px);
-    }
-    
-    .navbar-nav-tabs .nav-link:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-    
-    .navbar-nav-tabs .nav-link.active {
-      background: white;
-      color: var(--primary-color);
-      border-color: white;
-      font-weight: 600;
-    }
-
-    .navbar-nav-tabs .nav-link i {
-      margin-right: 0.25rem;
-      font-size: 0.65rem;
-    }
     
     .container-fluid {
       max-width: 95vw;
@@ -688,9 +581,6 @@ $user_data = getUserData();
   <?php renderSSONavbar('dashboard'); ?>
 
   <div class="container-fluid">
-    <!-- Wilayah Filter Info Box -->
-    <?php renderWilayahInfoBox(); ?>
-    
     <!-- Statistics Cards -->
     <div class="row mb-2" id="statsCards" style="display: none;">
       <div class="col-md-2">

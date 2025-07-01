@@ -127,12 +127,6 @@ function renderSSONavbar($active_page = 'dashboard') {
             </div>
             
             <div class="d-flex align-items-center gap-3">
-                <!-- Wilayah Filter Info -->
-                <div class="wilayah-info text-white text-end" style="font-size: 0.7rem;">
-                    <div style="font-weight: 600;">Cakupan Data:</div>
-                    <div style="opacity: 0.9;">' . getWilayahFilterLabel($filter) . '</div>
-                </div>
-                
                 <!-- User Info -->
                 <div class="user-info">
                     <div class="user-avatar">' . strtoupper($user_initial) . '</div>

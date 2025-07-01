@@ -20,6 +20,8 @@ $user_data = getUserData();
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Navbar CSS -->
+  <link rel="stylesheet" href="navbar.css">
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Bootstrap JS Bundle -->
@@ -62,45 +64,7 @@ $user_data = getUserData();
       font-size: 1.5rem;
     }
     
-    /* Compact Navigation Tabs - Integrated into navbar */
-    .navbar-nav-tabs {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-left: 2rem;
-    }
-    
-    .navbar-nav-tabs .nav-link {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: rgba(255, 255, 255, 0.9);
-      font-weight: 500;
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      position: relative;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      font-size: 0.7rem;
-      backdrop-filter: blur(10px);
-    }
-    
-    .navbar-nav-tabs .nav-link:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-    
-    .navbar-nav-tabs .nav-link.active {
-      background: white;
-      color: var(--primary-color);
-      border-color: white;
-      font-weight: 600;
-    }
 
-    .navbar-nav-tabs .nav-link i {
-      margin-right: 0.25rem;
-      font-size: 0.65rem;
-    }
 
     .card {
       border-radius: 12px;
@@ -846,9 +810,6 @@ $user_data = getUserData();
   <?php renderSSONavbar('monitoring'); ?>
 
   <div class="container-fluid">
-    <!-- Wilayah Filter Info Box -->
-    <?php renderWilayahInfoBox(); ?>
-    
     <!-- Statistics Cards -->
     <div class="row mb-2" id="statsCards" style="display: none;">
       <div class="col-md-2">
