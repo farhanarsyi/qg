@@ -168,42 +168,74 @@
       margin: 0;
       max-height: calc(100vh - 220px);
       min-height: 400px;
+      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.1);
+      background: white;
     }
     
     .table-monitoring {
       width: 100%;
       border-spacing: 0;
-      border: 1px solid #000;
-    }
-    
-    /* Basic border styling for consistency */
-    .table-monitoring th,
-    .table-monitoring td {
-      border-left: none;
-      border-right: 1px solid #000;
-      border-bottom: 1px solid #000;
+      border: none;
     }
     
     .table-monitoring th {
-      border: 1px solid #000;
-      padding: 4px;
+      padding: 8px 6px;
       text-align: center;
-      font-weight: normal;
-      background-color: #fff;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+      color: white;
       font-size: 0.7rem;
       position: sticky;
       top: 0;
       z-index: 1;
+      border: none;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     
     .table-monitoring td {
-      border: 1px solid #000;
-      padding: 4px;
+      padding: 8px 6px;
       vertical-align: middle;
       font-size: 0.7rem;
+      border: none;
     }
     
-    /* Status icons */
+    /* Alternating row colors - Green pastel theme */
+    .table-monitoring tbody tr:nth-child(odd) td {
+      background-color: #d1fae5; /* Light green pastel */
+    }
+    
+    .table-monitoring tbody tr:nth-child(even) td {
+      background-color: #a7f3d0; /* Medium green pastel */
+    }
+    
+    /* Alternating column colors overlay */
+    .table-monitoring td:nth-child(odd) {
+      filter: brightness(0.95);
+    }
+    
+    .table-monitoring td:nth-child(even) {
+      filter: brightness(1.05);
+    }
+    
+    /* Simple hover effects */
+    .table-monitoring tbody tr:hover td {
+      filter: brightness(1.05) !important;
+      transition: all 0.2s ease;
+    }
+    
+    /* Capitalize region names and content */
+    .table-monitoring td {
+      text-transform: capitalize;
+    }
+    
+    /* Don't capitalize certain elements */
+    .table-monitoring .activity-number,
+    .table-monitoring .status-icon {
+      text-transform: none;
+    }
+    
+    /* Modern Status icons */
     .status-icon {
       display: flex;
       justify-content: center;
@@ -211,60 +243,40 @@
     }
     
     .status-circle {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 12px;
-      font-weight: bold;
+      font-size: 13px;
+      font-weight: 700;
       color: white;
-      border: 2px solid;
+      border: none;
+      transition: all 0.2s ease;
     }
     
     .status-success .status-circle {
-      background-color: #10b981;
-      border-color: #059669;
+      background: linear-gradient(135deg, #10b981, #059669);
     }
     
     .status-danger .status-circle {
-      background-color: #ef4444;
-      border-color: #dc2626;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
     }
     
     .status-neutral .status-circle {
-      background-color: #6b7280;
-      border-color: #4b5563;
+      background: linear-gradient(135deg, #6b7280, #4b5563);
     }
     
     .status-warning .status-circle {
-      background-color: #f59e0b;
-      border-color: #d97706;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
     }
     
-    /* Hover effects */
+    /* Simple hover effects for status icons */
     .status-icon:hover .status-circle {
       transform: scale(1.1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      transition: all 0.2s ease;
       cursor: pointer;
-    }
-    
-    .status-success:hover .status-circle {
-      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
-    }
-    
-    .status-danger:hover .status-circle {
-      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-    }
-    
-    .status-neutral:hover .status-circle {
-      box-shadow: 0 2px 8px rgba(107, 114, 128, 0.4);
-    }
-    
-    .status-warning:hover .status-circle {
-      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+      transition: transform 0.2s ease;
     }
     
     /* Gate dan UK codes */
@@ -409,17 +421,19 @@
     
     /* Region header styles */
     .region-header {
-      font-weight: normal;
+      font-weight: 600;
       text-align: center;
-      background: #fff !important;
-      color: #000 !important;
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      color: white !important;
       white-space: normal;
       word-wrap: break-word;
       font-size: 0.65rem;
       line-height: 1.1;
-      padding: 3px 5px;
+      padding: 8px 6px;
       min-width: 90px;
       max-width: 120px;
+      text-transform: capitalize;
+      letter-spacing: 0.3px;
     }
     
     /* Frozen columns */
@@ -444,80 +458,117 @@
       left: 0 !important;
       width: 140px;
       min-width: 140px;
-      background-color: #fff !important;
       z-index: 3;
+    }
+    
+    .table-monitoring th:nth-child(1) {
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
     }
     
     /* Freeze Column 2: Ukuran Kualitas */
     .table-monitoring th:nth-child(2),
     .table-monitoring td:nth-child(2) {
       position: sticky;
-      left: 141px; /* 140px + 1px border */
+      left: 140px;
       width: 160px;
       min-width: 160px;
-      background-color: #fff;
+    }
+    
+    .table-monitoring th:nth-child(2) {
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
     }
     
     /* Freeze Column 3: Level */
     .table-monitoring th:nth-child(3),
     .table-monitoring td:nth-child(3) {
       position: sticky;
-      left: 302px; /* 141px + 160px + 1px border */
+      left: 300px;
       width: 60px;
       min-width: 60px;
-      background-color: #fff;
       text-align: center;
+    }
+    
+    .table-monitoring th:nth-child(3) {
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
     }
     
     /* Freeze Column 4: Aktivitas */
     .table-monitoring th:nth-child(4),
     .table-monitoring td:nth-child(4) {
       position: sticky;
-      left: 363px; /* 302px + 60px + 1px border */
+      left: 360px;
       width: 180px;
       min-width: 180px;
-      background-color: #fff;
       word-wrap: break-word;
       white-space: normal;
       line-height: 1.2;
+    }
+    
+    .table-monitoring th:nth-child(4) {
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
     }
     
     /* Freeze Column 5: Tanggal Mulai */
     .table-monitoring th:nth-child(5),
     .table-monitoring td:nth-child(5) {
       position: sticky;
-      left: 544px; /* 363px + 180px + 1px border */
+      left: 540px;
       width: 42px;
       min-width: 42px;
-      background-color: #fff;
       text-align: center;
       font-size: 0.65rem;
+    }
+    
+    .table-monitoring th:nth-child(5) {
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
     }
     
     /* Freeze Column 6: Tanggal Selesai */
     .table-monitoring th:nth-child(6),
     .table-monitoring td:nth-child(6) {
       position: sticky;
-      left: 587px; /* 544px + 42px + 1px border */
+      left: 582px;
       width: 48px;
       min-width: 48px;
-      background-color: #fff;
       text-align: center;
       font-size: 0.65rem;
     }
     
-    /* Background color for frozen cells to prevent overlap */
+    .table-monitoring th:nth-child(6) {
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+    }
+    
+    /* Z-index for frozen data cells */
     .table-monitoring td:nth-child(1) {
-      background-color: #fff;
       z-index: 5 !important;
     }
     
+    /* Z-index for frozen data cells */
     .table-monitoring td:nth-child(2),
     .table-monitoring td:nth-child(3),
     .table-monitoring td:nth-child(4),
     .table-monitoring td:nth-child(5),
     .table-monitoring td:nth-child(6) {
-      background-color: #fff;
+      z-index: 8 !important;
+    }
+    
+    /* Preserve alternating colors for frozen columns */
+    .table-monitoring tbody tr:nth-child(odd) td:nth-child(1),
+    .table-monitoring tbody tr:nth-child(odd) td:nth-child(2),
+    .table-monitoring tbody tr:nth-child(odd) td:nth-child(3),
+    .table-monitoring tbody tr:nth-child(odd) td:nth-child(4),
+    .table-monitoring tbody tr:nth-child(odd) td:nth-child(5),
+    .table-monitoring tbody tr:nth-child(odd) td:nth-child(6) {
+      background-color: #d1fae5 !important; /* Light green pastel */
+    }
+    
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(1),
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(2),
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(3),
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(4),
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(5),
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(6) {
+      background-color: #a7f3d0 !important; /* Medium green pastel */
     }
     
     /* Higher z-index for frozen column headers to stay on top */
@@ -533,7 +584,9 @@
     .table-monitoring th:nth-child(4),
     .table-monitoring th:nth-child(5),
     .table-monitoring th:nth-child(6) {
-      z-index: 2;
+      z-index: 10;
+      position: sticky !important;
+      top: 0 !important;
     }
     
     /* Force sticky for first column - additional safety */
@@ -542,14 +595,13 @@
       left: 0 !important;
       top: 0 !important;
       z-index: 100 !important;
-      background: #fff !important;
+      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
     }
     
     .table-wrapper .table-monitoring td:first-child {
       position: sticky !important;
       left: 0 !important;
       z-index: 5 !important;
-      background: #fff !important;
     }
     
     /* Date in range */
