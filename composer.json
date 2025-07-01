@@ -1,0 +1,14 @@
+{
+    "name": "bps/dashboard-quality-gates",
+    "description": "Dashboard Quality Gates dengan SSO BPS",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "irsadarief/jkd-sso": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+} 

@@ -1,5 +1,42 @@
 <?php
 // login.php - Halaman login untuk Quality Gates
+session_start();
+
+// Jika user sudah login, redirect ke dashboard
+require_once 'auth-check.php';
+if (isUserAuthenticated()) {
+    header('Location: index.php');
+    exit;
+}
+
+// Handle pesan error dan sukses
+$error_message = '';
+$success_message = '';
+
+if (isset($_GET['error'])) {
+    switch ($_GET['error']) {
+        case 'invalid_state':
+            $error_message = 'Terjadi kesalahan keamanan. Silakan coba login kembali.';
+            break;
+        case 'no_code':
+            $error_message = 'Tidak ada kode otorisasi dari SSO. Silakan coba login kembali.';
+            break;
+        case 'sso_failed':
+            $fallback_text = isset($_GET['fallback']) ? ' (Mode Fallback)' : '';
+            $error_message = 'Login SSO gagal' . $fallback_text . ': ' . (isset($_GET['message']) ? htmlspecialchars($_GET['message']) : 'Kesalahan tidak diketahui');
+            break;
+        default:
+            $error_message = 'Terjadi kesalahan. Silakan coba lagi.';
+    }
+}
+
+if (isset($_GET['message'])) {
+    switch ($_GET['message']) {
+        case 'logged_out':
+            $success_message = 'Anda telah berhasil logout.';
+            break;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -184,6 +221,65 @@
       color: var(--danger-color);
     }
     
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.12);
+      color: var(--success-color);
+    }
+    
+    .btn-sso {
+      background: linear-gradient(135deg, #1f2937, #374151);
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-weight: 500;
+      font-size: 1rem;
+      color: white;
+      width: 100%;
+      transition: all 0.2s ease;
+      margin-top: 1rem;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    
+    .btn-sso:hover {
+      background: linear-gradient(135deg, #374151, #4b5563);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(31, 41, 55, 0.3);
+      color: white;
+      text-decoration: none;
+    }
+    
+    .btn-sso:active {
+      transform: translateY(0);
+    }
+    
+    .login-divider {
+      text-align: center;
+      margin: 2rem 0 1rem;
+      position: relative;
+      color: var(--neutral-color);
+      font-size: 0.9rem;
+    }
+    
+    .login-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+    
+    .login-divider span {
+      background: white;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 2;
+    }
+    
     .spinner-border-sm {
       width: 1rem;
       height: 1rem;
@@ -214,6 +310,47 @@
         <h1 class="login-title">Quality Gates</h1>
         <p class="login-subtitle">Masuk ke Dashboard Anda</p>
       </div>
+      
+      <!-- Alert untuk pesan dari PHP -->
+      <?php if (!empty($error_message)): ?>
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <?php echo htmlspecialchars($error_message); ?>
+        </div>
+      <?php endif; ?>
+      
+      <?php if (!empty($success_message)): ?>
+        <div class="alert alert-success">
+          <i class="fas fa-check-circle me-2"></i>
+          <?php echo htmlspecialchars($success_message); ?>
+        </div>
+      <?php endif; ?>
+      
+      <!-- Tombol SSO BPS -->
+      <?php
+      // Pilih file SSO berdasarkan ketersediaan Composer
+      $sso_file = file_exists('vendor/autoload.php') ? 'sso-auth.php' : 'sso-auth-fallback.php';
+      ?>
+      <a href="<?php echo $sso_file; ?>" class="btn btn-sso">
+        <i class="fas fa-id-card me-2"></i>
+        Masuk dengan SSO BPS
+        <?php if (!file_exists('vendor/autoload.php')): ?>
+          <br><small style="font-size: 0.8em; opacity: 0.8;">⚠️ Mode Fallback (Composer tidak tersedia)</small>
+        <?php endif; ?>
+      </a>
+      
+      <div class="login-divider">
+        <span>atau masuk dengan akun lokal</span>
+      </div>
+      
+      <!-- Link troubleshooting -->
+      <?php if (!file_exists('vendor/autoload.php')): ?>
+      <div style="text-align: center; margin: 10px 0;">
+        <a href="check-system.php" style="color: #f59e0b; font-size: 0.85em; text-decoration: none;">
+          🔧 Troubleshooting SSO (Error 500?)
+        </a>
+      </div>
+      <?php endif; ?>
       
       <form id="loginForm">
         <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>

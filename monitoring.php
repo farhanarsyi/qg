@@ -1,5 +1,16 @@
 <?php
 // monitoring.php
+require_once 'auth-check.php';
+
+// Cek apakah user sudah login
+requireAuth();
+
+// Ambil data user
+$user_data = getUserData();
+$user_name = $user_data['nama'] ?? 'User';
+$user_initials = getUserInitials($user_name);
+$user_role = $user_data['jabatan'] ?? 'Pegawai';
+$logout_url = getLogoutUrl();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -849,19 +860,22 @@
         <a class="nav-link active" href="monitoring.php">
           <i class="fas fa-chart-line"></i>Monitoring
         </a>
+        <a class="nav-link" href="sso-debug.php" title="Debug SSO & Satuan Kerja">
+          <i class="fas fa-bug"></i>Debug
+        </a>
       </div>
       
               <div style="display: flex; align-items: center; gap: 0.4rem;">
         <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.65rem;" id="userAvatar">
-          <i class="fas fa-user"></i>
+          <?php echo htmlspecialchars($user_initials); ?>
         </div>
         <div style="display: flex; flex-direction: column;">
-          <div style="font-weight: 600; color: white; font-size: 0.65rem; line-height: 1;" id="userName">Loading...</div>
-          <div style="font-size: 0.55rem; color: rgba(255,255,255,0.8); line-height: 1;" id="userRole">Loading...</div>
+          <div style="font-weight: 600; color: white; font-size: 0.65rem; line-height: 1;" id="userName"><?php echo htmlspecialchars($user_name); ?></div>
+          <div style="font-size: 0.55rem; color: rgba(255,255,255,0.8); line-height: 1;" id="userRole"><?php echo htmlspecialchars($user_role); ?></div>
         </div>
-        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.65rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
+        <a href="<?php echo htmlspecialchars($logout_url); ?>" class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.65rem; transition: all 0.2s ease; backdrop-filter: blur(10px); text-decoration: none;" id="logoutBtn">
           <i class="fas fa-sign-out-alt me-1" style="font-size: 0.6rem;"></i>Logout
-        </button>
+        </a>
       </div>
     </div>
   </nav>
@@ -1107,42 +1121,37 @@
 
       // Inisialisasi user
       const initUser = () => {
-        const userData = localStorage.getItem('qg_user');
-        if (!userData) {
-          window.location.href = 'login.php';
-          return false;
+        // Set current user data from PHP session
+        currentUser = {
+          nama: <?php echo json_encode($user_data['nama'] ?? ''); ?>,
+          username: <?php echo json_encode($user_data['username'] ?? ''); ?>,
+          nip: <?php echo json_encode($user_data['nip'] ?? ''); ?>,
+          kode_provinsi: <?php echo json_encode($user_data['kode_provinsi'] ?? ''); ?>,
+          kode_kabupaten: <?php echo json_encode($user_data['kode_kabupaten'] ?? ''); ?>,
+          provinsi: <?php echo json_encode($user_data['provinsi'] ?? ''); ?>,
+          kabupaten: <?php echo json_encode($user_data['kabupaten'] ?? ''); ?>,
+          jabatan: <?php echo json_encode($user_data['jabatan'] ?? ''); ?>,
+          // For compatibility with existing code
+          name: <?php echo json_encode($user_data['nama'] ?? ''); ?>,
+          role_name: <?php echo json_encode($user_data['jabatan'] ?? ''); ?>,
+          prov: <?php echo json_encode($user_data['kode_provinsi'] ?? ''); ?>,
+          kab: <?php echo json_encode($user_data['kode_kabupaten'] ?? ''); ?>
+        };
+        
+        // Atur layout berdasarkan role user
+        if (currentUser.prov === "00" && currentUser.kab === "00") {
+          // User pusat - tampilkan dropdown wilayah
+          $("#regionSelectContainer").show();
+          $("#projectSelectContainer").removeClass("col-md-7").addClass("col-md-5");
+          $("#loadButtonContainer").removeClass("col-md-3").addClass("col-md-2");
+        } else {
+          // User provinsi/kabupaten - sembunyikan dropdown wilayah
+          $("#regionSelectContainer").hide();
+          $("#projectSelectContainer").removeClass("col-md-5").addClass("col-md-7");
+          $("#loadButtonContainer").removeClass("col-md-2").addClass("col-md-3");
         }
         
-        try {
-          currentUser = JSON.parse(userData);
-          if (!currentUser || !currentUser.username) {
-            throw new Error('Invalid user data');
-          }
-          
-          // Update UI dengan info user
-          $("#userName").text(currentUser.name || currentUser.username);
-          $("#userRole").text(currentUser.role_name || 'User');
-          $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
-          
-          // Atur layout berdasarkan role user
-          if (currentUser.prov === "00" && currentUser.kab === "00") {
-            // User pusat - tampilkan dropdown wilayah
-            $("#regionSelectContainer").show();
-            $("#projectSelectContainer").removeClass("col-md-7").addClass("col-md-5");
-            $("#loadButtonContainer").removeClass("col-md-3").addClass("col-md-2");
-          } else {
-            // User provinsi/kabupaten - sembunyikan dropdown wilayah
-            $("#regionSelectContainer").hide();
-            $("#projectSelectContainer").removeClass("col-md-5").addClass("col-md-7");
-            $("#loadButtonContainer").removeClass("col-md-2").addClass("col-md-3");
-          }
-          
-          return true;
-        } catch(e) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
-          return false;
-        }
+        return true;
       };
 
       const extractJson = response => {
@@ -1941,13 +1950,8 @@
 
       // --- Event Handlers ---
 
-      // Logout handler
-      $("#logoutBtn").on('click', function(){
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
-        }
-      });
+      // Logout is now handled by direct link to logout.php
+      // No need for click handler since it's an anchor tag
 
       $yearSelect.on('change', async function(){
         year = $(this).val();

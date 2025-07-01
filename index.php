@@ -1,5 +1,16 @@
 <?php
 // index.php - Dashboard per wilayah untuk Quality Gates (Home Page)
+require_once 'auth-check.php';
+
+// Cek apakah user sudah login
+requireAuth();
+
+// Ambil data user
+$user_data = getUserData();
+$user_name = $user_data['nama'] ?? 'User';
+$user_initials = getUserInitials($user_name);
+$user_role = $user_data['jabatan'] ?? 'Pegawai';
+$logout_url = getLogoutUrl();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -691,19 +702,22 @@
         <a class="nav-link" href="monitoring.php">
           <i class="fas fa-chart-line"></i>Monitoring
         </a>
+        <a class="nav-link" href="sso-debug.php" title="Debug SSO & Satuan Kerja">
+          <i class="fas fa-bug"></i>Debug
+        </a>
       </div>
       
       <div class="user-info">
         <div class="user-avatar" id="userAvatar">
-          <i class="fas fa-user"></i>
+          <?php echo htmlspecialchars($user_initials); ?>
         </div>
         <div class="user-details">
-          <div class="user-name" id="userName">Loading...</div>
-          <div class="user-role" id="userRole">Loading...</div>
+          <div class="user-name" id="userName"><?php echo htmlspecialchars($user_name); ?></div>
+          <div class="user-role" id="userRole"><?php echo htmlspecialchars($user_role); ?></div>
         </div>
-        <button class="btn btn-logout" id="logoutBtn">
+        <a href="<?php echo htmlspecialchars($logout_url); ?>" class="btn btn-logout" id="logoutBtn">
           <i class="fas fa-sign-out-alt me-1"></i>Logout
-        </button>
+        </a>
       </div>
     </div>
   </nav>
@@ -1068,35 +1082,30 @@
         }
       };
       
-      // Inisialisasi user
+      // Inisialisasi user (now handled by PHP session)
       const initUser = () => {
-        const userData = localStorage.getItem('qg_user');
-        if (!userData) {
-          window.location.href = 'login.php';
-          return false;
-        }
+        // Set current user data from PHP
+        currentUser = {
+          nama: <?php echo json_encode($user_data['nama'] ?? ''); ?>,
+          username: <?php echo json_encode($user_data['username'] ?? ''); ?>,
+          nip: <?php echo json_encode($user_data['nip'] ?? ''); ?>,
+          kode_provinsi: <?php echo json_encode($user_data['kode_provinsi'] ?? ''); ?>,
+          kode_kabupaten: <?php echo json_encode($user_data['kode_kabupaten'] ?? ''); ?>,
+          provinsi: <?php echo json_encode($user_data['provinsi'] ?? ''); ?>,
+          kabupaten: <?php echo json_encode($user_data['kabupaten'] ?? ''); ?>,
+          jabatan: <?php echo json_encode($user_data['jabatan'] ?? ''); ?>,
+          // For compatibility with existing code
+          name: <?php echo json_encode($user_data['nama'] ?? ''); ?>,
+          role_name: <?php echo json_encode($user_data['jabatan'] ?? ''); ?>,
+          prov: <?php echo json_encode($user_data['kode_provinsi'] ?? ''); ?>,
+          kab: <?php echo json_encode($user_data['kode_kabupaten'] ?? ''); ?>
+        };
         
-        try {
-          currentUser = JSON.parse(userData);
-          if (!currentUser || !currentUser.username) {
-            throw new Error('Invalid user data');
-          }
-          
-          // Update UI dengan info user
-          $("#userName").text(currentUser.name || currentUser.username);
-          $("#userRole").text(currentUser.role_name || 'User');
-          $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
-          
-          // Load filter options dan data
-          loadFilterOptions();
-          loadDashboardData();
-          
-          return true;
-        } catch(e) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
-          return false;
-        }
+        // Load filter options dan data
+        loadFilterOptions();
+        loadDashboardData();
+        
+        return true;
       };
       
       // Load data dashboard
@@ -1321,12 +1330,8 @@
       };
       
       // Event Handlers
-      $("#logoutBtn").on('click', function(){
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
-        }
-      });
+      // Logout is now handled by direct link to logout.php
+      // No need for click handler since it's an anchor tag
       
       $("#applyFilters").on('click', function(){
         const filters = {};
