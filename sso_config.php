@@ -184,13 +184,37 @@ function startSession() {
 // Fungsi untuk cek apakah user sudah login
 function isLoggedIn() {
     startSession();
-    return isset($_SESSION['user_data']) && !empty($_SESSION['user_data']);
+    return isset($_SESSION['sso_logged_in']) && $_SESSION['sso_logged_in'] === true && !empty($_SESSION['sso_username']);
 }
 
-// Fungsi untuk mendapatkan data user dari session
+// Fungsi untuk mendapatkan data user dari session (format baru SSO)
 function getUserData() {
     startSession();
-    return isset($_SESSION['user_data']) ? $_SESSION['user_data'] : null;
+    
+    if (!isLoggedIn()) {
+        return null;
+    }
+    
+    // Return data dalam format yang diharapkan oleh sso_integration.php
+    return array(
+        'nama' => $_SESSION['sso_nama'] ?? '',
+        'email' => $_SESSION['sso_email'] ?? '',
+        'username' => $_SESSION['sso_username'] ?? '',
+        'nip' => $_SESSION['sso_nip'] ?? '',
+        'nipbaru' => $_SESSION['sso_nipbaru'] ?? '',
+        'jabatan' => $_SESSION['sso_jabatan'] ?? '',
+        'golongan' => $_SESSION['sso_golongan'] ?? '',
+        'eselon' => $_SESSION['sso_eselon'] ?? '',
+        'kodeorganisasi_full' => $_SESSION['sso_kode_organisasi'] ?? '',
+        'kodeprovinsi' => $_SESSION['sso_prov'] ?? '00',
+        'kodekabupaten' => $_SESSION['sso_kab'] ?? '00',
+        'provinsi' => $_SESSION['sso_provinsi'] ?? '',
+        'kabupaten' => $_SESSION['sso_kabupaten'] ?? '',
+        'alamatkantor' => $_SESSION['sso_alamat_kantor'] ?? '',
+        'foto' => $_SESSION['sso_foto'] ?? '',
+        'unit_kerja' => $_SESSION['sso_unit_kerja'] ?? 'kabupaten',
+        'login_time' => $_SESSION['sso_login_time'] ?? time()
+    );
 }
 
 // Fungsi untuk mendapatkan unit kerja user
@@ -211,6 +235,31 @@ function getUserWilayahFilter() {
 // Fungsi untuk logout
 function logout() {
     startSession();
+    
+    // Hapus session SSO
+    unset($_SESSION['sso_logged_in']);
+    unset($_SESSION['sso_username']);
+    unset($_SESSION['sso_nama']);
+    unset($_SESSION['sso_email']);
+    unset($_SESSION['sso_nip']);
+    unset($_SESSION['sso_nipbaru']);
+    unset($_SESSION['sso_jabatan']);
+    unset($_SESSION['sso_golongan']);
+    unset($_SESSION['sso_eselon']);
+    unset($_SESSION['sso_prov']);
+    unset($_SESSION['sso_kab']);
+    unset($_SESSION['sso_unit_kerja']);
+    unset($_SESSION['sso_kode_organisasi']);
+    unset($_SESSION['sso_provinsi']);
+    unset($_SESSION['sso_kabupaten']);
+    unset($_SESSION['sso_alamat_kantor']);
+    unset($_SESSION['sso_foto']);
+    unset($_SESSION['sso_login_time']);
+    
+    // Hapus session lama juga untuk backward compatibility
+    unset($_SESSION['user_data']);
+    
+    // Destroy session
     session_destroy();
 }
 ?> 

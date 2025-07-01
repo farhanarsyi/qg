@@ -25,6 +25,12 @@ function getSSOWilayahFilter() {
         'restricted_to_kabupaten' => ($unit_kerja === 'kabupaten')
     );
     
+    // Debug log untuk troubleshooting
+    error_log('Filter Debug - Unit Kerja: ' . $unit_kerja);
+    error_log('Filter Debug - Kode Provinsi: ' . ($user_data['kodeprovinsi'] ?? 'empty'));
+    error_log('Filter Debug - Kode Kabupaten: ' . ($user_data['kodekabupaten'] ?? 'empty'));
+    error_log('Filter Debug - User Data Keys: ' . implode(', ', array_keys($user_data)));
+    
     return $filter;
 }
 

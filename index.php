@@ -1050,35 +1050,61 @@ $user_data = getUserData();
         }
       };
       
-      // Inisialisasi user
+      // Inisialisasi user dengan data SSO
       const initUser = () => {
-        const userData = localStorage.getItem('qg_user');
-        if (!userData) {
-          window.location.href = 'login.php';
+        console.log('🔍 [DEBUG] Initializing user...');
+        
+        // Data user sudah tersedia dari SSO PHP session
+        currentUser = {
+          username: '<?= isset($_SESSION["sso_username"]) ? $_SESSION["sso_username"] : "" ?>',
+          name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
+          email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
+          role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
+          prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
+          kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
+          unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
+        };
+        
+        console.log('👤 [DEBUG] Current User Data:', currentUser);
+        console.log('📝 [DEBUG] Username check:', {
+          username: currentUser.username,
+          isEmpty: !currentUser.username,
+          length: currentUser.username ? currentUser.username.length : 0
+        });
+        console.log('🗺️ [DEBUG] Wilayah filter:', {
+          prov: currentUser.prov,
+          kab: currentUser.kab,
+          unit_kerja: currentUser.unit_kerja,
+          prov_empty: !currentUser.prov,
+          kab_empty: !currentUser.kab
+        });
+        
+        // Validasi data user dengan delay untuk mencegah infinite redirect
+        if (!currentUser.username) {
+          console.error('❌ [ERROR] Username kosong! Redirecting to SSO login...');
+          console.log('🔗 [DEBUG] Redirecting to: sso_login.php');
+          alert('Session SSO tidak ditemukan. Akan diarahkan ke halaman login SSO.');
+          setTimeout(() => {
+            window.location.href = 'sso_login.php';
+          }, 1000);
           return false;
         }
         
-        try {
-          currentUser = JSON.parse(userData);
-          if (!currentUser || !currentUser.username) {
-            throw new Error('Invalid user data');
-          }
-          
-          // Update UI dengan info user
-          $("#userName").text(currentUser.name || currentUser.username);
-          $("#userRole").text(currentUser.role_name || 'User');
-          $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
-          
-          // Load filter options dan data
-          loadFilterOptions();
-          loadDashboardData();
-          
-          return true;
-        } catch(e) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
-          return false;
-        }
+        console.log('✅ [SUCCESS] User validation passed!');
+        
+        // Update UI dengan info user
+        $("#userName").text(currentUser.name || currentUser.username);
+        $("#userRole").text(currentUser.role_name || 'User');
+        $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
+        
+        console.log('🎨 [DEBUG] UI updated with user info');
+        
+        // Load filter options dan data
+        console.log('📊 [DEBUG] Loading filter options and dashboard data...');
+        loadFilterOptions();
+        loadDashboardData();
+        
+        return true;
       };
       
       // Load data dashboard
@@ -1097,7 +1123,11 @@ $user_data = getUserData();
             ...filters
           };
           
+          console.log('📡 [DEBUG] API Request Data:', requestData);
+          
           const response = await makeAjaxRequest(API_URL, requestData);
+          
+          console.log('📨 [DEBUG] API Response:', response);
           
           if (response.status && response.data) {
             dashboardData = response.data;
@@ -1305,8 +1335,7 @@ $user_data = getUserData();
       // Event Handlers
       $("#logoutBtn").on('click', function(){
         if (confirm('Apakah Anda yakin ingin logout?')) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
+          window.location.href = 'sso_logout.php';
         }
       });
       
@@ -1331,22 +1360,35 @@ $user_data = getUserData();
       });
       
       // Inisialisasi
-      if (initUser()) {
-        // Initialize searchable dropdown
-        filterProjectDropdown = createSearchableDropdown(
-          '#filterProjectSearch',
-          '#filterProjectOptions',
-          '#filterProject',
-          [],
-          'value',
-          'text',
-          (value, text) => {
-            // Auto apply filter when selection changes
-            const filters = {};
-            if (value) filters.filter_project = value;
-            loadDashboardData(filters);
-          }
-        );
+      console.log('🚀 [DEBUG] Starting page initialization...');
+      
+      try {
+        if (initUser()) {
+          console.log('✅ [DEBUG] User initialization successful, setting up dropdown...');
+          
+          // Initialize searchable dropdown
+          filterProjectDropdown = createSearchableDropdown(
+            '#filterProjectSearch',
+            '#filterProjectOptions',
+            '#filterProject',
+            [],
+            'value',
+            'text',
+            (value, text) => {
+              // Auto apply filter when selection changes
+              const filters = {};
+              if (value) filters.filter_project = value;
+              loadDashboardData(filters);
+            }
+          );
+          
+          console.log('🎯 [DEBUG] Page initialization completed successfully!');
+        } else {
+          console.error('❌ [ERROR] User initialization failed!');
+        }
+      } catch (error) {
+        console.error('💥 [ERROR] Exception during initialization:', error);
+        alert('Terjadi kesalahan saat inisialisasi. Silakan refresh halaman atau hubungi admin.');
       }
     });
   </script>
@@ -1355,9 +1397,26 @@ $user_data = getUserData();
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <!-- SSO Wilayah Filter JavaScript -->
-  <?php injectWilayahJS(); ?>
+  <?php 
+  // Inject wilayah JS only if functions exist and user is logged in
+  if (function_exists('injectWilayahJS') && isset($_SESSION['sso_logged_in']) && $_SESSION['sso_logged_in']) {
+    try {
+      injectWilayahJS(); 
+    } catch (Exception $e) {
+      echo "<!-- Error loading wilayah JS: " . htmlspecialchars($e->getMessage()) . " -->";
+    }
+  }
+  ?>
   
   <!-- Debug Info (hanya muncul jika ada parameter ?debug) -->
-  <?php renderDebugWilayahInfo(); ?>
+  <?php 
+  if (isset($_GET['debug']) && function_exists('renderDebugWilayahInfo')) {
+    try {
+      renderDebugWilayahInfo(); 
+    } catch (Exception $e) {
+      echo "<!-- Error loading debug info: " . htmlspecialchars($e->getMessage()) . " -->";
+    }
+  }
+  ?>
 </body>
 </html> 

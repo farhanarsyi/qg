@@ -1087,44 +1087,59 @@ $user_data = getUserData();
         };
       };
 
-      // Inisialisasi user
+      // Inisialisasi user dengan data SSO
       const initUser = () => {
-        const userData = localStorage.getItem('qg_user');
-        if (!userData) {
-          window.location.href = 'login.php';
+        console.log('🔍 [MONITORING] Initializing user...');
+        
+        // Data user sudah tersedia dari SSO PHP session
+        currentUser = {
+          username: '<?= isset($_SESSION["sso_username"]) ? $_SESSION["sso_username"] : "" ?>',
+          name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
+          email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
+          role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
+          prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
+          kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
+          unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
+        };
+        
+        console.log('👤 [MONITORING] Current User Data:', currentUser);
+        console.log('🗺️ [MONITORING] Wilayah filter:', {
+          prov: currentUser.prov,
+          kab: currentUser.kab,
+          unit_kerja: currentUser.unit_kerja,
+          prov_empty: !currentUser.prov,
+          kab_empty: !currentUser.kab
+        });
+        
+        // Validasi data user dengan delay untuk mencegah infinite redirect
+        if (!currentUser.username) {
+          console.error('❌ [MONITORING] Username kosong! Redirecting to SSO login...');
+          alert('Session SSO tidak ditemukan. Akan diarahkan ke halaman login SSO.');
+          setTimeout(() => {
+            window.location.href = 'sso_login.php';
+          }, 1000);
           return false;
         }
         
-        try {
-          currentUser = JSON.parse(userData);
-          if (!currentUser || !currentUser.username) {
-            throw new Error('Invalid user data');
-          }
-          
-          // Update UI dengan info user
-          $("#userName").text(currentUser.name || currentUser.username);
-          $("#userRole").text(currentUser.role_name || 'User');
-          $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
-          
-          // Atur layout berdasarkan role user
-          if (currentUser.prov === "00" && currentUser.kab === "00") {
-            // User pusat - tampilkan dropdown wilayah
-            $("#regionSelectContainer").show();
-            $("#projectSelectContainer").removeClass("col-md-7").addClass("col-md-5");
-            $("#loadButtonContainer").removeClass("col-md-3").addClass("col-md-2");
-          } else {
-            // User provinsi/kabupaten - sembunyikan dropdown wilayah
-            $("#regionSelectContainer").hide();
-            $("#projectSelectContainer").removeClass("col-md-5").addClass("col-md-7");
-            $("#loadButtonContainer").removeClass("col-md-2").addClass("col-md-3");
-          }
-          
-          return true;
-        } catch(e) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
-          return false;
+        // Update UI dengan info user
+        $("#userName").text(currentUser.name || currentUser.username);
+        $("#userRole").text(currentUser.role_name || 'User');
+        $("#userAvatar").text(currentUser.name ? currentUser.name.charAt(0).toUpperCase() : currentUser.username.charAt(0).toUpperCase());
+        
+        // Atur layout berdasarkan role user
+        if (currentUser.prov === "00" && currentUser.kab === "00") {
+          // User pusat - tampilkan dropdown wilayah
+          $("#regionSelectContainer").show();
+          $("#projectSelectContainer").removeClass("col-md-7").addClass("col-md-5");
+          $("#loadButtonContainer").removeClass("col-md-3").addClass("col-md-2");
+        } else {
+          // User provinsi/kabupaten - sembunyikan dropdown wilayah
+          $("#regionSelectContainer").hide();
+          $("#projectSelectContainer").removeClass("col-md-5").addClass("col-md-7");
+          $("#loadButtonContainer").removeClass("col-md-2").addClass("col-md-3");
         }
+        
+        return true;
       };
 
       const extractJson = response => {
@@ -1926,8 +1941,7 @@ $user_data = getUserData();
       // Logout handler
       $("#logoutBtn").on('click', function(){
         if (confirm('Apakah Anda yakin ingin logout?')) {
-          localStorage.removeItem('qg_user');
-          window.location.href = 'login.php';
+          window.location.href = 'sso_logout.php';
         }
       });
 
