@@ -1,5 +1,13 @@
 <?php
 // monitoring.php
+require_once 'sso_integration.php';
+
+// Pastikan user sudah login SSO
+requireSSOLogin('monitoring.php');
+
+// Dapatkan filter wilayah berdasarkan SSO user
+$wilayah_filter = getSSOWilayahFilter();
+$user_data = getUserData();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -834,39 +842,13 @@
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%); box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15); border-bottom: none; padding: 0.2rem 0; margin-bottom: 0.5rem;">
-    <div class="container-fluid">
-              <a class="navbar-brand" href="index.php" style="font-weight: 600; font-size: 0.75rem; color: white !important; padding-top: 0.2rem; padding-bottom: 0.2rem;">
-        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 3px; border-radius: 3px; font-size: 0.65rem;"></i>Quality Gates
-      </a>
-      
-      <!-- Navigation Tabs - Integrated into navbar -->
-      <div class="navbar-nav-tabs">
-        <a class="nav-link" href="index.php">
-          <i class="fas fa-chart-bar"></i>Dashboard
-        </a>
-        <a class="nav-link active" href="monitoring.php">
-          <i class="fas fa-chart-line"></i>Monitoring
-        </a>
-      </div>
-      
-              <div style="display: flex; align-items: center; gap: 0.4rem;">
-        <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; backdrop-filter: blur(10px); font-size: 0.65rem;" id="userAvatar">
-          <i class="fas fa-user"></i>
-        </div>
-        <div style="display: flex; flex-direction: column;">
-          <div style="font-weight: 600; color: white; font-size: 0.65rem; line-height: 1;" id="userName">Loading...</div>
-          <div style="font-size: 0.55rem; color: rgba(255,255,255,0.8); line-height: 1;" id="userRole">Loading...</div>
-        </div>
-        <button class="btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.65rem; transition: all 0.2s ease; backdrop-filter: blur(10px);" id="logoutBtn">
-          <i class="fas fa-sign-out-alt me-1" style="font-size: 0.6rem;"></i>Logout
-        </button>
-      </div>
-    </div>
-  </nav>
+  <!-- SSO Integrated Navigation -->
+  <?php renderSSONavbar('monitoring'); ?>
 
   <div class="container-fluid">
+    <!-- Wilayah Filter Info Box -->
+    <?php renderWilayahInfoBox(); ?>
+    
     <!-- Statistics Cards -->
     <div class="row mb-2" id="statsCards" style="display: none;">
       <div class="col-md-2">
@@ -2147,5 +2129,11 @@
   
   <!-- SweetAlert2 untuk notifikasi -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- SSO Wilayah Filter JavaScript -->
+  <?php injectWilayahJS(); ?>
+  
+  <!-- Debug Info (hanya muncul jika ada parameter ?debug) -->
+  <?php renderDebugWilayahInfo(); ?>
 </body>
 </html>

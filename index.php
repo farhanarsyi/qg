@@ -1,5 +1,13 @@
 <?php
 // index.php - Dashboard per wilayah untuk Quality Gates (Home Page)
+require_once 'sso_integration.php';
+
+// Pastikan user sudah login SSO
+requireSSOLogin('index.php');
+
+// Dapatkan filter wilayah berdasarkan SSO user
+$wilayah_filter = getSSOWilayahFilter();
+$user_data = getUserData();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -676,39 +684,13 @@
   </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="index.php" style="font-size: 0.75rem;">
-        <i class="fas fa-tasks me-2" style="background: rgba(255,255,255,0.2); padding: 3px; border-radius: 3px; font-size: 0.65rem;"></i>Quality Gates
-      </a>
-      
-      <!-- Navigation Tabs - Integrated into navbar -->
-      <div class="navbar-nav-tabs">
-        <a class="nav-link active" href="index.php">
-          <i class="fas fa-chart-bar"></i>Dashboard
-        </a>
-        <a class="nav-link" href="monitoring.php">
-          <i class="fas fa-chart-line"></i>Monitoring
-        </a>
-      </div>
-      
-      <div class="user-info">
-        <div class="user-avatar" id="userAvatar">
-          <i class="fas fa-user"></i>
-        </div>
-        <div class="user-details">
-          <div class="user-name" id="userName">Loading...</div>
-          <div class="user-role" id="userRole">Loading...</div>
-        </div>
-        <button class="btn btn-logout" id="logoutBtn">
-          <i class="fas fa-sign-out-alt me-1"></i>Logout
-        </button>
-      </div>
-    </div>
-  </nav>
+  <!-- SSO Integrated Navigation -->
+  <?php renderSSONavbar('dashboard'); ?>
 
   <div class="container-fluid">
+    <!-- Wilayah Filter Info Box -->
+    <?php renderWilayahInfoBox(); ?>
+    
     <!-- Statistics Cards -->
     <div class="row mb-2" id="statsCards" style="display: none;">
       <div class="col-md-2">
@@ -1371,5 +1353,11 @@
   
   <!-- SweetAlert2 untuk notifikasi -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- SSO Wilayah Filter JavaScript -->
+  <?php injectWilayahJS(); ?>
+  
+  <!-- Debug Info (hanya muncul jika ada parameter ?debug) -->
+  <?php renderDebugWilayahInfo(); ?>
 </body>
 </html> 
