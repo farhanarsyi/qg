@@ -755,6 +755,229 @@ if(isset($_POST['action'])){
             echo executeQuery($query, $params);
             break;
             
+        case "fetchMonitoringData":
+            $year = $_POST['year'];
+            $id_project = $_POST['id_project'];
+            $regions = json_decode($_POST['regions'], true); // Array of regions to fetch
+            
+            if (empty($regions)) {
+                echo json_encode(["status" => false, "message" => "No regions specified"]);
+                break;
+            }
+            
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            $result = [
+                'gates' => [],
+                'monitoring_data' => []
+            ];
+            
+            // 1. Fetch only required gate fields
+            $gatesQuery = "SELECT [id], [gate_number], [gate_name], 
+                          [prev_insert_start], [prev_insert_end], 
+                          [prev_upload_start], [prev_upload_end],
+                          [evaluation_start], [evaluation_end],
+                          [approval_start], [approval_end],
+                          [cor_insert_start], [cor_insert_end],
+                          [cor_upload_start], [cor_upload_end]
+                          FROM [project_gates] 
+                          WHERE [id_project] = ? AND [is_deleted] IS NULL 
+                          ORDER BY [gate_number]";
+            $gatesStmt = sqlsrv_query($conn, $gatesQuery, [$id_project]);
+            
+            if ($gatesStmt === false) {
+                $errors = sqlsrv_errors();
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => "Failed to fetch gates"]);
+                break;
+            }
+            
+            $gates = [];
+            while ($row = sqlsrv_fetch_array($gatesStmt, SQLSRV_FETCH_ASSOC)) {
+                // Convert DateTime objects to string format
+                foreach ($row as $key => $value) {
+                    if ($value instanceof DateTime) {
+                        $row[$key] = $value->format('Y-m-d');
+                    }
+                }
+                $gates[] = $row;
+            }
+            sqlsrv_free_stmt($gatesStmt);
+            $result['gates'] = $gates;
+            
+            if (empty($gates)) {
+                sqlsrv_close($conn);
+                echo json_encode(["status" => true, "data" => $result]);
+                break;
+            }
+            
+            // 2. For each region, get comprehensive monitoring data
+            foreach ($regions as $region) {
+                $prov = $region['prov'];
+                $kab = $region['kab'];
+                $region_id = $region['id'];
+                
+                $result['monitoring_data'][$region_id] = [];
+                
+                foreach ($gates as $gate) {
+                    $gate_id = $gate['id'];
+                    $gate_key = $gate_id;
+                    
+                    // Initialize gate data for this region
+                    $result['monitoring_data'][$region_id][$gate_key] = [
+                        'gate' => $gate,
+                        'measurements' => [],
+                        'assessment' => null,
+                        'preventives' => [],
+                        'correctives' => [],
+                        'doc_preventives' => [],
+                        'doc_correctives' => []
+                    ];
+                    
+                    // Fetch only required measurement fields
+                    $measurementsQuery = "SELECT [id], [measurement_name], [assessment_level] 
+                                         FROM [project_measurements] 
+                                         WHERE [id_project] = ? AND [id_gate] = ? 
+                                         AND [is_deleted] IS NULL 
+                                         ORDER BY [measurement_number]";
+                    
+                    $measurementsStmt = sqlsrv_query($conn, $measurementsQuery, [$id_project, $gate_id]);
+                    if ($measurementsStmt !== false) {
+                        $measurements = [];
+                        while ($row = sqlsrv_fetch_array($measurementsStmt, SQLSRV_FETCH_ASSOC)) {
+                            foreach ($row as $key => $value) {
+                                if ($value instanceof DateTime) {
+                                    $row[$key] = $value->format('Y-m-d H:i:s');
+                                }
+                            }
+                            $measurements[] = $row;
+                        }
+                        sqlsrv_free_stmt($measurementsStmt);
+                        $result['monitoring_data'][$region_id][$gate_key]['measurements'] = $measurements;
+                        
+                        // Fetch only required assessment fields
+                        $assessmentQuery = "SELECT [assessment], [state], [year] 
+                                           FROM [project_assessments] 
+                                           WHERE [id_project] = ? AND [id_gate] = ? 
+                                           AND [prov] = ? AND [kab] = ?";
+                        
+                        $assessmentStmt = sqlsrv_query($conn, $assessmentQuery, [$id_project, $gate_id, $prov, $kab]);
+                        if ($assessmentStmt !== false) {
+                            if ($row = sqlsrv_fetch_array($assessmentStmt, SQLSRV_FETCH_ASSOC)) {
+                                foreach ($row as $key => $value) {
+                                    if ($value instanceof DateTime) {
+                                        $row[$key] = $value->format('Y-m-d H:i:s');
+                                    }
+                                }
+                                
+                                // Add status field to match old API format
+                                if (isset($row['state'])) {
+                                    $row['status'] = $row['state'];
+                                }
+                                
+                                // Parse JSON fields
+                                if (isset($row['assessment'])) {
+                                    $row['assessment'] = json_decode($row['assessment'], true);
+                                }
+                                if (isset($row['notes']) && $row['notes'] !== null) {
+                                    $row['notes'] = json_decode($row['notes'], true);
+                                }
+                                
+                                $result['monitoring_data'][$region_id][$gate_key]['assessment'] = $row;
+                            }
+                            sqlsrv_free_stmt($assessmentStmt);
+                        }
+                        
+                        // For each measurement, fetch preventives and correctives
+                        foreach ($measurements as $measurement) {
+                            $measurement_id = $measurement['id'];
+                            
+                            // Check preventives existence (only need to know if exists)
+                            $preventivesQuery = "SELECT COUNT(*) as [count] FROM [project_preventives] 
+                                               WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                                               AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                                               AND [is_deleted] IS NULL";
+                            
+                            $preventivesStmt = sqlsrv_query($conn, $preventivesQuery, 
+                                [$year, $id_project, $gate_id, $measurement_id, $prov, $kab]);
+                            
+                            if ($preventivesStmt !== false) {
+                                $preventiveCount = 0;
+                                if ($row = sqlsrv_fetch_array($preventivesStmt, SQLSRV_FETCH_ASSOC)) {
+                                    $preventiveCount = (int)$row['count'];
+                                }
+                                sqlsrv_free_stmt($preventivesStmt);
+                                $result['monitoring_data'][$region_id][$gate_key]['preventives'][$measurement_id] = $preventiveCount;
+                            }
+                            
+                            // Check correctives existence (only need to know if exists)
+                            $correctivesQuery = "SELECT COUNT(*) as [count] FROM [project_correctives] 
+                                               WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                                               AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                                               AND [is_deleted] IS NULL";
+                            
+                            $correctivesStmt = sqlsrv_query($conn, $correctivesQuery, 
+                                [$year, $id_project, $gate_id, $measurement_id, $prov, $kab]);
+                            
+                            if ($correctivesStmt !== false) {
+                                $correctiveCount = 0;
+                                if ($row = sqlsrv_fetch_array($correctivesStmt, SQLSRV_FETCH_ASSOC)) {
+                                    $correctiveCount = (int)$row['count'];
+                                }
+                                sqlsrv_free_stmt($correctivesStmt);
+                                $result['monitoring_data'][$region_id][$gate_key]['correctives'][$measurement_id] = $correctiveCount;
+                            }
+                            
+                            // Check if preventive documents exist (only uploaded files)
+                            $docPrevQuery = "SELECT COUNT(*) as [count] FROM [project_doc_preventives] 
+                                           WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                                           AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                                           AND [is_deleted] IS NULL 
+                                           AND [filename] IS NOT NULL AND [filename] != ''";
+                            
+                            $docPrevStmt = sqlsrv_query($conn, $docPrevQuery, 
+                                [$year, $id_project, $gate_id, $measurement_id, $prov, $kab]);
+                            
+                            if ($docPrevStmt !== false) {
+                                $docPreventiveCount = 0;
+                                if ($row = sqlsrv_fetch_array($docPrevStmt, SQLSRV_FETCH_ASSOC)) {
+                                    $docPreventiveCount = (int)$row['count'];
+                                }
+                                sqlsrv_free_stmt($docPrevStmt);
+                                $result['monitoring_data'][$region_id][$gate_key]['doc_preventives'][$measurement_id] = $docPreventiveCount;
+                            }
+                            
+                            // Check if corrective documents exist (only uploaded files)
+                            $docCorQuery = "SELECT COUNT(*) as [count] FROM [project_doc_correctives] 
+                                          WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
+                                          AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
+                                          AND [is_deleted] IS NULL 
+                                          AND [filename] IS NOT NULL AND [filename] != ''";
+                            
+                            $docCorStmt = sqlsrv_query($conn, $docCorQuery, 
+                                [$year, $id_project, $gate_id, $measurement_id, $prov, $kab]);
+                            
+                            if ($docCorStmt !== false) {
+                                $docCorrectiveCount = 0;
+                                if ($row = sqlsrv_fetch_array($docCorStmt, SQLSRV_FETCH_ASSOC)) {
+                                    $docCorrectiveCount = (int)$row['count'];
+                                }
+                                sqlsrv_free_stmt($docCorStmt);
+                                $result['monitoring_data'][$region_id][$gate_key]['doc_correctives'][$measurement_id] = $docCorrectiveCount;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            sqlsrv_close($conn);
+            echo json_encode(["status" => true, "data" => $result]);
+            break;
+            
         case "fetchUsers":
             // Endpoint untuk testing - menampilkan daftar user
             $query = "SELECT id, username, name, prov, kab FROM [users] ORDER BY [prov], [kab], [username]";

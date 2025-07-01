@@ -836,7 +836,7 @@
           <div class="loading-dot"></div>
         </div>
       </div>
-      <div class="spinner-text">Memuat data monitoring...</div>
+      <div class="spinner-text" id="spinnerText">Memuat data monitoring...</div>
     </div>
   </div>
 
@@ -1098,194 +1098,7 @@
         return result;
       };
 
-      // --- Fungsi untuk menentukan status suatu aktivitas ---
-      const determineActivityStatus = async (gate, measurement, year, activityName, prov, kab, apiCache, getDataFromCacheOrApi) => {
-        // Dapatkan data actions yang sudah di-cache
-        const actionsKey = JSON.stringify({ 
-          action: 'fetchAllActions', 
-          id_project: selectedProject, 
-          id_gate: gate.id, 
-          prov, kab 
-        });
-        
-        const actionsResponse = apiCache.allActions[actionsKey] || { status: false };
-        
-        // Jika tidak ada data actions, semua status "Belum"
-        if (!actionsResponse.status || !actionsResponse.data || actionsResponse.data.length === 0) {
-          if (activityName === "Pengisian nama pelaksana aksi preventif") return "Belum ditentukan";
-          if (activityName === "Upload bukti pelaksanaan aksi preventif") return "Belum ditentukan";
-          if (activityName === "Penilaian ukuran kualitas") return "Belum dinilai";
-          if (activityName === "Approval Gate oleh Sign-off") return "Belum dinilai";
-          if (activityName === "Pengisian pelaksana aksi korektif") return "Belum disetujui";
-          if (activityName === "Upload bukti pelaksanaan aksi korektif") return "Belum disetujui";
-        }
-        
-        // Jika ini tentang preventif
-        if (activityName === "Pengisian nama pelaksana aksi preventif") {
-          const prevMeasureResponse = await getDataFromCacheOrApi(
-            'preventives',
-            'fetchPreventivesByMeasurement',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
-          
-          return (prevMeasureResponse.status && prevMeasureResponse.data.length > 0) 
-            ? "Sudah ditentukan" : "Belum ditentukan";
-        }
-        
-        if (activityName === "Upload bukti pelaksanaan aksi preventif") {
-          // Cek dulu apakah nama pelaksana sudah diisi
-          const prevMeasureResponse = await getDataFromCacheOrApi(
-            'preventives',
-            'fetchPreventivesByMeasurement',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
-          
-          const isPrevNameFilled = prevMeasureResponse.status && prevMeasureResponse.data.length > 0;
-          
-          if (!isPrevNameFilled) {
-            return "Belum ditentukan";
-          }
-          
-          // Cek upload bukti dari tabel project_doc_preventives
-          const docResponse = await getDataFromCacheOrApi(
-            'docPreventives',
-            'fetchDocPreventives',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
-          
-          if (docResponse.status && docResponse.data.length > 0) {
-            // Cek apakah ada file yang sudah di-upload dan tidak dihapus
-            const uploadedDoc = docResponse.data.find(doc => 
-              doc.filename && doc.filename.trim() !== '' && !doc.is_deleted
-            );
-            return uploadedDoc ? "Sudah diunggah" : "Belum diunggah";
-          }
-          
-          return "Belum diunggah";
-        }
-        
-        // Dapatkan data assessments dari cache
-        const assessmentsKey = JSON.stringify({ 
-          action: 'fetchAssessments', 
-          id_project: selectedProject, 
-          id_gate: gate.id, 
-          prov, kab 
-        });
-        
-        const assessmentsResponse = apiCache.assessments[assessmentsKey] || { status: false };
-        
-        // Cek apakah measurement sudah dinilai
-        // Assessment data adalah array dengan format [{"idm":259,"ass":"3"},{"idm":260,"ass":"1"}]
-        let assessmentStatus = "Belum dinilai";
-        let isAssessed = false;
-        let isApproved = false;
-        let assessmentValue = null;
-        
-        if (assessmentsResponse.status && assessmentsResponse.data.length > 0) {
-          const assessmentRecord = assessmentsResponse.data[0];
-          
-          // Parse assessment JSON array
-          if (assessmentRecord.assessment && Array.isArray(assessmentRecord.assessment)) {
-            const measurementAssessment = assessmentRecord.assessment.find(item => 
-              item.idm && item.idm == measurement.id
-            );
-            
-            if (measurementAssessment && measurementAssessment.ass) {
-              assessmentValue = measurementAssessment.ass;
-              
-              if (assessmentValue === "1" || assessmentValue === 1) {
-                assessmentStatus = "Sudah dinilai (merah)";
-              } else if (assessmentValue === "2" || assessmentValue === 2) {
-                assessmentStatus = "Sudah dinilai (kuning)";
-              } else if (assessmentValue === "3" || assessmentValue === 3) {
-                assessmentStatus = "Sudah dinilai (hijau)";
-              }
-              
-              isAssessed = assessmentStatus.startsWith("Sudah dinilai");
-            }
-          }
-          
-          // Check approval status
-          isApproved = assessmentRecord.state === "1" || assessmentRecord.status === "1";
-        }
-        
-        // Status penilaian
-        if (activityName === "Penilaian ukuran kualitas") {
-          return assessmentStatus;
-        }
-        
-        // Status approval
-        if (activityName === "Approval Gate oleh Sign-off") {
-          if (!isAssessed) return "Belum dinilai";
-          return isApproved ? "Sudah disetujui" : "Belum disetujui";
-        }
-        
-        // Aksi korektif
-        if (activityName === "Pengisian pelaksana aksi korektif" || activityName === "Upload bukti pelaksanaan aksi korektif") {
-          if (!isApproved) return "Belum disetujui";
-          if (assessmentStatus === "Sudah dinilai (hijau)") return "Tidak perlu";
-          
-          // Untuk aksi korektif, lanjutkan hanya jika merah/kuning
-          if (activityName === "Pengisian pelaksana aksi korektif") {
-            const corMeasureResponse = await getDataFromCacheOrApi(
-              'correctives',
-              'fetchCorrectivesByMeasurement',
-              {
-                year, id_project: selectedProject, id_gate: gate.id,
-                id_measurement: measurement.id, prov, kab
-              }
-            );
-            
-            return (corMeasureResponse.status && corMeasureResponse.data.length > 0)
-              ? "Sudah ditentukan" : "Belum ditentukan";
-          }
-          
-          // Upload bukti korektif
-          const corMeasureResponse = await getDataFromCacheOrApi(
-            'correctives',
-            'fetchCorrectivesByMeasurement',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
-          
-          if (!(corMeasureResponse.status && corMeasureResponse.data.length > 0)) {
-            return "Belum ditentukan";
-          }
-          
-          // Cek upload bukti dari tabel project_doc_correctives
-          const docCorResponse = await getDataFromCacheOrApi(
-            'docCorrectives',
-            'fetchDocCorrectives',
-            {
-              year, id_project: selectedProject, id_gate: gate.id,
-              id_measurement: measurement.id, prov, kab
-            }
-          );
-          
-          if (docCorResponse.status && docCorResponse.data.length > 0) {
-            // Cek apakah ada file yang sudah di-upload dan tidak dihapus
-            const uploadedDoc = docCorResponse.data.find(doc => 
-              doc.filename && doc.filename.trim() !== '' && !doc.is_deleted
-            );
-            return uploadedDoc ? "Sudah diunggah" : "Belum diunggah";
-          }
-          
-          return "Belum diunggah";
-        }
-        
-        return "Tidak tersedia";
-      };
+
 
       // Calculate and display statistics for monitoring
       const calculateMonitoringStatistics = (regions) => {
@@ -1751,196 +1564,54 @@
         }
       };
 
-      // --- Fungsi untuk memproses dan menyimpan data aktivitas per wilayah ---
+      // --- Fungsi untuk memproses dan menyimpan data aktivitas per wilayah (Optimized) ---
       const processData = async (regions) => {
         // Reset data
         activityData = {};
         
-        // Dapatkan semua gates
-        const gatesResponse = await makeAjaxRequest(API_URL, {
-          action: "fetchGates",
-          id_project: selectedProject
+        // Panggil API baru yang mengambil semua data sekaligus
+        const monitoringResponse = await makeAjaxRequest(API_URL, {
+          action: "fetchMonitoringData",
+          year: year,
+          id_project: selectedProject,
+          regions: JSON.stringify(regions)
         });
         
-        if (!gatesResponse.status || !gatesResponse.data.length) {
+        if (!monitoringResponse.status) {
+          throw new Error(monitoringResponse.message || "Gagal memuat data monitoring");
+        }
+        
+        const data = monitoringResponse.data;
+        const gates = data.gates || [];
+        const monitoringData = data.monitoring_data || {};
+        
+        if (gates.length === 0) {
           throw new Error("Tidak ada data gate");
         }
         
-        const gates = gatesResponse.data;
-        
-        // Cache untuk data API
-        const apiCache = {
-          measurements: {},
-          preventives: {},
-          preventivesKab: {},
-          assessments: {},
-          correctives: {},
-          correctivesKab: {},
-          allActions: {},
-          docPreventives: {},
-          docCorrectives: {}
-        };
-        
-        // Fungsi untuk mendapatkan data dari cache atau API
-        const getDataFromCacheOrApi = async (cacheKey, apiAction, apiParams) => {
-          const cacheKeyString = JSON.stringify({ action: apiAction, ...apiParams });
-          
-          if (!apiCache[cacheKey][cacheKeyString]) {
-            apiCache[cacheKey][cacheKeyString] = await makeAjaxRequest(API_URL, { 
-              action: apiAction, 
-              ...apiParams 
-            });
-          }
-          
-          return apiCache[cacheKey][cacheKeyString];
-        };
-        
-        // 1. Pre-load semua measurements untuk semua gates
+        // Process data untuk setiap gate dan measurement
         for (const gate of gates) {
-          // Dapatkan measurements untuk gate ini (dari pusat)
-          const measurementsResponse = await getDataFromCacheOrApi(
-            'measurements',
-            'fetchMeasurements', 
-            {
-              id_project: selectedProject,
-              id_gate: gate.id,
-              prov: "00",
-              kab: "00"
-            }
-          );
-          
-          if (!measurementsResponse.status || !measurementsResponse.data.length) {
-            continue; // Skip jika tidak ada measurements
-          }
-          
-          const measurements = measurementsResponse.data;
           const gateNumber = gate.gate_number || gates.indexOf(gate) + 1;
           const gateName = `GATE${gateNumber}: ${gate.gate_name}`;
           
-          // 2. Untuk setiap ukuran kualitas, tentukan region yang sesuai berdasarkan assessment_level
-
+          // Ambil measurements dari region pertama (assumsi measurements sama untuk semua region)
+          let measurements = [];
+          for (const regionId in monitoringData) {
+            if (monitoringData[regionId][gate.id] && monitoringData[regionId][gate.id].measurements) {
+              measurements = monitoringData[regionId][gate.id].measurements;
+              break;
+            }
+          }
+          
+          if (measurements.length === 0) continue;
+          
+          // Proses setiap measurement
           for (let j = 0; j < measurements.length; j++) {
             const measurement = measurements[j];
             const ukNumber = j + 1;
             const ukName = `UK${ukNumber}: ${measurement.measurement_name}`;
-            
             const ukLevel = getUkLevelLabel(measurement);
-            
-            // Tentukan assessment_level (default ke 1 jika tidak ada)
             const assessmentLevel = parseInt(measurement.assessment_level || 1);
-            
-            // Filter region berdasarkan assessment_level
-            const applicableRegions = regions.filter(region => {
-              if (assessmentLevel === 1) {
-                // Khusus pusat (00, 00)
-                return region.prov === "00" && region.kab === "00";
-              } else if (assessmentLevel === 2) {
-                // Khusus level provinsi (kab = 00, prov != 00)
-                return region.prov !== "00" && region.kab === "00";
-              } else if (assessmentLevel === 3) {
-                // Khusus level kabupaten (kab != 00)
-                return region.kab !== "00";
-              }
-              return false;
-            });
-            
-            // Optimasi untuk fetchAllActions: gunakan cache untuk kabupaten dari provinsi yang sama
-            // Pengelompokan region berdasarkan provinsi untuk level 3 (kabupaten)
-            const provinceGroups = {};
-            if (assessmentLevel === 3) {
-              applicableRegions.forEach(region => {
-                if (!provinceGroups[region.prov]) {
-                  provinceGroups[region.prov] = [];
-                }
-                provinceGroups[region.prov].push(region);
-              });
-            }
-            
-            // Pre-load data hanya untuk region yang sesuai dengan assessment_level
-            if (assessmentLevel === 3) {
-              // Untuk level kabupaten, ambil sampel 1 kabupaten per provinsi untuk fetchAllActions
-              for (const prov in provinceGroups) {
-                if (provinceGroups[prov].length > 0) {
-                  const sampleRegion = provinceGroups[prov][0];
-                  
-                  // Fetch allActions hanya untuk sampel kabupaten
-                  const actionsKey = JSON.stringify({
-                    action: 'fetchAllActions',
-                    id_project: selectedProject,
-                    id_gate: gate.id,
-                    prov: sampleRegion.prov,
-                    kab: sampleRegion.kab
-                  });
-                  
-                  // Ambil data Actions untuk sampel
-                  if (!apiCache.allActions[actionsKey]) {
-                    apiCache.allActions[actionsKey] = await makeAjaxRequest(API_URL, {
-                      action: 'fetchAllActions',
-                      id_project: selectedProject,
-                      id_gate: gate.id,
-                      prov: sampleRegion.prov,
-                      kab: sampleRegion.kab
-                    });
-                  }
-                  
-                  // Clone response untuk kabupaten lain dalam provinsi yang sama
-                  for (let i = 1; i < provinceGroups[prov].length; i++) {
-                    const otherRegion = provinceGroups[prov][i];
-                    const otherActionsKey = JSON.stringify({
-                      action: 'fetchAllActions',
-                      id_project: selectedProject,
-                      id_gate: gate.id,
-                      prov: otherRegion.prov,
-                      kab: otherRegion.kab
-                    });
-                    
-                    // Gunakan data yang sama
-                    apiCache.allActions[otherActionsKey] = JSON.parse(JSON.stringify(apiCache.allActions[actionsKey]));
-                  }
-                  
-                  // Tetap fetch assessments untuk semua kabupaten
-                  for (const region of provinceGroups[prov]) {
-                    await getDataFromCacheOrApi(
-                      'assessments',
-                      'fetchAssessments',
-                      {
-                        id_project: selectedProject,
-                        id_gate: gate.id,
-                        prov: region.prov,
-                        kab: region.kab
-                      }
-                    );
-                  }
-                }
-              }
-            } else {
-              // Untuk level pusat dan provinsi, tetap gunakan cara normal
-              for (const region of applicableRegions) {
-                // Pre-load allActions untuk gate & region
-                await getDataFromCacheOrApi(
-                  'allActions',
-                  'fetchAllActions',
-                  {
-                    id_project: selectedProject,
-                    id_gate: gate.id,
-                    prov: region.prov,
-                    kab: region.kab
-                  }
-                );
-                
-                // Pre-load assessments data untuk gate & region
-                await getDataFromCacheOrApi(
-                  'assessments',
-                  'fetchAssessments',
-                  {
-                    id_project: selectedProject,
-                    id_gate: gate.id,
-                    prov: region.prov,
-                    kab: region.kab
-                  }
-                );
-              }
-            }
             
             // Daftar aktivitas standar untuk gate ini
             const activities = [
@@ -1976,28 +1647,25 @@
               }
             ];
             
-            // 4. Cari status untuk setiap aktivitas dan setiap wilayah
+            // Proses setiap aktivitas
             for (const activity of activities) {
               const activityKey = `${gateName}|${ukName}|${activity.name}`;
               
-                            // Simpan info aktivitas
+              // Simpan info aktivitas
               if (!activityData[activityKey]) {
-                const rawAssessmentLevel = parseInt(measurement.assessment_level || 1);
                 activityData[activityKey] = {
                   gate: gateName,
                   uk: ukName,
                   ukLevel: ukLevel,
-                  assessmentLevel: rawAssessmentLevel, // Simpan level mentah juga
+                  assessmentLevel: assessmentLevel,
                   activity: activity.name,
                   start: activity.start,
                   end: activity.end,
                   statuses: {}
                 };
-                
-
               }
               
-              // 5. Untuk setiap wilayah, isi status
+              // Untuk setiap wilayah, tentukan status
               for (const region of regions) {
                 // Cek apakah ukuran kualitas sesuai dengan level wilayah
                 const isApplicable = isUkApplicableForRegion(measurement, region);
@@ -2007,16 +1675,86 @@
                   continue;
                 }
                 
-                // Dapatkan status aktivitas
-                const status = await determineActivityStatus(
-                  gate, measurement, year, activity.name, region.prov, region.kab, apiCache, getDataFromCacheOrApi
+                // Ambil data monitoring untuk region ini
+                const regionData = monitoringData[region.id] && monitoringData[region.id][gate.id];
+                if (!regionData) {
+                  activityData[activityKey].statuses[region.id] = "Tidak tersedia";
+                  continue;
+                }
+                
+                // Tentukan status berdasarkan aktivitas
+                const status = determineActivityStatusFromData(
+                  regionData, measurement, activity.name
                 );
                 
-                // Simpan status
                 activityData[activityKey].statuses[region.id] = status;
               }
             }
           }
+        }
+      };
+      
+      // Fungsi helper untuk menentukan status dari data yang sudah dimuat
+      const determineActivityStatusFromData = (regionData, measurement, activityName) => {
+        const assessment = regionData.assessment;
+        const preventiveCount = regionData.preventives[measurement.id] || 0;
+        const correctiveCount = regionData.correctives[measurement.id] || 0;
+        const docPreventiveCount = regionData.doc_preventives[measurement.id] || 0;
+        const docCorrectiveCount = regionData.doc_correctives[measurement.id] || 0;
+        
+        // Cek status assessment
+        let assessmentValue = null;
+        let isAssessed = false;
+        let isApproved = false;
+        
+        if (assessment && assessment.assessment && Array.isArray(assessment.assessment)) {
+          const measurementAssessment = assessment.assessment.find(item => 
+            item.idm && item.idm == measurement.id
+          );
+          
+          if (measurementAssessment && measurementAssessment.ass) {
+            assessmentValue = measurementAssessment.ass;
+            isAssessed = true;
+          }
+        }
+        
+        if (assessment) {
+          isApproved = assessment.state === "1" || assessment.status === "1";
+        }
+        
+        // Tentukan status berdasarkan aktivitas
+        switch (activityName) {
+          case "Pengisian nama pelaksana aksi preventif":
+            return preventiveCount > 0 ? "Sudah ditentukan" : "Belum ditentukan";
+            
+          case "Upload bukti pelaksanaan aksi preventif":
+            if (preventiveCount === 0) return "Belum ditentukan";
+            return docPreventiveCount > 0 ? "Sudah diunggah" : "Belum diunggah";
+            
+          case "Penilaian ukuran kualitas":
+            if (!isAssessed) return "Belum dinilai";
+            if (assessmentValue === "1" || assessmentValue === 1) return "Sudah dinilai (merah)";
+            if (assessmentValue === "2" || assessmentValue === 2) return "Sudah dinilai (kuning)";
+            if (assessmentValue === "3" || assessmentValue === 3) return "Sudah dinilai (hijau)";
+            return "Belum dinilai";
+            
+          case "Approval Gate oleh Sign-off":
+            if (!isAssessed) return "Belum dinilai";
+            return isApproved ? "Sudah disetujui" : "Belum disetujui";
+            
+          case "Pengisian pelaksana aksi korektif":
+            if (!isApproved) return "Belum disetujui";
+            if (assessmentValue === "3" || assessmentValue === 3) return "Tidak perlu";
+            return correctiveCount > 0 ? "Sudah ditentukan" : "Belum ditentukan";
+            
+          case "Upload bukti pelaksanaan aksi korektif":
+            if (!isApproved) return "Belum disetujui";
+            if (assessmentValue === "3" || assessmentValue === 3) return "Tidak perlu";
+            if (correctiveCount === 0) return "Belum ditentukan";
+            return docCorrectiveCount > 0 ? "Sudah diunggah" : "Belum diunggah";
+            
+          default:
+            return "Tidak tersedia";
         }
       };
 
@@ -2070,7 +1808,10 @@
           }
           return;
         }
+        
+        const startTime = Date.now();
         $spinner.fadeIn(200);
+        $("#spinnerText").text("Mengumpulkan data dari database...");
         $resultsContainer.empty();
         try {
           // Tentukan daftar wilayah yang akan diproses
@@ -2137,10 +1878,38 @@
           }
           
           // Proses data untuk semua wilayah terpilih
+          $("#spinnerText").text(`Memproses data untuk ${regionsToProcess.length} wilayah...`);
           await processData(regionsToProcess);
           
+          $("#spinnerText").text("Menyiapkan tampilan tabel...");
           // Tampilkan hasil dalam format tabel
           displayResultTable(regionsToProcess);
+          
+          const loadTime = ((Date.now() - startTime) / 1000).toFixed(1);
+          console.log(`✅ Data monitoring berhasil dimuat dalam ${loadTime} detik (${regionsToProcess.length} wilayah)`);
+          
+          // Show success message in console for performance tracking
+          if (regionsToProcess.length > 10) {
+            console.log(`🚀 Optimasi berhasil! Memuat ${Object.keys(activityData).length} aktivitas untuk ${regionsToProcess.length} wilayah hanya dalam ${loadTime} detik`);
+          }
+          
+          // Show performance info to user
+          setTimeout(() => {
+            const toast = $(`
+              <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 100px; right: 20px; z-index: 10000; min-width: 300px;">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Data berhasil dimuat!</strong><br>
+                <small>${Object.keys(activityData).length} aktivitas • ${regionsToProcess.length} wilayah • ${loadTime}s</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            `);
+            $('body').append(toast);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+              toast.fadeOut(300, function() { $(this).remove(); });
+            }, 4000);
+                     }, 300);
           
         } catch(error) {
           showError(error.message || "Terjadi kesalahan saat memuat data");
