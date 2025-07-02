@@ -1339,7 +1339,11 @@ $user_data = getUserData();
         
         // Tambahkan kolom status untuk setiap wilayah
         regions.forEach(region => {
-          tableHtml += `<th class="status-column region-header">${region.name}</th>`;
+          // Capitalize each word in region name
+          const capitalizedName = region.name.split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          ).join(' ');
+          tableHtml += `<th class="status-column region-header">${capitalizedName}</th>`;
         });
         
         tableHtml += `

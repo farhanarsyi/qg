@@ -149,8 +149,8 @@ $user_data = getUserData();
     .table-dashboard th {
       background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%);
       font-weight: 600;
-      padding: 0.7rem 0.9rem;
-      font-size: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.65rem;
       color: var(--primary-color);
       white-space: nowrap;
       position: sticky;
@@ -166,9 +166,9 @@ $user_data = getUserData();
     }
     
     .table-dashboard td {
-      padding: 0.7rem 0.9rem;
+      padding: 0.65rem 0.85rem;
       vertical-align: middle;
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       border-bottom: 1px solid var(--border-color);
     }
     

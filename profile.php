@@ -48,6 +48,8 @@ function getUserValue($user_data, $key, $default = '') {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Navbar CSS -->
+    <link rel="stylesheet" href="navbar.css">
     <style>
         :root {
             --primary-color: #059669;
@@ -71,35 +73,7 @@ function getUserValue($user_data, $key, $default = '') {
             min-height: 100vh;
         }
         
-        .navbar {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
-            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
-            border-bottom: none;
-            padding: 1rem 0;
-        }
-        
-        .navbar-brand {
-            font-weight: 600;
-            font-size: 1.25rem;
-            color: white !important;
-        }
-        
-        .btn-logout {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .btn-logout:hover {
-            background: var(--danger-color);
-            border-color: var(--danger-color);
-            color: white;
-        }
+        /* Navbar styles are in navbar.css */
         
         .container {
             max-width: 1200px;
