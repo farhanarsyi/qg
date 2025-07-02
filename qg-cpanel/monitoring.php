@@ -148,13 +148,14 @@ $user_data = getUserData();
       width: 100%;
       border-spacing: 0;
       border: none;
+      border-collapse: collapse;
     }
     
     .table-monitoring th {
       padding: 8px 6px;
       text-align: center;
       font-weight: 600;
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color));
+      background-color: var(--primary-color);
       color: white;
       font-size: 0.7rem;
       position: sticky;
@@ -163,6 +164,7 @@ $user_data = getUserData();
       border: none;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+      white-space: nowrap;
     }
     
     .table-monitoring td {
@@ -170,29 +172,17 @@ $user_data = getUserData();
       vertical-align: middle;
       font-size: 0.7rem;
       border: none;
+      background-color: white;
     }
     
-    /* Alternating row colors - Green pastel theme */
-    .table-monitoring tbody tr:nth-child(odd) td {
-      background-color: #d1fae5; /* Light green pastel */
-    }
-    
+    /* Simple alternating row colors */
     .table-monitoring tbody tr:nth-child(even) td {
-      background-color: #a7f3d0; /* Medium green pastel */
-    }
-    
-    /* Alternating column colors overlay */
-    .table-monitoring td:nth-child(odd) {
-      filter: brightness(0.95);
-    }
-    
-    .table-monitoring td:nth-child(even) {
-      filter: brightness(1.05);
+      background-color: #f9fafb;
     }
     
     /* Simple hover effects */
     .table-monitoring tbody tr:hover td {
-      filter: brightness(1.05) !important;
+      background-color: #f0f9ff !important;
       transition: all 0.2s ease;
     }
     
@@ -229,19 +219,19 @@ $user_data = getUserData();
     }
     
     .status-success .status-circle {
-      background: linear-gradient(135deg, #10b981, #059669);
+      background-color: #10b981;
     }
     
     .status-danger .status-circle {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
+      background-color: #ef4444;
     }
     
     .status-neutral .status-circle {
-      background: linear-gradient(135deg, #6b7280, #4b5563);
+      background-color: #6b7280;
     }
     
     .status-warning .status-circle {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
+      background-color: #f59e0b;
     }
     
     /* Simple hover effects for status icons */
@@ -336,9 +326,9 @@ $user_data = getUserData();
     .spinner-text {
       font-weight: 600;
       color: var(--primary-color);
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       text-align: center;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
     
     /* Custom Loading Animation */
@@ -409,172 +399,131 @@ $user_data = getUserData();
     }
     
     /* Frozen columns */
-    .table-monitoring th:nth-child(1), /* Gate */
-    .table-monitoring td:nth-child(1) {
-      position: sticky;
-      left: 0;
-      background-color: #fff;
-      z-index: 10;
-      width: 140px;
-      min-width: 140px;
-      max-width: 140px;
-      margin-right: -1px;
-      font-size: 0.7rem;
-      padding: 4px;
-    }
+    /* === CLEAN STICKY COLUMNS IMPLEMENTATION === */
     
-    /* Freeze Column 1: Gate */
+    /* Column 1: Gate (leftmost, highest z-index) */
     .table-monitoring th:nth-child(1),
     .table-monitoring td:nth-child(1) {
       position: sticky !important;
-      left: 0 !important;
+      left: 0px !important;
       width: 140px;
       min-width: 140px;
-      z-index: 3;
+      max-width: 140px;
+      z-index: 15 !important;
     }
     
     .table-monitoring th:nth-child(1) {
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 25 !important;
     }
     
-    /* Freeze Column 2: Ukuran Kualitas */
+    /* Column 2: Ukuran Kualitas */
     .table-monitoring th:nth-child(2),
     .table-monitoring td:nth-child(2) {
-      position: sticky;
-      left: 140px;
+      position: sticky !important;
+      left: 140px !important;
       width: 160px;
       min-width: 160px;
+      max-width: 160px;
+      z-index: 14 !important;
     }
     
     .table-monitoring th:nth-child(2) {
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 24 !important;
     }
     
-    /* Freeze Column 3: Level */
+    /* Column 3: Level */
     .table-monitoring th:nth-child(3),
     .table-monitoring td:nth-child(3) {
-      position: sticky;
-      left: 300px;
+      position: sticky !important;
+      left: 300px !important;
       width: 60px;
       min-width: 60px;
+      max-width: 60px;
       text-align: center;
+      z-index: 13 !important;
     }
     
     .table-monitoring th:nth-child(3) {
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 23 !important;
     }
     
-    /* Freeze Column 4: Aktivitas */
+    /* Column 4: Aktivitas */
     .table-monitoring th:nth-child(4),
     .table-monitoring td:nth-child(4) {
-      position: sticky;
-      left: 360px;
+      position: sticky !important;
+      left: 360px !important;
       width: 180px;
       min-width: 180px;
+      max-width: 180px;
       word-wrap: break-word;
       white-space: normal;
       line-height: 1.2;
+      z-index: 12 !important;
     }
     
     .table-monitoring th:nth-child(4) {
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 22 !important;
     }
     
-    /* Freeze Column 5: Tanggal Mulai */
+    /* Column 5: Tanggal Mulai */
     .table-monitoring th:nth-child(5),
     .table-monitoring td:nth-child(5) {
-      position: sticky;
-      left: 540px;
-      width: 42px;
-      min-width: 42px;
+      position: sticky !important;
+      left: 540px !important;
+      width: 50px;
+      min-width: 50px;
+      max-width: 50px;
       text-align: center;
       font-size: 0.65rem;
+      white-space: nowrap;
+      z-index: 11 !important;
     }
     
     .table-monitoring th:nth-child(5) {
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 21 !important;
     }
     
-    /* Freeze Column 6: Tanggal Selesai */
+    /* Column 6: Tanggal Selesai */
     .table-monitoring th:nth-child(6),
     .table-monitoring td:nth-child(6) {
-      position: sticky;
-      left: 582px;
-      width: 48px;
-      min-width: 48px;
+      position: sticky !important;
+      left: 590px !important;
+      width: 55px;
+      min-width: 55px;
+      max-width: 55px;
       text-align: center;
       font-size: 0.65rem;
+      white-space: nowrap;
+      z-index: 10 !important;
     }
     
     .table-monitoring th:nth-child(6) {
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 20 !important;
     }
     
-    /* Z-index for frozen data cells */
-    .table-monitoring td:nth-child(1) {
-      z-index: 5 !important;
-    }
-    
-    /* Z-index for frozen data cells */
-    .table-monitoring td:nth-child(2),
-    .table-monitoring td:nth-child(3),
-    .table-monitoring td:nth-child(4),
-    .table-monitoring td:nth-child(5),
-    .table-monitoring td:nth-child(6) {
-      z-index: 8 !important;
-    }
-    
-    /* Preserve alternating colors for frozen columns */
-    .table-monitoring tbody tr:nth-child(odd) td:nth-child(1),
-    .table-monitoring tbody tr:nth-child(odd) td:nth-child(2),
-    .table-monitoring tbody tr:nth-child(odd) td:nth-child(3),
-    .table-monitoring tbody tr:nth-child(odd) td:nth-child(4),
-    .table-monitoring tbody tr:nth-child(odd) td:nth-child(5),
-    .table-monitoring tbody tr:nth-child(odd) td:nth-child(6) {
-      background-color: #d1fae5 !important; /* Light green pastel */
-    }
-    
+    /* Ensure alternating row colors work with sticky columns */
     .table-monitoring tbody tr:nth-child(even) td:nth-child(1),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(2),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(3),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(4),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(5),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(6) {
-      background-color: #a7f3d0 !important; /* Medium green pastel */
+      background-color: #f9fafb !important;
     }
     
-    /* Higher z-index for frozen column headers to stay on top */
-    .table-monitoring th:nth-child(1) {
-      z-index: 50 !important;
-      position: sticky !important;
-      top: 0 !important;
-      left: 0 !important;
-    }
-    
-    .table-monitoring th:nth-child(2),
-    .table-monitoring th:nth-child(3),
-    .table-monitoring th:nth-child(4),
-    .table-monitoring th:nth-child(5),
-    .table-monitoring th:nth-child(6) {
-      z-index: 10;
-      position: sticky !important;
-      top: 0 !important;
-    }
-    
-    /* Force sticky for first column - additional safety */
-    .table-wrapper .table-monitoring th:first-child {
-      position: sticky !important;
-      left: 0 !important;
-      top: 0 !important;
-      z-index: 100 !important;
-      background: linear-gradient(135deg, var(--primary-color), var(--success-color)) !important;
-    }
-    
-    .table-wrapper .table-monitoring td:first-child {
-      position: sticky !important;
-      left: 0 !important;
-      z-index: 5 !important;
-    }
+    /* Clean borderless design - visual separation through background only */
     
     /* Date in range */
     .date-in-range {
@@ -685,7 +634,7 @@ $user_data = getUserData();
     }
     
     #statsCards .card-body {
-      padding: 0.2rem 0.15rem !important;
+      padding: 0.4rem 0.15rem !important;
     }
     
     #statsCards h6 {
@@ -811,8 +760,48 @@ $user_data = getUserData();
   <?php renderSSONavbar('monitoring'); ?>
 
   <div class="container-fluid">
+    <!-- Input Filters -->
+    <div class="card mb-2">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Filter Data</span>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-md-2">
+            <label for="yearSelect" class="form-label">Tahun</label>
+            <select id="yearSelect" class="form-select">
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025" selected>2025</option>
+            </select>
+          </div>
+          <div id="projectSelectContainer" class="col-md-5">
+            <label for="projectSearch" class="form-label">Pilih Kegiatan</label>
+            <div class="searchable-dropdown">
+              <input type="text" class="form-control dropdown-search-input" id="projectSearch" placeholder="Cari kegiatan..." disabled>
+              <div class="dropdown-options" id="projectOptions" style="display: none;"></div>
+              <input type="hidden" id="projectSelect">
+            </div>
+          </div>
+          <div class="col-md-3" id="regionSelectContainer">
+            <label for="regionSearch" class="form-label">Pilih Cakupan Wilayah</label>
+            <div class="searchable-dropdown">
+              <input type="text" class="form-control dropdown-search-input" id="regionSearch" placeholder="Cari wilayah..." disabled>
+              <div class="dropdown-options" id="regionOptions" style="display: none;"></div>
+              <input type="hidden" id="regionSelect">
+            </div>
+          </div>
+          <div id="loadButtonContainer" class="col-md-2 d-flex align-items-end">
+            <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+              <i class="fas fa-search me-2"></i>Tampilkan Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Statistics Cards -->
-    <div class="row mb-2" id="statsCards" style="display: none;">
+    <div class="row mb-1" id="statsCards" style="display: none;">
       <div class="col-md-2">
         <div class="card border-0 bg-success bg-opacity-10">
           <div class="card-body text-center">
@@ -876,46 +865,6 @@ $user_data = getUserData();
               <h6 class="mb-0 text-info fw-semibold">Total</h6>
             </div>
             <h3 class="mb-0 text-info fw-bold" id="statTotal">0</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Input Filters -->
-    <div class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Filter Data</span>
-      </div>
-      <div class="card-body">
-        <div class="row g-4">
-          <div class="col-md-2">
-            <label for="yearSelect" class="form-label">Tahun</label>
-            <select id="yearSelect" class="form-select">
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025" selected>2025</option>
-            </select>
-          </div>
-          <div id="projectSelectContainer" class="col-md-5">
-            <label for="projectSearch" class="form-label">Pilih Kegiatan</label>
-            <div class="searchable-dropdown">
-              <input type="text" class="form-control dropdown-search-input" id="projectSearch" placeholder="Cari kegiatan..." disabled>
-              <div class="dropdown-options" id="projectOptions" style="display: none;"></div>
-              <input type="hidden" id="projectSelect">
-            </div>
-          </div>
-          <div class="col-md-3" id="regionSelectContainer">
-            <label for="regionSearch" class="form-label">Pilih Cakupan Wilayah</label>
-            <div class="searchable-dropdown">
-              <input type="text" class="form-control dropdown-search-input" id="regionSearch" placeholder="Cari wilayah..." disabled>
-              <div class="dropdown-options" id="regionOptions" style="display: none;"></div>
-              <input type="hidden" id="regionSelect">
-            </div>
-          </div>
-          <div id="loadButtonContainer" class="col-md-2 d-flex align-items-end">
-            <button id="loadData" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
-              <i class="fas fa-search me-2"></i>Tampilkan Data
-            </button>
           </div>
         </div>
       </div>
@@ -2039,11 +1988,11 @@ $user_data = getUserData();
           // Show performance info to user
           setTimeout(() => {
             const toast = $(`
-              <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 100px; right: 20px; z-index: 10000; min-width: 300px;">
+              <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 100px; right: 20px; z-index: 10000; min-width: 250px; font-size: 0.8rem;">
                 <i class="fas fa-check-circle me-2"></i>
-                <strong>Data berhasil dimuat!</strong><br>
-                <small>${Object.keys(activityData).length} aktivitas • ${regionsToProcess.length} wilayah • ${loadTime}s</small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong style="font-size: 0.85rem;">Data berhasil dimuat!</strong><br>
+                <small style="font-size: 0.7rem;">${Object.keys(activityData).length} aktivitas • ${regionsToProcess.length} wilayah • ${loadTime}s</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.7rem;"></button>
               </div>
             `);
             $('body').append(toast);

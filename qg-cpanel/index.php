@@ -327,9 +327,9 @@ try {
     .spinner-text {
       font-weight: 600;
       color: var(--primary-color);
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       text-align: center;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
     
     /* Custom Loading Animation */
@@ -473,7 +473,7 @@ try {
     }
     
     #statsCards .card-body {
-      padding: 0.2rem 0.15rem !important;
+      padding: 0.4rem 0.15rem !important;
     }
     
     #statsCards h6 {
@@ -609,8 +609,37 @@ try {
   <?php renderSSONavbar('dashboard'); ?>
 
   <div class="container-fluid">
+    <!-- Filters -->
+    <div class="card mb-2" id="filtersCard">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Filter Data</span>
+        <div>
+          <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
+            <i class="fas fa-times me-1"></i>Reset Filter
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-10">
+            <label for="filterProjectSearch" class="form-label">Kegiatan</label>
+            <div class="searchable-dropdown">
+              <input type="text" class="form-control dropdown-search-input" id="filterProjectSearch" placeholder="Cari kegiatan..." value="Semua Kegiatan">
+              <div class="dropdown-options" id="filterProjectOptions" style="display: none;"></div>
+              <input type="hidden" id="filterProject">
+            </div>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button id="applyFilters" class="btn btn-primary w-100">
+              <i class="fas fa-filter me-2"></i>Tampilkan Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Statistics Cards -->
-    <div class="row mb-2" id="statsCards" style="display: none;">
+    <div class="row mb-1" id="statsCards" style="display: none;">
       <div class="col-md-2">
         <div class="card border-0 bg-success bg-opacity-10">
           <div class="card-body text-center">
@@ -674,35 +703,6 @@ try {
               <h6 class="mb-0 text-dark fw-semibold">Kegiatan</h6>
             </div>
             <h3 class="mb-0 text-dark fw-bold" id="statProjects">0</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card" id="filtersCard">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Filter Data</span>
-        <div>
-          <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
-            <i class="fas fa-times me-1"></i>Reset Filter
-          </button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="row g-3">
-          <div class="col-md-10">
-            <label for="filterProjectSearch" class="form-label">Kegiatan</label>
-            <div class="searchable-dropdown">
-              <input type="text" class="form-control dropdown-search-input" id="filterProjectSearch" placeholder="Cari kegiatan..." value="Semua Kegiatan">
-              <div class="dropdown-options" id="filterProjectOptions" style="display: none;"></div>
-              <input type="hidden" id="filterProject">
-            </div>
-          </div>
-          <div class="col-md-2 d-flex align-items-end">
-            <button id="applyFilters" class="btn btn-primary w-100">
-              <i class="fas fa-filter me-2"></i>Tampilkan Data
-            </button>
           </div>
         </div>
       </div>

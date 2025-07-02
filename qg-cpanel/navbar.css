@@ -5,8 +5,9 @@
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
   box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
   border-bottom: none;
-  padding: 0.2rem 0;
+  padding: 0.5rem 0;
   margin-bottom: 0.75rem;
+  min-height: 60px;
 }
 
 .navbar-brand {
