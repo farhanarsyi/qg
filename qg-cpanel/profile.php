@@ -1,6 +1,6 @@
 <?php
 // profile.php - Halaman profil pegawai dengan menu navigasi
-require_once 'sso_config.php';
+require_once 'sso_integration.php';
 
 startSession();
 
@@ -290,21 +290,8 @@ function getUserValue($user_data, $key, $default = '') {
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container-fluid">
-            <span class="navbar-brand">
-                <i class="fas fa-chart-line me-2"></i>
-                Dashboard Quality Gates - BPS
-            </span>
-            <div>
-                <a href="sso_logout.php" class="btn btn-logout">
-                    <i class="fas fa-sign-out-alt me-1"></i>
-                    Logout
-                </a>
-            </div>
-        </div>
-    </nav>
+    <!-- SSO Integrated Navigation -->
+    <?php renderSSONavbar('profile'); ?>
 
     <div class="container">
         <!-- Profile Header -->
@@ -337,6 +324,16 @@ function getUserValue($user_data, $key, $default = '') {
                 <?php endif; ?>
             </div>
             <?php endif; ?>
+            
+            <!-- Quick Navigation -->
+            <div style="margin-top: 1.5rem;">
+                <a href="index.php" class="btn" style="background: var(--primary-color); color: white; margin: 0 0.5rem; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s ease;" onmouseover="this.style.background='var(--primary-hover)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='var(--primary-color)'; this.style.transform='translateY(0)'">
+                    <i class="fas fa-chart-bar me-2"></i>Dashboard
+                </a>
+                <a href="monitoring.php" class="btn" style="background: var(--success-color); color: white; margin: 0 0.5rem; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; transition: all 0.2s ease;" onmouseover="this.style.background='#047857'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='var(--success-color)'; this.style.transform='translateY(0)'">
+                    <i class="fas fa-desktop me-2"></i>Monitoring
+                </a>
+            </div>
         </div>
 
         <!-- Profile Details -->

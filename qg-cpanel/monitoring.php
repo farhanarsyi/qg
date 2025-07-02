@@ -675,7 +675,8 @@ $user_data = getUserData();
     /* Statistics Cards - Ultra Compact */
     #statsCards .card {
       transition: all 0.2s ease;
-      height: 100%;
+      height: auto;
+      min-height: auto;
     }
     
     #statsCards .card:hover {
@@ -684,30 +685,30 @@ $user_data = getUserData();
     }
     
     #statsCards .card-body {
-      padding: 0.3rem 0.25rem;
+      padding: 0.2rem 0.15rem !important;
     }
     
     #statsCards h6 {
-      font-size: 0.55rem;
-      margin-bottom: 0.05rem;
-      line-height: 1.1;
+      font-size: 0.5rem;
+      margin-bottom: 0.025rem;
+      line-height: 1.0;
       font-weight: 600;
     }
     
     #statsCards h3 {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       margin-bottom: 0;
       font-weight: 700;
     }
     
     #statsCards .d-flex {
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.05rem;
       align-items: center;
     }
     
     #statsCards i {
-      font-size: 0.6rem;
-      margin-right: 0.15rem !important;
+      font-size: 0.55rem;
+      margin-right: 0.1rem !important;
     }
 
     /* Zoom and Resolution optimizations */
@@ -814,7 +815,7 @@ $user_data = getUserData();
     <div class="row mb-2" id="statsCards" style="display: none;">
       <div class="col-md-2">
         <div class="card border-0 bg-success bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-check-circle text-success me-2"></i>
               <h6 class="mb-0 text-success fw-semibold">Sudah</h6>
@@ -825,7 +826,7 @@ $user_data = getUserData();
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-danger bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-times-circle text-danger me-2"></i>
               <h6 class="mb-0 text-danger fw-semibold">Belum</h6>
@@ -836,7 +837,7 @@ $user_data = getUserData();
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-secondary bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-minus-circle text-secondary me-2"></i>
               <h6 class="mb-0 text-secondary fw-semibold">Tidak Perlu</h6>
@@ -847,7 +848,7 @@ $user_data = getUserData();
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-warning bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-clock text-warning me-2"></i>
               <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
@@ -858,7 +859,7 @@ $user_data = getUserData();
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-primary bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-play-circle text-primary me-2"></i>
               <h6 class="mb-0 text-primary fw-semibold">Berlangsung</h6>
@@ -869,7 +870,7 @@ $user_data = getUserData();
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-info bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-list text-info me-2"></i>
               <h6 class="mb-0 text-info fw-semibold">Total</h6>

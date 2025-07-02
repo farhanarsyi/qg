@@ -229,10 +229,10 @@ try {
     .date-active {
       background: linear-gradient(135deg, var(--success-color), #30d158);
       color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 16px;
       font-weight: 500;
-      font-size: 0.8rem;
+      font-size: 0.65rem;
       display: inline-block;
       animation: pulse 2s infinite;
     }
@@ -240,20 +240,20 @@ try {
     .date-upcoming {
       background: rgba(255,159,10,0.12);
       color: var(--warning-color);
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 16px;
       font-weight: 500;
-      font-size: 0.8rem;
+      font-size: 0.65rem;
       display: inline-block;
     }
     
     .date-completed {
       background: rgba(142,142,147,0.12);
       color: var(--neutral-color);
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 16px;
       font-weight: 500;
-      font-size: 0.8rem;
+      font-size: 0.65rem;
       display: inline-block;
     }
     
@@ -463,7 +463,8 @@ try {
     /* Statistics Cards - Ultra Compact */
     #statsCards .card {
       transition: all 0.2s ease;
-      height: 100%;
+      height: auto;
+      min-height: auto;
     }
     
     #statsCards .card:hover {
@@ -472,30 +473,30 @@ try {
     }
     
     #statsCards .card-body {
-      padding: 0.3rem 0.25rem;
+      padding: 0.2rem 0.15rem !important;
     }
     
     #statsCards h6 {
-      font-size: 0.55rem;
-      margin-bottom: 0.05rem;
-      line-height: 1.1;
+      font-size: 0.5rem;
+      margin-bottom: 0.025rem;
+      line-height: 1.0;
       font-weight: 600;
     }
     
     #statsCards h3 {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       margin-bottom: 0;
       font-weight: 700;
     }
     
     #statsCards .d-flex {
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.05rem;
       align-items: center;
     }
     
     #statsCards i {
-      font-size: 0.6rem;
-      margin-right: 0.15rem !important;
+      font-size: 0.55rem;
+      margin-right: 0.1rem !important;
     }
 
     /* Zoom and Resolution optimizations */
@@ -612,7 +613,7 @@ try {
     <div class="row mb-2" id="statsCards" style="display: none;">
       <div class="col-md-2">
         <div class="card border-0 bg-success bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-play-circle text-success me-2"></i>
               <h6 class="mb-0 text-success fw-semibold">Sedang Berlangsung</h6>
@@ -623,7 +624,7 @@ try {
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-warning bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-clock text-warning me-2"></i>
               <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
@@ -634,7 +635,7 @@ try {
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-secondary bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-check-circle text-secondary me-2"></i>
               <h6 class="mb-0 text-secondary fw-semibold">Selesai</h6>
@@ -645,7 +646,7 @@ try {
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-info bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-list text-info me-2"></i>
               <h6 class="mb-0 text-info fw-semibold">Total Gate</h6>
@@ -656,7 +657,7 @@ try {
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-primary bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-percentage text-primary me-2"></i>
               <h6 class="mb-0 text-primary fw-semibold">Progress</h6>
@@ -667,7 +668,7 @@ try {
       </div>
       <div class="col-md-2">
         <div class="card border-0 bg-dark bg-opacity-10">
-          <div class="card-body text-center p-3">
+          <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
               <i class="fas fa-project-diagram text-dark me-2"></i>
               <h6 class="mb-0 text-dark fw-semibold">Kegiatan</h6>
