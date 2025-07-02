@@ -392,8 +392,8 @@ $user_data = getUserData();
       font-size: 0.65rem;
       line-height: 1.1;
       padding: 8px 6px;
-      min-width: 90px;
-      max-width: 120px;
+      min-width: 130px;
+      max-width: 180px;
       text-transform: capitalize;
       letter-spacing: 0.3px;
     }
@@ -761,7 +761,7 @@ $user_data = getUserData();
 
   <div class="container-fluid">
     <!-- Input Filters -->
-    <div class="card mb-2">
+    <div class="card" style="margin-bottom: 0.75rem;">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Filter Data</span>
       </div>
@@ -801,7 +801,7 @@ $user_data = getUserData();
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-1" id="statsCards" style="display: none;">
+    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.75rem;">
       <div class="col-md-2">
         <div class="card border-0 bg-success bg-opacity-10">
           <div class="card-body text-center">

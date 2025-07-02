@@ -413,22 +413,22 @@ try {
     }
     
     .dropdown-search-input {
-      border-radius: 8px 8px 0 0 !important;
-      border-bottom: 1px solid var(--border-color) !important;
+      border-radius: 0 0 8px 8px !important;
+      border-top: 1px solid var(--border-color) !important;
     }
     .dropdown-options {
       position: absolute;
-      top: 100%;
+      bottom: 100%;
       left: 0;
       right: 0;
       background: white;
       border: 1px solid var(--border-color);
-      border-top: none;
-      border-radius: 0 0 4px 4px;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
       max-height: 200px;
       overflow-y: auto;
       z-index: 99999;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.2);
     }
     
     .dropdown-option {
@@ -610,7 +610,7 @@ try {
 
   <div class="container-fluid">
     <!-- Filters -->
-    <div class="card mb-2" id="filtersCard">
+    <div class="card" id="filtersCard" style="margin-bottom: 0.75rem;">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Filter Data</span>
         <div>
@@ -639,7 +639,7 @@ try {
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-1" id="statsCards" style="display: none;">
+    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.75rem;">
       <div class="col-md-2">
         <div class="card border-0 bg-success bg-opacity-10">
           <div class="card-body text-center">
