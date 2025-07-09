@@ -257,6 +257,8 @@ try {
       display: inline-block;
     }
     
+
+    
     @keyframes pulse {
       0% { 
         opacity: 1; 
@@ -641,35 +643,13 @@ try {
     <!-- Statistics Cards -->
     <div class="row" id="statsCards" style="display: none; margin-bottom: 0.75rem;">
       <div class="col-md-2">
-        <div class="card border-0 bg-success bg-opacity-10">
+        <div class="card border-0 bg-dark bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-play-circle text-success me-2"></i>
-              <h6 class="mb-0 text-success fw-semibold">Sedang Berlangsung</h6>
+              <i class="fas fa-project-diagram text-dark me-2"></i>
+              <h6 class="mb-0 text-dark fw-semibold">Kegiatan</h6>
             </div>
-            <h3 class="mb-0 text-success fw-bold" id="statActive">0</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-warning bg-opacity-10">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-clock text-warning me-2"></i>
-              <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
-            </div>
-            <h3 class="mb-0 text-warning fw-bold" id="statUpcoming">0</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-secondary bg-opacity-10">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-check-circle text-secondary me-2"></i>
-              <h6 class="mb-0 text-secondary fw-semibold">Selesai</h6>
-            </div>
-            <h3 class="mb-0 text-secondary fw-bold" id="statCompleted">0</h3>
+            <h3 class="mb-0 text-dark fw-bold" id="statProjects">0</h3>
           </div>
         </div>
       </div>
@@ -685,24 +665,35 @@ try {
         </div>
       </div>
       <div class="col-md-2">
-        <div class="card border-0 bg-primary bg-opacity-10">
+        <div class="card border-0 bg-secondary bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-percentage text-primary me-2"></i>
-              <h6 class="mb-0 text-primary fw-semibold">Progress</h6>
+              <i class="fas fa-check-circle text-secondary me-2"></i>
+              <h6 class="mb-0 text-secondary fw-semibold">Selesai</h6>
             </div>
-            <h3 class="mb-0 text-primary fw-bold" id="statProgress">0%</h3>
+            <h3 class="mb-0 text-secondary fw-bold" id="statCompleted">0</h3>
           </div>
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-dark bg-opacity-10">
+      <div class="col-md-3">
+        <div class="card border-0 bg-success bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-project-diagram text-dark me-2"></i>
-              <h6 class="mb-0 text-dark fw-semibold">Kegiatan</h6>
+              <i class="fas fa-play-circle text-success me-2"></i>
+              <h6 class="mb-0 text-success fw-semibold">Sedang Berlangsung</h6>
             </div>
-            <h3 class="mb-0 text-dark fw-bold" id="statProjects">0</h3>
+            <h3 class="mb-0 text-success fw-bold" id="statActive">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 bg-warning bg-opacity-10">
+          <div class="card-body text-center">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-clock text-warning me-2"></i>
+              <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
+            </div>
+            <h3 class="mb-0 text-warning fw-bold" id="statUpcoming">0</h3>
           </div>
         </div>
       </div>
@@ -1180,15 +1171,11 @@ try {
           }
         });
         
-        // Calculate progress (completed / total * 100)
-        const progress = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
-        
         // Update UI
         $("#statActive").text(stats.active);
         $("#statUpcoming").text(stats.upcoming);
         $("#statCompleted").text(stats.completed);
         $("#statTotal").text(stats.total);
-        $("#statProgress").text(progress + '%');
         $("#statProjects").text(stats.projects.size);
         
         // Show stats cards

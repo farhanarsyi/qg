@@ -497,7 +497,20 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(6),
     .table-monitoring td:nth-child(6) {
       position: sticky !important;
+      
       left: 590px !important;
+      
+    /* Animasi kedap-kedip untuk tanggal yang sedang berlangsung */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+    
+    .date-in-range {
+      color: #10b981 !important;
+      font-weight: 600 !important;
+      animation: blink 2s infinite !important;
+    }
       width: 55px;
       min-width: 55px;
       max-width: 55px;
@@ -525,16 +538,19 @@ $user_data = getUserData();
     
     /* Clean borderless design - visual separation through background only */
     
-    /* Date in range */
-    .date-in-range {
-      color: #000;
-      font-weight: normal;
-    }
+
     
     /* Untuk kompatibilitas */
     .date-column {
       text-align: center;
       font-size: 0.65rem;
+    }
+    
+    /* Pastikan animasi kedap-kedip tidak ditimpa oleh CSS lain */
+    .date-column.date-in-range {
+      color: #10b981 !important;
+      font-weight: 600 !important;
+      animation: blink 2s infinite !important;
     }
     
     /* Activity number */
@@ -802,51 +818,18 @@ $user_data = getUserData();
 
     <!-- Statistics Cards -->
     <div class="row" id="statsCards" style="display: none; margin-bottom: 0.75rem;">
-      <div class="col-md-2">
-        <div class="card border-0 bg-success bg-opacity-10">
+      <div class="col-md-3">
+        <div class="card border-0 bg-info bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-check-circle text-success me-2"></i>
-              <h6 class="mb-0 text-success fw-semibold">Sudah</h6>
+              <i class="fas fa-list text-info me-2"></i>
+              <h6 class="mb-0 text-info fw-semibold">Total</h6>
             </div>
-            <h3 class="mb-0 text-success fw-bold" id="statSudah">0</h3>
+            <h3 class="mb-0 text-info fw-bold" id="statTotal">0</h3>
           </div>
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-danger bg-opacity-10">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-times-circle text-danger me-2"></i>
-              <h6 class="mb-0 text-danger fw-semibold">Belum</h6>
-            </div>
-            <h3 class="mb-0 text-danger fw-bold" id="statBelum">0</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-secondary bg-opacity-10">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-minus-circle text-secondary me-2"></i>
-              <h6 class="mb-0 text-secondary fw-semibold">Tidak Perlu</h6>
-            </div>
-            <h3 class="mb-0 text-secondary fw-bold" id="statTidakPerlu">0</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-warning bg-opacity-10">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-clock text-warning me-2"></i>
-              <h6 class="mb-0 text-warning fw-semibold">Akan Datang</h6>
-            </div>
-            <h3 class="mb-0 text-warning fw-bold" id="statAkanDatang">0</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-2">
+      <div class="col-md-3">
         <div class="card border-0 bg-primary bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
@@ -857,14 +840,25 @@ $user_data = getUserData();
           </div>
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="card border-0 bg-info bg-opacity-10">
+      <div class="col-md-3">
+        <div class="card border-0 bg-success bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-list text-info me-2"></i>
-              <h6 class="mb-0 text-info fw-semibold">Total</h6>
+              <i class="fas fa-check-circle text-success me-2"></i>
+              <h6 class="mb-0 text-success fw-semibold">Sudah</h6>
             </div>
-            <h3 class="mb-0 text-info fw-bold" id="statTotal">0</h3>
+            <h3 class="mb-0 text-success fw-bold" id="statSudah">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 bg-danger bg-opacity-10">
+          <div class="card-body text-center">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-times-circle text-danger me-2"></i>
+              <h6 class="mb-0 text-danger fw-semibold">Belum</h6>
+            </div>
+            <h3 class="mb-0 text-danger fw-bold" id="statBelum">0</h3>
           </div>
         </div>
       </div>
@@ -1194,8 +1188,6 @@ $user_data = getUserData();
         const stats = {
           sudah: 0,
           belum: 0,
-          tidakPerlu: 0,
-          akanDatang: 0,
           berlangsung: 0,
           total: 0
         };
@@ -1206,9 +1198,6 @@ $user_data = getUserData();
           
           // Check if activity dates are in range for "berlangsung"
           const isInDateRange = isDateInRange(activity.start, activity.end);
-          if (isInDateRange) {
-            stats.akanDatang++; // Will be corrected below
-          }
           
           // Count statuses for each region
           regions.forEach(region => {
@@ -1219,35 +1208,20 @@ $user_data = getUserData();
               stats.sudah++;
             } else if (status.startsWith('Belum')) {
               stats.belum++;
-            } else if (status === 'Tidak perlu') {
-              stats.tidakPerlu++;
-            } else if (isInDateRange) {
+            }
+            
+            // Count "berlangsung" based on date range
+            if (isInDateRange) {
               stats.berlangsung++;
             }
           });
         }
         
-        // Count activities that are "akan datang" (future dates)
-        for (const key in activityData) {
-          const activity = activityData[key];
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          if (activity.start) {
-            const startDate = new Date(activity.start);
-            startDate.setHours(0, 0, 0, 0);
-            
-            if (today < startDate) {
-              stats.akanDatang += regions.length; // Multiply by regions count
-            }
-          }
-        }
+
         
         // Update UI
         $("#statSudah").text(stats.sudah);
         $("#statBelum").text(stats.belum);
-        $("#statTidakPerlu").text(stats.tidakPerlu);
-        $("#statAkanDatang").text(stats.akanDatang);
         $("#statBerlangsung").text(stats.berlangsung);
         $("#statTotal").text(stats.total);
         
@@ -1375,6 +1349,11 @@ $user_data = getUserData();
           const startDate = data.start;
           const endDate = data.end;
           const isInDateRange = isDateInRange(startDate, endDate);
+          
+          // Debug: log untuk memastikan fungsi bekerja
+          if (isInDateRange) {
+            console.log('Tanggal dalam range:', startDate, endDate);
+          }
           
           // Tambahkan class untuk tanggal yang dalam rentang
           const startDateClass = isInDateRange ? 'date-in-range' : '';
