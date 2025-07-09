@@ -83,6 +83,36 @@ function formatAssessmentResponse($data) {
     return ["status" => true, "data" => $assessment];
 }
 
+// Function to get nama daerah from daftar_daerah.csv
+function getNamaDaerah($kode) {
+    static $daerah_map = null;
+    
+    // Load CSV file only once
+    if ($daerah_map === null) {
+        $daerah_map = [];
+        $csv_file = 'daftar_daerah.csv';
+        
+        if (file_exists($csv_file)) {
+            $handle = fopen($csv_file, 'r');
+            if ($handle) {
+                // Skip header
+                fgetcsv($handle);
+                
+                while (($data = fgetcsv($handle)) !== false) {
+                    if (count($data) >= 2) {
+                        $kode_daerah = $data[0];
+                        $nama_daerah = $data[1];
+                        $daerah_map[$kode_daerah] = $nama_daerah;
+                    }
+                }
+                fclose($handle);
+            }
+        }
+    }
+    
+    return isset($daerah_map[$kode]) ? $daerah_map[$kode] : "Wilayah " . $kode;
+}
+
 if(isset($_POST['action'])){
     $action = $_POST['action'];
     
@@ -314,7 +344,35 @@ if(isset($_POST['action'])){
             
             $query = "SELECT * FROM [project_coverages] WHERE [id_project] = ? ORDER BY [prov], [kab]";
             
-            echo executeQuery($query, [$id_project]);
+            $conn = getConnection();
+            if ($conn === null) {
+                echo json_encode(["status" => false, "message" => "Connection failed"]);
+                break;
+            }
+            
+            $stmt = sqlsrv_query($conn, $query, [$id_project]);
+            if ($stmt === false) {
+                $errors = sqlsrv_errors();
+                $errorMsg = isset($errors[0]['message']) ? $errors[0]['message'] : "Query execution failed";
+                sqlsrv_close($conn);
+                echo json_encode(["status" => false, "message" => $errorMsg]);
+                break;
+            }
+            
+            $data = [];
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                // Jika name null, cari dari daftar_daerah.csv
+                if ($row['name'] === null) {
+                    $kode = $row['prov'] . $row['kab'];
+                    $nama_daerah = getNamaDaerah($kode);
+                    $row['name'] = $nama_daerah;
+                }
+                $data[] = $row;
+            }
+            sqlsrv_free_stmt($stmt);
+            sqlsrv_close($conn);
+            
+            echo json_encode(["status" => true, "data" => $data]);
             break;
             
         case "fetchCorrectivesByKab":

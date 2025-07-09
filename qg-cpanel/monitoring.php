@@ -1289,10 +1289,13 @@ $user_data = getUserData();
         
         // Tambahkan kolom status untuk setiap wilayah
         regions.forEach(region => {
-          // Capitalize each word in region name
-          const capitalizedName = region.name.split(' ').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          ).join(' ');
+          // Capitalize each word in region name, handle null case
+          let capitalizedName = "Wilayah Tidak Diketahui";
+          if (region.name && region.name.trim() !== '') {
+            capitalizedName = region.name.split(' ').map(word => 
+              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            ).join(' ');
+          }
           tableHtml += `<th class="status-column region-header">${capitalizedName}</th>`;
         });
         
@@ -1502,7 +1505,7 @@ $user_data = getUserData();
                 let provinceName = `Provinsi ${provCode}`;
                 
                 // Coba ekstrak nama provinsi dari nama kabupaten
-                if (firstKab && firstKab.name) {
+                if (firstKab && firstKab.name && firstKab.name.trim() !== '') {
                   const kabName = firstKab.name;
                   if (kabName.includes(' - ')) {
                     // Format: "Nama Provinsi - Nama Kabupaten"
@@ -1598,7 +1601,7 @@ $user_data = getUserData();
                   
                   // Coba ekstrak dari nama kabupaten
                   const kabName = firstKabupaten.name;
-                  if (kabName.includes(' - ')) {
+                  if (kabName && kabName.trim() !== '' && kabName.includes(' - ')) {
                     // Format: "Nama Provinsi - Nama Kabupaten"
                     provinceName = kabName.split(' - ')[0];
                   } else {
