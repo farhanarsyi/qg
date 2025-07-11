@@ -13,6 +13,7 @@ $user_data = getUserData();
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Monitoring Quality Gates</title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -711,8 +712,8 @@ $user_data = getUserData();
       transform: translateY(-1px);
     }
 
-    /* Zoom and Resolution optimizations */
-    @media screen {
+    /* Zoom and Resolution optimizations - Desktop only */
+    @media screen and (min-width: 992px) {
       html {
         zoom: 1;
         width: 100%;
@@ -757,51 +758,230 @@ $user_data = getUserData();
       }
     }
     
+    /* Tablet Responsive */
     @media (max-width: 992px) {
       .container-fluid {
         padding: 0.8rem;
-        min-width: 1000px;
+        min-width: auto;
+        max-width: 100%;
       }
       
       .card-body {
-        padding: 0.6rem;
+        padding: 0.8rem;
       }
       
-      #statsCards .col-md-2 {
-        margin-bottom: 0.3rem;
+      /* Stack filters vertically on tablet */
+      #projectSelectContainer {
+        order: 1;
+      }
+      
+      #regionSelectContainer {
+        order: 2;
+      }
+      
+      #loadButtonContainer {
+        order: 3;
+        margin-top: 1rem;
+      }
+      
+      /* Statistics cards adjustment */
+      #statsCards .col-md-2, #statsCards .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        margin-bottom: 0.5rem;
+      }
+      
+      #statsCards .card-body {
+        padding: 0.6rem 0.4rem;
+      }
+      
+      #statsCards h6 {
+        font-size: 0.7rem;
+      }
+      
+      #statsCards h3 {
+        font-size: 1.1rem;
       }
     }
     
+    /* Mobile Responsive */
     @media (max-width: 768px) {
       .container-fluid {
-        padding: 0.5rem;
-        min-width: 900px;
+        padding: 1rem 0.5rem;
+        min-width: auto;
+        max-width: 100%;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+      
+      /* Filter Cards - Full width on mobile */
+      .card-header {
+        padding: 0.8rem;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      
+      .card-body {
+        padding: 1rem;
+      }
+      
+      /* Filter Layout - Stack everything */
+      .row.g-4 {
+        gap: 1rem !important;
+      }
+      
+      .col-md-2, .col-md-3, .col-md-5 {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+      
+      /* Form elements - Larger for touch */
+      .form-label {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      
+      .form-select, .form-control {
+        font-size: 1.1rem;
+        padding: 0.8rem;
+        min-height: 48px; /* Touch target size */
+      }
+      
+      /* Searchable dropdowns */
+      .dropdown-search-input {
+        font-size: 1.1rem;
+        padding: 0.8rem;
+        min-height: 48px;
+      }
+      
+      .dropdown-options {
+        font-size: 1rem;
+        max-height: 200px;
+      }
+      
+      .dropdown-option {
+        padding: 0.8rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+      }
+      
+      /* Button - Larger for touch */
+      #loadData {
+        font-size: 1.1rem;
+        padding: 0.9rem 1.2rem;
+        min-height: 52px;
+        margin-top: 0.5rem;
+      }
+      
+      /* Statistics cards - 2 per row */
+      #statsCards .col-md-2, #statsCards .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+        margin-bottom: 0.8rem;
+      }
+      
+      #statsCards .card-body {
+        padding: 0.8rem 0.4rem;
+      }
+      
+      #statsCards h6 {
+        font-size: 0.8rem;
+        line-height: 1.2;
+      }
+      
+      #statsCards h3 {
+        font-size: 1.3rem;
+        margin-top: 0.3rem;
+      }
+      
+      #statsCards i {
+        font-size: 0.8rem;
+      }
+      
+      /* Level filter cards - Larger and easier to tap */
+      .level-filter-card {
+        padding: 0.8rem 1.2rem;
+        font-size: 0.95rem;
+        min-height: 44px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Table wrapper - Better mobile scrolling */
+      .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-height: 60vh;
+      }
+      
+      .table-monitoring th,
+      .table-monitoring td {
+        font-size: 0.8rem;
+        padding: 0.6rem 0.4rem;
+        min-width: 100px;
+      }
+    }
+    
+    /* Small Mobile Responsive */
+    @media (max-width: 480px) {
+      .container-fluid {
+        padding: 0.8rem 0.3rem;
       }
       
       h1 {
         font-size: 1.3rem;
-        margin-bottom: 1rem;
-      }
-      
-      .card-header {
-        padding: 0.5rem 0.6rem;
       }
       
       .card-body {
-        padding: 0.6rem;
+        padding: 0.8rem;
       }
       
-      #statsCards .col-md-2 {
-        width: 50%;
-        margin-bottom: 0.3rem;
+      /* Statistics cards - Single column on very small screens */
+      #statsCards .col-md-2, #statsCards .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 0.6rem;
+      }
+      
+      #statsCards .card-body {
+        padding: 1rem 0.8rem;
       }
       
       #statsCards h6 {
-        font-size: 0.5rem;
+        font-size: 0.9rem;
       }
       
       #statsCards h3 {
-        font-size: 0.85rem;
+        font-size: 1.5rem;
+      }
+      
+      /* Level filter cards - Full width stack */
+      .d-flex.justify-content-start {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .level-filter-card {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        padding: 1rem;
+        font-size: 1rem;
+      }
+      
+      /* Table - Even more scrollable */
+      .table-monitoring th,
+      .table-monitoring td {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.3rem;
+        min-width: 90px;
       }
     }
   </style>
