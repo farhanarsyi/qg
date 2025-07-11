@@ -676,6 +676,41 @@ $user_data = getUserData();
       margin-right: 0.1rem !important;
     }
 
+    /* Level Filter Cards */
+    .level-filter-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .level-filter-card:hover {
+      border-color: #059669;
+      color: #059669;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
+    }
+
+    .level-filter-card.active {
+      background: #059669;
+      border-color: #059669;
+      color: white;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+    }
+
+    .level-filter-card.active:hover {
+      background: #047857;
+      border-color: #047857;
+      transform: translateY(-1px);
+    }
+
     /* Zoom and Resolution optimizations */
     @media screen {
       html {
@@ -777,7 +812,7 @@ $user_data = getUserData();
 
   <div class="container-fluid">
     <!-- Input Filters -->
-    <div class="card" style="margin-bottom: 0.75rem;">
+    <div class="card" style="margin-bottom: 0.5rem;">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Filter Data</span>
       </div>
@@ -817,8 +852,19 @@ $user_data = getUserData();
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.75rem;">
-      <div class="col-md-3">
+    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.15rem;">
+      <div class="col-md-2">
+        <div class="card border-0 bg-primary bg-opacity-10">
+          <div class="card-body text-center">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-play-circle text-primary me-2"></i>
+              <h6 class="mb-0 text-primary fw-semibold">Sedang Berjalan</h6>
+            </div>
+            <h3 class="mb-0 text-primary fw-bold" id="statSedangBerjalan">0</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
         <div class="card border-0 bg-info bg-opacity-10">
           <div class="card-body text-center">
             <div class="d-flex align-items-center justify-content-center mb-2">
@@ -826,17 +872,6 @@ $user_data = getUserData();
               <h6 class="mb-0 text-info fw-semibold">Total</h6>
             </div>
             <h3 class="mb-0 text-info fw-bold" id="statTotal">0</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card border-0 bg-primary bg-opacity-10">
-          <div class="card-body text-center">
-            <div class="d-flex align-items-center justify-content-center mb-2">
-              <i class="fas fa-play-circle text-primary me-2"></i>
-              <h6 class="mb-0 text-primary fw-semibold">Berlangsung</h6>
-            </div>
-            <h3 class="mb-0 text-primary fw-bold" id="statBerlangsung">0</h3>
           </div>
         </div>
       </div>
@@ -862,10 +897,38 @@ $user_data = getUserData();
           </div>
         </div>
       </div>
+      <div class="col-md-2">
+        <div class="card border-0 bg-secondary bg-opacity-10">
+          <div class="card-body text-center">
+            <div class="d-flex align-items-center justify-content-center mb-2">
+              <i class="fas fa-ban text-secondary me-2"></i>
+              <h6 class="mb-0 text-secondary fw-semibold">Tidak Perlu</h6>
+            </div>
+            <h3 class="mb-0 text-secondary fw-bold" id="statTidakPerlu">0</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Filter Cards -->
+    <div class="row" id="levelFilterCards" style="display: none; margin-bottom: 0.15rem;">
+      <div class="col-md-12">
+        <div class="d-flex justify-content-start gap-2">
+          <div class="level-filter-card" data-level="1">
+            <span>Pusat</span>
+          </div>
+          <div class="level-filter-card" data-level="2">
+            <span>Provinsi</span>
+          </div>
+          <div class="level-filter-card" data-level="3">
+            <span>Kabupaten/Kota</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Results Section -->
-    <div id="resultsContainer"></div>
+    <div id="resultsContainer" style="margin-top: 0.1rem;"></div>
   </div>
 
   <!-- Enhanced Loading Spinner -->
@@ -894,6 +957,7 @@ $user_data = getUserData();
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
       let currentUser = null; // User yang sedang login
+      let activeLevelFilters = new Set(); // Track active level filters
 
       // Cache selector DOM
       const $yearSelect    = $("#yearSelect");
@@ -1188,45 +1252,58 @@ $user_data = getUserData();
         const stats = {
           sudah: 0,
           belum: 0,
-          berlangsung: 0,
+          sedangBerjalan: 0,
+          tidakPerlu: 0,
           total: 0
         };
         
-        // Count statuses from all activities and regions
+        // Count individual cells (activity × region combinations)
         for (const key in activityData) {
           const activity = activityData[key];
           
-          // Check if activity dates are in range for "berlangsung"
-          const isInDateRange = isDateInRange(activity.start, activity.end);
+          // Apply level filter if active
+          if (activeLevelFilters.size > 0) {
+            const rawLevel = activity.assessmentLevel || 1;
+            if (!activeLevelFilters.has(rawLevel)) {
+              continue; // Skip this activity if level filter doesn't match
+            }
+          }
           
-          // Count statuses for each region
+          // Check if activity dates are in range for "sedang berjalan" (per row)
+          const isInDateRange = isDateInRange(activity.start, activity.end);
+          if (isInDateRange) {
+            stats.sedangBerjalan++;
+          }
+          
+          // Count status for each region (each cell)
           regions.forEach(region => {
             const status = activity.statuses[region.id] || "Tidak tersedia";
+            
+            // Count total cells
             stats.total++;
             
+            // Count by status type
             if (status.startsWith('Sudah')) {
               stats.sudah++;
             } else if (status.startsWith('Belum')) {
               stats.belum++;
+            } else if (status === 'Tidak perlu') {
+              stats.tidakPerlu++;
             }
-            
-            // Count "berlangsung" based on date range
-            if (isInDateRange) {
-              stats.berlangsung++;
-            }
+            // Note: "Tidak tersedia" and other statuses are not counted in specific categories
           });
         }
-        
-
         
         // Update UI
         $("#statSudah").text(stats.sudah);
         $("#statBelum").text(stats.belum);
-        $("#statBerlangsung").text(stats.berlangsung);
+        $("#statSedangBerjalan").text(stats.sedangBerjalan);
+        $("#statTidakPerlu").text(stats.tidakPerlu);
         $("#statTotal").text(stats.total);
         
-        // Show stats cards
+        // Show stats cards and level filter cards
         $("#statsCards").show();
+        $("#levelFilterCards").show();
       };
 
       // --- Fungsi untuk membuat dan menampilkan tabel hasil ---
@@ -1285,6 +1362,15 @@ $user_data = getUserData();
         // 1. Ambil semua aktivitas dan urutkan berdasarkan gate, UK, dan proses
         for (const key in activityData) {
           const data = activityData[key];
+          
+          // Apply level filter if active
+          if (activeLevelFilters.size > 0) {
+            const rawLevel = data.assessmentLevel || 1;
+            if (!activeLevelFilters.has(rawLevel)) {
+              continue; // Skip this activity if level filter doesn't match
+            }
+          }
+          
           orderedActivities.push(data);
         }
         
@@ -1384,8 +1470,34 @@ $user_data = getUserData();
         
         $resultsContainer.html(tableHtml);
         
-        // Calculate and display statistics
+        // Update result count with filtered activities
+        $("#resultCount").text(`${orderedActivities.length} aktivitas`);
+        
+        // Calculate and display statistics using filtered data
         calculateMonitoringStatistics(regions);
+      };
+
+      // Function to apply level filter
+      const applyLevelFilter = () => {
+        // Find current regions from last display
+        const currentRegions = [];
+        $('.region-header').each(function() {
+          const name = $(this).text().trim();
+          // Try to match with existing regions
+          if (name === "Pusat") {
+            currentRegions.push({ id: "pusat", prov: "00", kab: "00", name: "Pusat" });
+          } else {
+            // For other regions, try to find from coverageData
+            const region = coverageData.find(r => r.name && r.name.toLowerCase() === name.toLowerCase());
+            if (region) {
+              currentRegions.push(region);
+            }
+          }
+        });
+        
+        if (currentRegions.length > 0) {
+          displayResultTable(currentRegions);
+        }
       };
 
       // --- Fungsi untuk Load Data (Projects & Regions) ---
@@ -1839,6 +1951,26 @@ $user_data = getUserData();
       $("#logoutBtn").on('click', function(){
         if (confirm('Apakah Anda yakin ingin logout?')) {
           window.location.href = 'sso_logout.php';
+        }
+      });
+
+      // Level Filter handlers
+      $(document).on('click', '.level-filter-card', function(){
+        const level = $(this).data('level');
+        const $card = $(this);
+        
+        // Toggle active state
+        if ($card.hasClass('active')) {
+          $card.removeClass('active');
+          activeLevelFilters.delete(level);
+        } else {
+          $card.addClass('active');
+          activeLevelFilters.add(level);
+        }
+        
+        // Re-filter table if data is already loaded
+        if (Object.keys(activityData).length > 0) {
+          applyLevelFilter();
         }
       });
 
