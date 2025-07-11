@@ -203,7 +203,7 @@ try {
     echo "</ul>";
     echo "<p><a href='debug.php?show=debug'>🐛 Debug Info</a> | ";
     echo "<a href='sso_login.php'>🔑 Try Login Again</a> | ";
-    echo "<a href='main.php'>🏠 Home</a></p>";
+    echo "<a href='index.php'>🏠 Home</a></p>";
     echo "</body></html>";
     exit;
 }

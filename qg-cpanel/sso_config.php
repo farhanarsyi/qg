@@ -11,7 +11,7 @@ define('SSO_AUTH_SERVER_URL', 'https://sso.bps.go.id');
 define('SSO_REALM', 'pegawai-bps');
 define('SSO_CLIENT_ID', '07300-dashqg-l30');
 define('SSO_CLIENT_SECRET', 'e1c46e44-f33a-45f0-ace1-62c445333ae7');
-define('SSO_REDIRECT_URI', 'https://dashboardqg.web.bps.go.id/main/sso_callback.php'); // Production URL
+define('SSO_REDIRECT_URI', 'https://dashboardqg.web.bps.go.id/sso_callback.php'); // Production URL
 define('SSO_SCOPE', 'openid profile-pegawai');
 
 // URL API Pegawai BPS

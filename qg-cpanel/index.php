@@ -31,7 +31,7 @@ try {
     echo "<!DOCTYPE html><html><head><title>Error - Dashboard</title></head><body>";
     echo "<h1>🚨 Dashboard Error</h1>";
     echo "<p>Terjadi kesalahan saat memuat dashboard: " . htmlspecialchars($e->getMessage()) . "</p>";
-    echo "<p><a href='debug.php?show=debug'>🐛 Debug Info</a> | <a href='sso_login.php'>🔑 Login Ulang</a> | <a href='main.php'>🏠 Kembali</a></p>";
+    echo "<p><a href='debug.php?show=debug'>🐛 Debug Info</a> | <a href='sso_login.php'>🔑 Login Ulang</a> | <a href='index.php'>🏠 Kembali</a></p>";
     echo "</body></html>";
     exit;
 }

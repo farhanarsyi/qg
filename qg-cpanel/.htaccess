@@ -6,9 +6,8 @@ Header always set X-Frame-Options DENY
 Header always set X-XSS-Protection "1; mode=block"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
-# Redirect main domain ke main.php sebagai entry point
-RewriteRule ^$ main.php [L]
-RewriteRule ^index/?$ main.php [L]
+# Redirect root domain ke index.php sebagai entry point
+RewriteRule ^$ index.php [L]
 
 # Allow specific files
 RewriteRule ^(sso_callback|sso_login|sso_logout|index|main|monitoring|profile|api|debug|debug_helper|test_session)\.php$ - [L]
