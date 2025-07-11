@@ -852,7 +852,7 @@ $user_data = getUserData();
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.15rem;">
+    <div class="row" id="statsCards" style="display: none; margin-bottom: 0;">
       <div class="col-md-2">
         <div class="card border-0 bg-primary bg-opacity-10">
           <div class="card-body text-center">
@@ -911,7 +911,7 @@ $user_data = getUserData();
     </div>
 
     <!-- Level Filter Cards -->
-    <div class="row" id="levelFilterCards" style="display: none; margin-bottom: 0.15rem;">
+    <div class="row" id="levelFilterCards" style="display: none; margin-bottom: 0.1rem;">
       <div class="col-md-12">
         <div class="d-flex justify-content-start gap-2">
           <div class="level-filter-card" data-level="1">
@@ -1945,6 +1945,16 @@ $user_data = getUserData();
         }
       };
 
+      // --- Helper function to hide table and stats ---
+      const hideTableAndStats = () => {
+        $resultsContainer.empty();
+        $("#statsCards").hide();
+        $("#levelFilterCards").hide();
+        activityData = {}; // Clear activity data
+        activeLevelFilters.clear(); // Clear level filters
+        $('.level-filter-card').removeClass('active'); // Reset level filter cards
+      };
+
       // --- Event Handlers ---
 
       // Logout handler
@@ -1976,6 +1986,9 @@ $user_data = getUserData();
 
       $yearSelect.on('change', async function(){
         year = $(this).val();
+        
+        // Hide table and stats when year changes
+        hideTableAndStats();
         
         // Reset dropdowns
         projectDropdown.clear();
@@ -2138,6 +2151,9 @@ $user_data = getUserData();
             selectedProject = value;
             selectedRegion = null;
             
+            // Hide table and stats when project changes
+            hideTableAndStats();
+            
             if (currentUser.prov === "00" && currentUser.kab === "00") {
               regionDropdown.clear();
               regionDropdown.disable();
@@ -2156,6 +2172,9 @@ $user_data = getUserData();
           'text',
           (value, text) => {
             selectedRegion = value;
+            
+            // Hide table and stats when region changes
+            hideTableAndStats();
           }
         );
         
