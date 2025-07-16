@@ -83,29 +83,25 @@ function formatAssessmentResponse($data) {
     return ["status" => true, "data" => $assessment];
 }
 
-// Function to get nama daerah from daftar_daerah.csv
+// Function to get nama daerah from daftar_daerah.json
 function getNamaDaerah($kode) {
     static $daerah_map = null;
     
-    // Load CSV file only once
+    // Load JSON file only once
     if ($daerah_map === null) {
         $daerah_map = [];
-        $csv_file = 'daftar_daerah.csv';
+        $json_file = __DIR__ . '/daftar_daerah.json';
         
-        if (file_exists($csv_file)) {
-            $handle = fopen($csv_file, 'r');
-            if ($handle) {
-                // Skip header
-                fgetcsv($handle);
-                
-                while (($data = fgetcsv($handle)) !== false) {
-                    if (count($data) >= 2) {
-                        $kode_daerah = $data[0];
-                        $nama_daerah = $data[1];
-                        $daerah_map[$kode_daerah] = $nama_daerah;
+        if (file_exists($json_file)) {
+            $json_content = file_get_contents($json_file);
+            $daerah_data = json_decode($json_content, true);
+            
+            if (is_array($daerah_data)) {
+                foreach ($daerah_data as $item) {
+                    if (isset($item['kode']) && isset($item['daerah'])) {
+                        $daerah_map[$item['kode']] = $item['daerah'];
                     }
                 }
-                fclose($handle);
             }
         }
     }
@@ -361,7 +357,7 @@ if(isset($_POST['action'])){
             
             $data = [];
             while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-                // Jika name null, cari dari daftar_daerah.csv
+                // Jika name null, cari dari daftar_daerah.json
                 if ($row['name'] === null) {
                     $kode = $row['prov'] . $row['kab'];
                     $nama_daerah = getNamaDaerah($kode);

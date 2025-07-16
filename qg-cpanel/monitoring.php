@@ -70,7 +70,7 @@ $user_data = getUserData();
       border-radius: 12px;
       box-shadow: 0 2px 20px rgba(0,0,0,0.04);
       border: none;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.5rem;
       background-color: #ffffff;
       overflow: visible;
     }
@@ -812,7 +812,7 @@ $user_data = getUserData();
 
   <div class="container-fluid">
     <!-- Input Filters -->
-    <div class="card" style="margin-bottom: 0.3rem;">
+    <div class="card" style="margin-bottom: 0.5rem;">
       <div class="card-body">
         <div class="row g-4">
           <div class="col-md-2">
