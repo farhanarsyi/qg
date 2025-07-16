@@ -440,9 +440,9 @@ $user_data = getUserData();
     .table-monitoring td:nth-child(3) {
       position: sticky !important;
       left: 300px !important;
-      width: 60px;
-      min-width: 60px;
-      max-width: 60px;
+      width: 100px;
+      min-width: 100px;
+      max-width: 100px;
       text-align: center;
       z-index: 13 !important;
     }
@@ -457,7 +457,7 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(4),
     .table-monitoring td:nth-child(4) {
       position: sticky !important;
-      left: 360px !important;
+      left: 400px !important;
       width: 180px;
       min-width: 180px;
       max-width: 180px;
@@ -477,7 +477,7 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(5),
     .table-monitoring td:nth-child(5) {
       position: sticky !important;
-      left: 540px !important;
+      left: 580px !important;
       width: 50px;
       min-width: 50px;
       max-width: 50px;
@@ -498,7 +498,7 @@ $user_data = getUserData();
     .table-monitoring td:nth-child(6) {
       position: sticky !important;
       
-      left: 590px !important;
+      left: 630px !important;
       
     /* Animasi kedap-kedip untuk tanggal yang sedang berlangsung */
     @keyframes blink {
