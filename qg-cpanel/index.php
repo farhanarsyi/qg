@@ -613,14 +613,6 @@ try {
   <div class="container-fluid">
     <!-- Filters -->
     <div class="card" id="filtersCard" style="margin-bottom: 0.75rem;">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Filter Data</span>
-        <div>
-          <button class="btn btn-sm btn-outline-secondary" id="clearFilters">
-            <i class="fas fa-times me-1"></i>Reset Filter
-          </button>
-        </div>
-      </div>
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-10">
