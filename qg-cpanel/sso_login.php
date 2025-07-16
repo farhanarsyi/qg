@@ -18,12 +18,11 @@ if (isLoggedIn()) {
     $redirect_to = $_GET['redirect'] ?? 'index.php';
     
     // Validasi redirect target untuk keamanan
-    $allowed_redirects = ['index.php', 'monitoring.php', 'profile.php', 'dashboard', 'monitoring', 'profile'];
+    $allowed_redirects = ['index.php', 'monitoring.php', 'dashboard', 'monitoring'];
     
     if (in_array($redirect_to, $allowed_redirects)) {
         if ($redirect_to === 'dashboard') $redirect_to = 'index.php';
         if ($redirect_to === 'monitoring') $redirect_to = 'monitoring.php';
-        if ($redirect_to === 'profile') $redirect_to = 'profile.php';
         
         header('Location: ' . $redirect_to);
     } else {

@@ -148,10 +148,6 @@ function renderSSONavbar($active_page = 'dashboard') {
                         <i class="fas fa-user-circle"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="profile.php">
-                            <i class="fas fa-user me-2"></i>Profile
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="sso_logout.php">
                             <i class="fas fa-sign-out-alt me-2"></i>Logout
                         </a></li>
