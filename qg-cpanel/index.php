@@ -641,7 +641,7 @@ try {
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.75rem;">
+    <div class="row" id="statsCards" style="display: none; margin-bottom: 0rem;">
       <div class="col-md-2">
         <div class="card border-0 bg-dark bg-opacity-10">
           <div class="card-body text-center">
@@ -701,10 +701,6 @@ try {
 
     <!-- Results -->
     <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Daftar Project-Gate</span>
-        <span id="resultCount" class="badge bg-primary rounded-pill">0 data</span>
-      </div>
       <div class="card-body p-0">
         <div class="table-wrapper">
           <table class="table-dashboard">

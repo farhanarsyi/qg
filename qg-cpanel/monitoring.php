@@ -70,7 +70,7 @@ $user_data = getUserData();
       border-radius: 12px;
       box-shadow: 0 2px 20px rgba(0,0,0,0.04);
       border: none;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.3rem;
       background-color: #ffffff;
       overflow: visible;
     }
@@ -655,19 +655,19 @@ $user_data = getUserData();
     
     #statsCards h6 {
       font-size: 0.5rem;
-      margin-bottom: 0.025rem;
+      margin-bottom: 0.3rem;
       line-height: 1.0;
       font-weight: 600;
     }
     
     #statsCards h3 {
       font-size: 0.8rem;
-      margin-bottom: 0;
+      margin-bottom: 0.3rem;
       font-weight: 700;
     }
     
     #statsCards .d-flex {
-      margin-bottom: 0.05rem;
+      margin-bottom: 0.3rem;
       align-items: center;
     }
     
@@ -812,10 +812,7 @@ $user_data = getUserData();
 
   <div class="container-fluid">
     <!-- Input Filters -->
-    <div class="card" style="margin-bottom: 0.5rem;">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Filter Data</span>
-      </div>
+    <div class="card" style="margin-bottom: 0.3rem;">
       <div class="card-body">
         <div class="row g-4">
           <div class="col-md-2">
@@ -852,7 +849,7 @@ $user_data = getUserData();
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row" id="statsCards" style="display: none; margin-bottom: 0;">
+    <div class="row" id="statsCards" style="display: none; margin-bottom: 0.3rem;">
       <div class="col-md-2">
         <div class="card border-0 bg-primary bg-opacity-10">
           <div class="card-body text-center">
@@ -911,7 +908,7 @@ $user_data = getUserData();
     </div>
 
     <!-- Level Filter Cards -->
-    <div class="row" id="levelFilterCards" style="display: none; margin-bottom: 0.1rem;">
+    <div class="row" id="levelFilterCards" style="display: none; margin-bottom: 0.3rem;">
       <div class="col-md-12">
         <div class="d-flex justify-content-start gap-2">
           <div class="level-filter-card" data-level="1">

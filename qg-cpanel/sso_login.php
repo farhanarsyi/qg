@@ -223,11 +223,6 @@ $_SESSION['oauth2state'] = $provider->getState();
                 <i class="fas fa-sign-in-alt"></i>
                 Masuk dengan SSO BPS
             </a>
-            
-            <div class="footer-info">
-                <p><strong>Secure Login</strong></p>
-                <p>Anda akan diarahkan ke portal SSO resmi BPS untuk proses autentikasi yang aman.</p>
-            </div>
         </div>
     </div>
     
