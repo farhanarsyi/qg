@@ -567,6 +567,50 @@ $user_data = getUserData();
       text-align: center;
     }
     
+    /* Gate and UK Badge Styles */
+    .gate-badge {
+      display: inline-block;
+      border-radius: 10px;
+      background: #d1fae5; /* hijau pastel */
+      color: #047857;
+      font-weight: bold;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+      box-shadow: none;
+      border: 1px solid #a7f3d0;
+      margin-bottom: 2px;
+      cursor: default;
+      transition: none;
+      text-align: center;
+      min-width: 60px;
+    }
+    .uk-badge {
+      display: inline-block;
+      border-radius: 10px;
+      background: #dbeafe; /* biru pastel */
+      color: #1e40af;
+      font-weight: bold;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+      box-shadow: none;
+      border: 1px solid #bfdbfe;
+      margin-bottom: 2px;
+      cursor: default;
+      transition: none;
+      text-align: center;
+      min-width: 60px;
+    }
+    .gate-badge:hover, .uk-badge:hover {
+      background: inherit;
+      color: inherit;
+    }
+    /* Center content in table cell for gate and uk */
+    .table-monitoring td:nth-child(1),
+    .table-monitoring td:nth-child(2) {
+      text-align: center;
+      vertical-align: middle;
+    }
+    
     /* Activity text */
     .activity-text {
       font-size: 0.7rem;
@@ -804,6 +848,40 @@ $user_data = getUserData();
         font-size: 0.85rem;
       }
     }
+
+    /* Gate badge colors */
+    .gate-badge-1  { background: #d1fae5; color: #047857; border-color: #a7f3d0; }
+    .gate-badge-2  { background: #fef9c3; color: #b45309; border-color: #fde68a; }
+    .gate-badge-3  { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    .gate-badge-4  { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+    .gate-badge-5  { background: #f3e8ff; color: #7c3aed; border-color: #e9d5ff; }
+    .gate-badge-6  { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+    .gate-badge-7  { background: #fef2f2; color: #be123c; border-color: #fecdd3; }
+    .gate-badge-8  { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+    .gate-badge-9  { background: #f0fdfa; color: #0e7490; border-color: #99f6e4; }
+    .gate-badge-10 { background: #fefce8; color: #a16207; border-color: #fef9c3; }
+    .gate-badge-11 { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+    .gate-badge-12 { background: #f3f4f6; color: #6d28d9; border-color: #ddd6fe; }
+    .gate-badge-13 { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .gate-badge-14 { background: #f0fdf4; color: #059669; border-color: #bbf7d0; }
+    .gate-badge-15 { background: #f1f5f9; color: #0369a1; border-color: #bae6fd; }
+
+    /* UK badge colors */
+    .uk-badge-1  { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+    .uk-badge-2  { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .uk-badge-3  { background: #fce7f3; color: #be185d; border-color: #fbcfe8; }
+    .uk-badge-4  { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+    .uk-badge-5  { background: #ede9fe; color: #6d28d9; border-color: #ddd6fe; }
+    .uk-badge-6  { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+    .uk-badge-7  { background: #fef2f2; color: #be123c; border-color: #fecdd3; }
+    .uk-badge-8  { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+    .uk-badge-9  { background: #f0fdfa; color: #0e7490; border-color: #99f6e4; }
+    .uk-badge-10 { background: #fefce8; color: #a16207; border-color: #fef9c3; }
+    .uk-badge-11 { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+    .uk-badge-12 { background: #f3f4f6; color: #7c3aed; border-color: #ddd6fe; }
+    .uk-badge-13 { background: #fce7f3; color: #be185d; border-color: #fbcfe8; }
+    .uk-badge-14 { background: #f0fdf4; color: #059669; border-color: #bbf7d0; }
+    .uk-badge-15 { background: #f1f5f9; color: #0369a1; border-color: #bae6fd; }
   </style>
 </head>
 <body>
@@ -1419,12 +1497,28 @@ $user_data = getUserData();
           else if (rawLevel === 3) levelLabel = "Kabupaten";
           else levelLabel = "Tidak diketahui";
           
+          // Ambil nomor gate dan uk untuk badge warna
+          let gateNum = 1;
+          let ukNum = 1;
+          const gateMatch = data.gate.match(/GATE\s?(\d+)/i);
+          if (gateMatch) gateNum = parseInt(gateMatch[1]);
+          const ukMatch = data.uk.match(/UK\s?(\d+)/i);
+          if (ukMatch) ukNum = parseInt(ukMatch[1]);
+          
           tableHtml += `<tr class="${rowClass}">`;
           
           // Tampilkan semua kolom untuk setiap baris (tanpa rowspan)
           tableHtml += `
-            <td>${data.gate}</td>
-            <td>${data.uk}</td>
+            <td>
+              <span class="gate-badge gate-badge-${gateNum}" title="${data.gate}">
+                GATE ${gateNum}
+              </span>
+            </td>
+            <td>
+              <span class="uk-badge uk-badge-${ukNum}" title="${data.uk}">
+                UK ${ukNum}
+              </span>
+            </td>
             <td style="text-align: center;">${levelLabel}</td>
           `;
           
