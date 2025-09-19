@@ -1260,7 +1260,8 @@ $user_data = getUserData();
         return today >= startDate && today <= endDate;
       };
 
-      const getStatusBadge = status => {
+      // Ubah fungsi getStatusBadge agar menerima endDateStr
+      const getStatusBadge = (status, endDateStr) => {
         if (status.startsWith('Sudah')) {
           return `<div class="status-icon status-success" title="${status}">
                     <div class="status-circle">
@@ -1269,11 +1270,33 @@ $user_data = getUserData();
                   </div>`;
         }
         if (status.startsWith('Belum')) {
-          return `<div class="status-icon status-danger" title="${status}">
-                    <div class="status-circle">
-                      <i class="fas fa-minus"></i>
-                    </div>
-                  </div>`;
+          // Cek apakah hari ini sudah lewat tanggal selesai
+          let isOverdue = false;
+          if (endDateStr && endDateStr !== '-') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const parts = endDateStr.split('-');
+            if (parts.length === 3) {
+              const endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+              endDate.setHours(23, 59, 59, 999);
+              isOverdue = today > endDate;
+            }
+          }
+          if (isOverdue) {
+            // Sudah lewat deadline, merah
+            return `<div class="status-icon status-danger" title="${status} (Terlambat)">
+                      <div class="status-circle">
+                        <i class="fas fa-minus"></i>
+                      </div>
+                    </div>`;
+          } else {
+            // Belum lewat deadline, orange
+            return `<div class="status-icon status-warning" title="${status} (Masih dalam tenggat)">
+                      <div class="status-circle">
+                        <i class="fas fa-exclamation"></i>
+                      </div>
+                    </div>`;
+          }
         }
         if (status === 'Tidak perlu') {
           return `<div class="status-icon status-neutral" title="${status}">
@@ -1545,7 +1568,7 @@ $user_data = getUserData();
           // Tambahkan status untuk setiap wilayah
           regions.forEach(region => {
             const status = data.statuses[region.id] || "Tidak tersedia";
-            tableHtml += `<td class="status-column">${getStatusBadge(status)}</td>`;
+            tableHtml += `<td class="status-column">${getStatusBadge(status, data.end)}</td>`;
           });
           
           tableHtml += `</tr>`;
