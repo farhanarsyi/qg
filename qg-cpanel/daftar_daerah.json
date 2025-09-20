@@ -1,0 +1,2214 @@
+[
+    {
+        "kode": "1100",
+        "daerah": "ACEH"
+    },
+    {
+        "kode": "1101",
+        "daerah": "Simeulue"
+    },
+    {
+        "kode": "1102",
+        "daerah": "Aceh Singkil"
+    },
+    {
+        "kode": "1103",
+        "daerah": "Aceh Selatan"
+    },
+    {
+        "kode": "1104",
+        "daerah": "Aceh Tenggara"
+    },
+    {
+        "kode": "1105",
+        "daerah": "Aceh Timur"
+    },
+    {
+        "kode": "1106",
+        "daerah": "Aceh Tengah"
+    },
+    {
+        "kode": "1107",
+        "daerah": "Aceh Barat"
+    },
+    {
+        "kode": "1108",
+        "daerah": "Aceh Besar"
+    },
+    {
+        "kode": "1109",
+        "daerah": "Pidie"
+    },
+    {
+        "kode": "1110",
+        "daerah": "Bireuen"
+    },
+    {
+        "kode": "1111",
+        "daerah": "Aceh Utara"
+    },
+    {
+        "kode": "1112",
+        "daerah": "Aceh Barat Daya"
+    },
+    {
+        "kode": "1113",
+        "daerah": "Gayo Lues"
+    },
+    {
+        "kode": "1114",
+        "daerah": "Aceh Tamiang"
+    },
+    {
+        "kode": "1115",
+        "daerah": "Nagan Raya"
+    },
+    {
+        "kode": "1116",
+        "daerah": "Aceh Jaya"
+    },
+    {
+        "kode": "1117",
+        "daerah": "Bener Meriah"
+    },
+    {
+        "kode": "1118",
+        "daerah": "Pidie Jaya"
+    },
+    {
+        "kode": "1171",
+        "daerah": "Kota Banda Aceh"
+    },
+    {
+        "kode": "1172",
+        "daerah": "Kota Sabang"
+    },
+    {
+        "kode": "1173",
+        "daerah": "Kota Langsa"
+    },
+    {
+        "kode": "1174",
+        "daerah": "Kota Lhokseumawe"
+    },
+    {
+        "kode": "1175",
+        "daerah": "Kota Subulussalam"
+    },
+    {
+        "kode": "1200",
+        "daerah": "SUMATERA UTARA"
+    },
+    {
+        "kode": "1201",
+        "daerah": "Nias"
+    },
+    {
+        "kode": "1202",
+        "daerah": "Mandailing Natal"
+    },
+    {
+        "kode": "1203",
+        "daerah": "Tapanuli Selatan"
+    },
+    {
+        "kode": "1204",
+        "daerah": "Tapanuli Tengah"
+    },
+    {
+        "kode": "1205",
+        "daerah": "Tapanuli Utara"
+    },
+    {
+        "kode": "1206",
+        "daerah": "Toba"
+    },
+    {
+        "kode": "1207",
+        "daerah": "Labuhan Batu"
+    },
+    {
+        "kode": "1208",
+        "daerah": "Asahan"
+    },
+    {
+        "kode": "1209",
+        "daerah": "Simalungun"
+    },
+    {
+        "kode": "1210",
+        "daerah": "Dairi"
+    },
+    {
+        "kode": "1211",
+        "daerah": "Karo"
+    },
+    {
+        "kode": "1212",
+        "daerah": "Deli Serdang"
+    },
+    {
+        "kode": "1213",
+        "daerah": "Langkat"
+    },
+    {
+        "kode": "1214",
+        "daerah": "Nias Selatan"
+    },
+    {
+        "kode": "1215",
+        "daerah": "Humbang Hasundutan"
+    },
+    {
+        "kode": "1216",
+        "daerah": "Pakpak Bharat"
+    },
+    {
+        "kode": "1217",
+        "daerah": "Samosir"
+    },
+    {
+        "kode": "1218",
+        "daerah": "Serdang Bedagai"
+    },
+    {
+        "kode": "1219",
+        "daerah": "Batu Bara"
+    },
+    {
+        "kode": "1220",
+        "daerah": "Padang Lawas Utara"
+    },
+    {
+        "kode": "1221",
+        "daerah": "Padang Lawas"
+    },
+    {
+        "kode": "1222",
+        "daerah": "Labuhan Batu Selatan"
+    },
+    {
+        "kode": "1223",
+        "daerah": "Labuhan Batu Utara"
+    },
+    {
+        "kode": "1224",
+        "daerah": "Nias Utara"
+    },
+    {
+        "kode": "1225",
+        "daerah": "Nias Barat"
+    },
+    {
+        "kode": "1271",
+        "daerah": "Kota Sibolga"
+    },
+    {
+        "kode": "1272",
+        "daerah": "Kota Tanjung Balai"
+    },
+    {
+        "kode": "1273",
+        "daerah": "Kota Pematang Siantar"
+    },
+    {
+        "kode": "1274",
+        "daerah": "Kota Tebing Tinggi"
+    },
+    {
+        "kode": "1275",
+        "daerah": "Kota Medan"
+    },
+    {
+        "kode": "1276",
+        "daerah": "Kota Binjai"
+    },
+    {
+        "kode": "1277",
+        "daerah": "Kota Padangsidimpuan"
+    },
+    {
+        "kode": "1278",
+        "daerah": "Kota Gunungsitoli"
+    },
+    {
+        "kode": "1300",
+        "daerah": "SUMATERA BARAT"
+    },
+    {
+        "kode": "1301",
+        "daerah": "Kepulauan Mentawai"
+    },
+    {
+        "kode": "1302",
+        "daerah": "Pesisir Selatan"
+    },
+    {
+        "kode": "1303",
+        "daerah": "Solok"
+    },
+    {
+        "kode": "1304",
+        "daerah": "Sijunjung"
+    },
+    {
+        "kode": "1305",
+        "daerah": "Tanah Datar"
+    },
+    {
+        "kode": "1306",
+        "daerah": "Padang Pariaman"
+    },
+    {
+        "kode": "1307",
+        "daerah": "Agam"
+    },
+    {
+        "kode": "1308",
+        "daerah": "Lima Puluh Kota"
+    },
+    {
+        "kode": "1309",
+        "daerah": "Pasaman"
+    },
+    {
+        "kode": "1310",
+        "daerah": "Solok Selatan"
+    },
+    {
+        "kode": "1311",
+        "daerah": "Dharmasraya"
+    },
+    {
+        "kode": "1312",
+        "daerah": "Pasaman Barat"
+    },
+    {
+        "kode": "1371",
+        "daerah": "Kota Padang"
+    },
+    {
+        "kode": "1372",
+        "daerah": "Kota Solok"
+    },
+    {
+        "kode": "1373",
+        "daerah": "Kota Sawah Lunto"
+    },
+    {
+        "kode": "1374",
+        "daerah": "Kota Padang Panjang"
+    },
+    {
+        "kode": "1375",
+        "daerah": "Kota Bukittinggi"
+    },
+    {
+        "kode": "1376",
+        "daerah": "Kota Payakumbuh"
+    },
+    {
+        "kode": "1377",
+        "daerah": "Kota Pariaman"
+    },
+    {
+        "kode": "1400",
+        "daerah": "RIAU"
+    },
+    {
+        "kode": "1401",
+        "daerah": "Kuantan Singingi"
+    },
+    {
+        "kode": "1402",
+        "daerah": "Indragiri Hulu"
+    },
+    {
+        "kode": "1403",
+        "daerah": "Indragiri Hilir"
+    },
+    {
+        "kode": "1404",
+        "daerah": "Pelalawan"
+    },
+    {
+        "kode": "1405",
+        "daerah": "Siak"
+    },
+    {
+        "kode": "1406",
+        "daerah": "Kampar"
+    },
+    {
+        "kode": "1407",
+        "daerah": "Rokan Hulu"
+    },
+    {
+        "kode": "1408",
+        "daerah": "Bengkalis"
+    },
+    {
+        "kode": "1409",
+        "daerah": "Rokan Hilir"
+    },
+    {
+        "kode": "1410",
+        "daerah": "Kepulauan Meranti"
+    },
+    {
+        "kode": "1471",
+        "daerah": "Kota Pekanbaru"
+    },
+    {
+        "kode": "1473",
+        "daerah": "Kota Dumai"
+    },
+    {
+        "kode": "1500",
+        "daerah": "JAMBI"
+    },
+    {
+        "kode": "1501",
+        "daerah": "Kerinci"
+    },
+    {
+        "kode": "1502",
+        "daerah": "Merangin"
+    },
+    {
+        "kode": "1503",
+        "daerah": "Sarolangun"
+    },
+    {
+        "kode": "1504",
+        "daerah": "Batang Hari"
+    },
+    {
+        "kode": "1505",
+        "daerah": "Muaro Jambi"
+    },
+    {
+        "kode": "1506",
+        "daerah": "Tanjung Jabung Timur"
+    },
+    {
+        "kode": "1507",
+        "daerah": "Tanjung Jabung Barat"
+    },
+    {
+        "kode": "1508",
+        "daerah": "Tebo"
+    },
+    {
+        "kode": "1509",
+        "daerah": "Bungo"
+    },
+    {
+        "kode": "1571",
+        "daerah": "Kota Jambi"
+    },
+    {
+        "kode": "1572",
+        "daerah": "Kota Sungai Penuh"
+    },
+    {
+        "kode": "1600",
+        "daerah": "SUMATERA SELATAN"
+    },
+    {
+        "kode": "1601",
+        "daerah": "Ogan Komering Ulu"
+    },
+    {
+        "kode": "1602",
+        "daerah": "Ogan Komering Ilir"
+    },
+    {
+        "kode": "1603",
+        "daerah": "Muara Enim"
+    },
+    {
+        "kode": "1604",
+        "daerah": "Lahat"
+    },
+    {
+        "kode": "1605",
+        "daerah": "Musi Rawas"
+    },
+    {
+        "kode": "1606",
+        "daerah": "Musi Banyuasin"
+    },
+    {
+        "kode": "1607",
+        "daerah": "Banyu Asin"
+    },
+    {
+        "kode": "1608",
+        "daerah": "Ogan Komering Ulu Selatan"
+    },
+    {
+        "kode": "1609",
+        "daerah": "Ogan Komering Ulu Timur"
+    },
+    {
+        "kode": "1610",
+        "daerah": "Ogan Ilir"
+    },
+    {
+        "kode": "1611",
+        "daerah": "Empat Lawang"
+    },
+    {
+        "kode": "1612",
+        "daerah": "Penukal Abab Lematang Ilir"
+    },
+    {
+        "kode": "1613",
+        "daerah": "Musi Rawas Utara"
+    },
+    {
+        "kode": "1671",
+        "daerah": "Kota Palembang"
+    },
+    {
+        "kode": "1672",
+        "daerah": "Kota Prabumulih"
+    },
+    {
+        "kode": "1673",
+        "daerah": "Kota Pagar Alam"
+    },
+    {
+        "kode": "1674",
+        "daerah": "Kota Lubuklinggau"
+    },
+    {
+        "kode": "1700",
+        "daerah": "BENGKULU"
+    },
+    {
+        "kode": "1701",
+        "daerah": "Bengkulu Selatan"
+    },
+    {
+        "kode": "1702",
+        "daerah": "Rejang Lebong"
+    },
+    {
+        "kode": "1703",
+        "daerah": "Bengkulu Utara"
+    },
+    {
+        "kode": "1704",
+        "daerah": "Kaur"
+    },
+    {
+        "kode": "1705",
+        "daerah": "Seluma"
+    },
+    {
+        "kode": "1706",
+        "daerah": "Mukomuko"
+    },
+    {
+        "kode": "1707",
+        "daerah": "Lebong"
+    },
+    {
+        "kode": "1708",
+        "daerah": "Kepahiang"
+    },
+    {
+        "kode": "1709",
+        "daerah": "Bengkulu Tengah"
+    },
+    {
+        "kode": "1771",
+        "daerah": "Kota Bengkulu"
+    },
+    {
+        "kode": "1800",
+        "daerah": "LAMPUNG"
+    },
+    {
+        "kode": "1801",
+        "daerah": "Lampung Barat"
+    },
+    {
+        "kode": "1802",
+        "daerah": "Tanggamus"
+    },
+    {
+        "kode": "1803",
+        "daerah": "Lampung Selatan"
+    },
+    {
+        "kode": "1804",
+        "daerah": "Lampung Timur"
+    },
+    {
+        "kode": "1805",
+        "daerah": "Lampung Tengah"
+    },
+    {
+        "kode": "1806",
+        "daerah": "Lampung Utara"
+    },
+    {
+        "kode": "1807",
+        "daerah": "Way Kanan"
+    },
+    {
+        "kode": "1808",
+        "daerah": "Tulangbawang"
+    },
+    {
+        "kode": "1809",
+        "daerah": "Pesawaran"
+    },
+    {
+        "kode": "1810",
+        "daerah": "Pringsewu"
+    },
+    {
+        "kode": "1811",
+        "daerah": "Mesuji"
+    },
+    {
+        "kode": "1812",
+        "daerah": "Tulang Bawang Barat"
+    },
+    {
+        "kode": "1813",
+        "daerah": "Pesisir Barat"
+    },
+    {
+        "kode": "1871",
+        "daerah": "Kota Bandar Lampung"
+    },
+    {
+        "kode": "1872",
+        "daerah": "Kota Metro"
+    },
+    {
+        "kode": "1900",
+        "daerah": "KEP. BANGKA BELITUNG"
+    },
+    {
+        "kode": "1901",
+        "daerah": "Bangka"
+    },
+    {
+        "kode": "1902",
+        "daerah": "Belitung"
+    },
+    {
+        "kode": "1903",
+        "daerah": "Bangka Barat"
+    },
+    {
+        "kode": "1904",
+        "daerah": "Bangka Tengah"
+    },
+    {
+        "kode": "1905",
+        "daerah": "Bangka Selatan"
+    },
+    {
+        "kode": "1906",
+        "daerah": "Belitung Timur"
+    },
+    {
+        "kode": "1971",
+        "daerah": "Kota Pangkal Pinang"
+    },
+    {
+        "kode": "2100",
+        "daerah": "KEPULAUAN RIAU"
+    },
+    {
+        "kode": "2101",
+        "daerah": "Karimun"
+    },
+    {
+        "kode": "2102",
+        "daerah": "Bintan"
+    },
+    {
+        "kode": "2103",
+        "daerah": "Natuna"
+    },
+    {
+        "kode": "2104",
+        "daerah": "Lingga"
+    },
+    {
+        "kode": "2105",
+        "daerah": "Kepulauan Anambas"
+    },
+    {
+        "kode": "2171",
+        "daerah": "Kota Batam"
+    },
+    {
+        "kode": "2172",
+        "daerah": "Kota Tanjung Pinang"
+    },
+    {
+        "kode": "3100",
+        "daerah": "DKI JAKARTA"
+    },
+    {
+        "kode": "3101",
+        "daerah": "Kep. Seribu"
+    },
+    {
+        "kode": "3171",
+        "daerah": "Kota Jakarta Selatan"
+    },
+    {
+        "kode": "3172",
+        "daerah": "Kota Jakarta Timur"
+    },
+    {
+        "kode": "3173",
+        "daerah": "Kota Jakarta Pusat"
+    },
+    {
+        "kode": "3174",
+        "daerah": "Kota Jakarta Barat"
+    },
+    {
+        "kode": "3175",
+        "daerah": "Kota Jakarta Utara"
+    },
+    {
+        "kode": "3200",
+        "daerah": "JAWA BARAT"
+    },
+    {
+        "kode": "3201",
+        "daerah": "Bogor"
+    },
+    {
+        "kode": "3202",
+        "daerah": "Sukabumi"
+    },
+    {
+        "kode": "3203",
+        "daerah": "Cianjur"
+    },
+    {
+        "kode": "3204",
+        "daerah": "Bandung"
+    },
+    {
+        "kode": "3205",
+        "daerah": "Garut"
+    },
+    {
+        "kode": "3206",
+        "daerah": "Tasikmalaya"
+    },
+    {
+        "kode": "3207",
+        "daerah": "Ciamis"
+    },
+    {
+        "kode": "3208",
+        "daerah": "Kuningan"
+    },
+    {
+        "kode": "3209",
+        "daerah": "Cirebon"
+    },
+    {
+        "kode": "3210",
+        "daerah": "Majalengka"
+    },
+    {
+        "kode": "3211",
+        "daerah": "Sumedang"
+    },
+    {
+        "kode": "3212",
+        "daerah": "Indramayu"
+    },
+    {
+        "kode": "3213",
+        "daerah": "Subang"
+    },
+    {
+        "kode": "3214",
+        "daerah": "Purwakarta"
+    },
+    {
+        "kode": "3215",
+        "daerah": "Karawang"
+    },
+    {
+        "kode": "3216",
+        "daerah": "Bekasi"
+    },
+    {
+        "kode": "3217",
+        "daerah": "Bandung Barat"
+    },
+    {
+        "kode": "3218",
+        "daerah": "Pangandaran"
+    },
+    {
+        "kode": "3271",
+        "daerah": "Kota Bogor"
+    },
+    {
+        "kode": "3272",
+        "daerah": "Kota Sukabumi"
+    },
+    {
+        "kode": "3273",
+        "daerah": "Kota Bandung"
+    },
+    {
+        "kode": "3274",
+        "daerah": "Kota Cirebon"
+    },
+    {
+        "kode": "3275",
+        "daerah": "Kota Bekasi"
+    },
+    {
+        "kode": "3276",
+        "daerah": "Kota Depok"
+    },
+    {
+        "kode": "3277",
+        "daerah": "Kota Cimahi"
+    },
+    {
+        "kode": "3278",
+        "daerah": "Kota Tasikmalaya"
+    },
+    {
+        "kode": "3279",
+        "daerah": "Kota Banjar"
+    },
+    {
+        "kode": "3300",
+        "daerah": "JAWA TENGAH"
+    },
+    {
+        "kode": "3301",
+        "daerah": "Cilacap"
+    },
+    {
+        "kode": "3302",
+        "daerah": "Banyumas"
+    },
+    {
+        "kode": "3303",
+        "daerah": "Purbalingga"
+    },
+    {
+        "kode": "3304",
+        "daerah": "Banjarnegara"
+    },
+    {
+        "kode": "3305",
+        "daerah": "Kebumen"
+    },
+    {
+        "kode": "3306",
+        "daerah": "Purworejo"
+    },
+    {
+        "kode": "3307",
+        "daerah": "Wonosobo"
+    },
+    {
+        "kode": "3308",
+        "daerah": "Magelang"
+    },
+    {
+        "kode": "3309",
+        "daerah": "Boyolali"
+    },
+    {
+        "kode": "3310",
+        "daerah": "Klaten"
+    },
+    {
+        "kode": "3311",
+        "daerah": "Sukoharjo"
+    },
+    {
+        "kode": "3312",
+        "daerah": "Wonogiri"
+    },
+    {
+        "kode": "3313",
+        "daerah": "Karanganyar"
+    },
+    {
+        "kode": "3314",
+        "daerah": "Sragen"
+    },
+    {
+        "kode": "3315",
+        "daerah": "Grobogan"
+    },
+    {
+        "kode": "3316",
+        "daerah": "Blora"
+    },
+    {
+        "kode": "3317",
+        "daerah": "Rembang"
+    },
+    {
+        "kode": "3318",
+        "daerah": "Pati"
+    },
+    {
+        "kode": "3319",
+        "daerah": "Kudus"
+    },
+    {
+        "kode": "3320",
+        "daerah": "Jepara"
+    },
+    {
+        "kode": "3321",
+        "daerah": "Demak"
+    },
+    {
+        "kode": "3322",
+        "daerah": "Semarang"
+    },
+    {
+        "kode": "3323",
+        "daerah": "Temanggung"
+    },
+    {
+        "kode": "3324",
+        "daerah": "Kendal"
+    },
+    {
+        "kode": "3325",
+        "daerah": "Batang"
+    },
+    {
+        "kode": "3326",
+        "daerah": "Pekalongan"
+    },
+    {
+        "kode": "3327",
+        "daerah": "Pemalang"
+    },
+    {
+        "kode": "3328",
+        "daerah": "Tegal"
+    },
+    {
+        "kode": "3329",
+        "daerah": "Brebes"
+    },
+    {
+        "kode": "3371",
+        "daerah": "Kota Magelang"
+    },
+    {
+        "kode": "3372",
+        "daerah": "Kota Surakarta"
+    },
+    {
+        "kode": "3373",
+        "daerah": "Kota Salatiga"
+    },
+    {
+        "kode": "3374",
+        "daerah": "Kota Semarang"
+    },
+    {
+        "kode": "3375",
+        "daerah": "Kota Pekalongan"
+    },
+    {
+        "kode": "3376",
+        "daerah": "Kota Tegal"
+    },
+    {
+        "kode": "3400",
+        "daerah": "D I YOGYAKARTA"
+    },
+    {
+        "kode": "3401",
+        "daerah": "Kulon Progo"
+    },
+    {
+        "kode": "3402",
+        "daerah": "Bantul"
+    },
+    {
+        "kode": "3403",
+        "daerah": "Gunung Kidul"
+    },
+    {
+        "kode": "3404",
+        "daerah": "Sleman"
+    },
+    {
+        "kode": "3471",
+        "daerah": "Kota Yogyakarta"
+    },
+    {
+        "kode": "3500",
+        "daerah": "JAWA TIMUR"
+    },
+    {
+        "kode": "3501",
+        "daerah": "Pacitan"
+    },
+    {
+        "kode": "3502",
+        "daerah": "Ponorogo"
+    },
+    {
+        "kode": "3503",
+        "daerah": "Trenggalek"
+    },
+    {
+        "kode": "3504",
+        "daerah": "Tulungagung"
+    },
+    {
+        "kode": "3505",
+        "daerah": "Blitar"
+    },
+    {
+        "kode": "3506",
+        "daerah": "Kediri"
+    },
+    {
+        "kode": "3507",
+        "daerah": "Malang"
+    },
+    {
+        "kode": "3508",
+        "daerah": "Lumajang"
+    },
+    {
+        "kode": "3509",
+        "daerah": "Jember"
+    },
+    {
+        "kode": "3510",
+        "daerah": "Banyuwangi"
+    },
+    {
+        "kode": "3511",
+        "daerah": "Bondowoso"
+    },
+    {
+        "kode": "3512",
+        "daerah": "Situbondo"
+    },
+    {
+        "kode": "3513",
+        "daerah": "Probolinggo"
+    },
+    {
+        "kode": "3514",
+        "daerah": "Pasuruan"
+    },
+    {
+        "kode": "3515",
+        "daerah": "Sidoarjo"
+    },
+    {
+        "kode": "3516",
+        "daerah": "Mojokerto"
+    },
+    {
+        "kode": "3517",
+        "daerah": "Jombang"
+    },
+    {
+        "kode": "3518",
+        "daerah": "Nganjuk"
+    },
+    {
+        "kode": "3519",
+        "daerah": "Madiun"
+    },
+    {
+        "kode": "3520",
+        "daerah": "Magetan"
+    },
+    {
+        "kode": "3521",
+        "daerah": "Ngawi"
+    },
+    {
+        "kode": "3522",
+        "daerah": "Bojonegoro"
+    },
+    {
+        "kode": "3523",
+        "daerah": "Tuban"
+    },
+    {
+        "kode": "3524",
+        "daerah": "Lamongan"
+    },
+    {
+        "kode": "3525",
+        "daerah": "Gresik"
+    },
+    {
+        "kode": "3526",
+        "daerah": "Bangkalan"
+    },
+    {
+        "kode": "3527",
+        "daerah": "Sampang"
+    },
+    {
+        "kode": "3528",
+        "daerah": "Pamekasan"
+    },
+    {
+        "kode": "3529",
+        "daerah": "Sumenep"
+    },
+    {
+        "kode": "3571",
+        "daerah": "Kota Kediri"
+    },
+    {
+        "kode": "3572",
+        "daerah": "Kota Blitar"
+    },
+    {
+        "kode": "3573",
+        "daerah": "Kota Malang"
+    },
+    {
+        "kode": "3574",
+        "daerah": "Kota Probolinggo"
+    },
+    {
+        "kode": "3575",
+        "daerah": "Kota Pasuruan"
+    },
+    {
+        "kode": "3576",
+        "daerah": "Kota Mojokerto"
+    },
+    {
+        "kode": "3577",
+        "daerah": "Kota Madiun"
+    },
+    {
+        "kode": "3578",
+        "daerah": "Kota Surabaya"
+    },
+    {
+        "kode": "3579",
+        "daerah": "Kota Batu"
+    },
+    {
+        "kode": "3600",
+        "daerah": "BANTEN"
+    },
+    {
+        "kode": "3601",
+        "daerah": "Pandeglang"
+    },
+    {
+        "kode": "3602",
+        "daerah": "Lebak"
+    },
+    {
+        "kode": "3603",
+        "daerah": "Tangerang"
+    },
+    {
+        "kode": "3604",
+        "daerah": "Serang"
+    },
+    {
+        "kode": "3671",
+        "daerah": "Kota Tangerang"
+    },
+    {
+        "kode": "3672",
+        "daerah": "Kota Cilegon"
+    },
+    {
+        "kode": "3673",
+        "daerah": "Kota Serang"
+    },
+    {
+        "kode": "3674",
+        "daerah": "Kota Tangerang Selatan"
+    },
+    {
+        "kode": "5100",
+        "daerah": "BALI"
+    },
+    {
+        "kode": "5101",
+        "daerah": "Jembrana"
+    },
+    {
+        "kode": "5102",
+        "daerah": "Tabanan"
+    },
+    {
+        "kode": "5103",
+        "daerah": "Badung"
+    },
+    {
+        "kode": "5104",
+        "daerah": "Gianyar"
+    },
+    {
+        "kode": "5105",
+        "daerah": "Klungkung"
+    },
+    {
+        "kode": "5106",
+        "daerah": "Bangli"
+    },
+    {
+        "kode": "5107",
+        "daerah": "Karangasem"
+    },
+    {
+        "kode": "5108",
+        "daerah": "Buleleng"
+    },
+    {
+        "kode": "5171",
+        "daerah": "Kota Denpasar"
+    },
+    {
+        "kode": "5200",
+        "daerah": "NUSA TENGGARA BARAT"
+    },
+    {
+        "kode": "5201",
+        "daerah": "Lombok Barat"
+    },
+    {
+        "kode": "5202",
+        "daerah": "Lombok Tengah"
+    },
+    {
+        "kode": "5203",
+        "daerah": "Lombok Timur"
+    },
+    {
+        "kode": "5204",
+        "daerah": "Sumbawa"
+    },
+    {
+        "kode": "5205",
+        "daerah": "Dompu"
+    },
+    {
+        "kode": "5206",
+        "daerah": "Bima"
+    },
+    {
+        "kode": "5207",
+        "daerah": "Sumbawa Barat"
+    },
+    {
+        "kode": "5208",
+        "daerah": "Lombok Utara"
+    },
+    {
+        "kode": "5271",
+        "daerah": "Kota Mataram"
+    },
+    {
+        "kode": "5272",
+        "daerah": "Kota Bima"
+    },
+    {
+        "kode": "5300",
+        "daerah": "NUSA TENGGARA TIMUR"
+    },
+    {
+        "kode": "5301",
+        "daerah": "Sumba Barat"
+    },
+    {
+        "kode": "5302",
+        "daerah": "Sumba Timur"
+    },
+    {
+        "kode": "5303",
+        "daerah": "Kupang"
+    },
+    {
+        "kode": "5304",
+        "daerah": "Timor Tengah Selatan"
+    },
+    {
+        "kode": "5305",
+        "daerah": "Timor Tengah Utara"
+    },
+    {
+        "kode": "5306",
+        "daerah": "Belu"
+    },
+    {
+        "kode": "5307",
+        "daerah": "Alor"
+    },
+    {
+        "kode": "5308",
+        "daerah": "Lembata"
+    },
+    {
+        "kode": "5309",
+        "daerah": "Flores Timur"
+    },
+    {
+        "kode": "5310",
+        "daerah": "Sikka"
+    },
+    {
+        "kode": "5311",
+        "daerah": "Ende"
+    },
+    {
+        "kode": "5312",
+        "daerah": "Ngada"
+    },
+    {
+        "kode": "5313",
+        "daerah": "Manggarai"
+    },
+    {
+        "kode": "5314",
+        "daerah": "Rote Ndao"
+    },
+    {
+        "kode": "5315",
+        "daerah": "Manggarai Barat"
+    },
+    {
+        "kode": "5316",
+        "daerah": "Sumba Tengah"
+    },
+    {
+        "kode": "5317",
+        "daerah": "Sumba Barat Daya"
+    },
+    {
+        "kode": "5318",
+        "daerah": "Nagekeo"
+    },
+    {
+        "kode": "5319",
+        "daerah": "Manggarai Timur"
+    },
+    {
+        "kode": "5320",
+        "daerah": "Sabu Raijua"
+    },
+    {
+        "kode": "5321",
+        "daerah": "Malaka"
+    },
+    {
+        "kode": "5371",
+        "daerah": "Kota Kupang"
+    },
+    {
+        "kode": "6100",
+        "daerah": "KALIMANTAN BARAT"
+    },
+    {
+        "kode": "6101",
+        "daerah": "Sambas"
+    },
+    {
+        "kode": "6102",
+        "daerah": "Bengkayang"
+    },
+    {
+        "kode": "6103",
+        "daerah": "Landak"
+    },
+    {
+        "kode": "6104",
+        "daerah": "Mempawah"
+    },
+    {
+        "kode": "6105",
+        "daerah": "Sanggau"
+    },
+    {
+        "kode": "6106",
+        "daerah": "Ketapang"
+    },
+    {
+        "kode": "6107",
+        "daerah": "Sintang"
+    },
+    {
+        "kode": "6108",
+        "daerah": "Kapuas Hulu"
+    },
+    {
+        "kode": "6109",
+        "daerah": "Sekadau"
+    },
+    {
+        "kode": "6110",
+        "daerah": "Melawi"
+    },
+    {
+        "kode": "6111",
+        "daerah": "Kayong Utara"
+    },
+    {
+        "kode": "6112",
+        "daerah": "Kubu Raya"
+    },
+    {
+        "kode": "6171",
+        "daerah": "Kota Pontianak"
+    },
+    {
+        "kode": "6172",
+        "daerah": "Kota Singkawang"
+    },
+    {
+        "kode": "6200",
+        "daerah": "KALIMANTAN TENGAH"
+    },
+    {
+        "kode": "6201",
+        "daerah": "Kotawaringin Barat"
+    },
+    {
+        "kode": "6202",
+        "daerah": "Kotawaringin Timur"
+    },
+    {
+        "kode": "6203",
+        "daerah": "Kapuas"
+    },
+    {
+        "kode": "6204",
+        "daerah": "Barito Selatan"
+    },
+    {
+        "kode": "6205",
+        "daerah": "Barito Utara"
+    },
+    {
+        "kode": "6206",
+        "daerah": "Sukamara"
+    },
+    {
+        "kode": "6207",
+        "daerah": "Lamandau"
+    },
+    {
+        "kode": "6208",
+        "daerah": "Seruyan"
+    },
+    {
+        "kode": "6209",
+        "daerah": "Katingan"
+    },
+    {
+        "kode": "6210",
+        "daerah": "Pulang Pisau"
+    },
+    {
+        "kode": "6211",
+        "daerah": "Gunung Mas"
+    },
+    {
+        "kode": "6212",
+        "daerah": "Barito Timur"
+    },
+    {
+        "kode": "6213",
+        "daerah": "Murung Raya"
+    },
+    {
+        "kode": "6271",
+        "daerah": "Kota Palangka Raya"
+    },
+    {
+        "kode": "6300",
+        "daerah": "KALIMANTAN SELATAN"
+    },
+    {
+        "kode": "6301",
+        "daerah": "Tanah Laut"
+    },
+    {
+        "kode": "6302",
+        "daerah": "Kotabaru"
+    },
+    {
+        "kode": "6303",
+        "daerah": "Banjar"
+    },
+    {
+        "kode": "6304",
+        "daerah": "Barito Kuala"
+    },
+    {
+        "kode": "6305",
+        "daerah": "Tapin"
+    },
+    {
+        "kode": "6306",
+        "daerah": "Hulu Sungai Selatan"
+    },
+    {
+        "kode": "6307",
+        "daerah": "Hulu Sungai Tengah"
+    },
+    {
+        "kode": "6308",
+        "daerah": "Hulu Sungai Utara"
+    },
+    {
+        "kode": "6309",
+        "daerah": "Tabalong"
+    },
+    {
+        "kode": "6310",
+        "daerah": "Tanah Bumbu"
+    },
+    {
+        "kode": "6311",
+        "daerah": "Balangan"
+    },
+    {
+        "kode": "6371",
+        "daerah": "Kota Banjarmasin"
+    },
+    {
+        "kode": "6372",
+        "daerah": "Kota Banjar Baru"
+    },
+    {
+        "kode": "6400",
+        "daerah": "KALIMANTAN TIMUR"
+    },
+    {
+        "kode": "6401",
+        "daerah": "Paser"
+    },
+    {
+        "kode": "6402",
+        "daerah": "Kutai Barat"
+    },
+    {
+        "kode": "6403",
+        "daerah": "Kutai Kartanegara"
+    },
+    {
+        "kode": "6404",
+        "daerah": "Kutai Timur"
+    },
+    {
+        "kode": "6405",
+        "daerah": "Berau"
+    },
+    {
+        "kode": "6409",
+        "daerah": "Penajam Paser Utara"
+    },
+    {
+        "kode": "6411",
+        "daerah": "Mahakam Ulu"
+    },
+    {
+        "kode": "6471",
+        "daerah": "Kota Balikpapan"
+    },
+    {
+        "kode": "6472",
+        "daerah": "Kota Samarinda"
+    },
+    {
+        "kode": "6474",
+        "daerah": "Kota Bontang"
+    },
+    {
+        "kode": "6500",
+        "daerah": "KALIMANTAN UTARA"
+    },
+    {
+        "kode": "6501",
+        "daerah": "Malinau"
+    },
+    {
+        "kode": "6502",
+        "daerah": "Bulungan"
+    },
+    {
+        "kode": "6503",
+        "daerah": "Tana Tidung"
+    },
+    {
+        "kode": "6504",
+        "daerah": "Nunukan"
+    },
+    {
+        "kode": "6571",
+        "daerah": "Kota Tarakan"
+    },
+    {
+        "kode": "7100",
+        "daerah": "SULAWESI UTARA"
+    },
+    {
+        "kode": "7101",
+        "daerah": "Bolaang Mongondow"
+    },
+    {
+        "kode": "7102",
+        "daerah": "Minahasa"
+    },
+    {
+        "kode": "7103",
+        "daerah": "Kepulauan Sangihe"
+    },
+    {
+        "kode": "7104",
+        "daerah": "Kepulauan Talaud"
+    },
+    {
+        "kode": "7105",
+        "daerah": "Minahasa Selatan"
+    },
+    {
+        "kode": "7106",
+        "daerah": "Minahasa Utara"
+    },
+    {
+        "kode": "7107",
+        "daerah": "Bolaang Mongondow Utara"
+    },
+    {
+        "kode": "7108",
+        "daerah": "Siau Tagulandang Biaro"
+    },
+    {
+        "kode": "7109",
+        "daerah": "Minahasa Tenggara"
+    },
+    {
+        "kode": "7110",
+        "daerah": "Bolaang Mongondow Selatan"
+    },
+    {
+        "kode": "7111",
+        "daerah": "Bolaang Mongondow Timur"
+    },
+    {
+        "kode": "7171",
+        "daerah": "Kota Manado"
+    },
+    {
+        "kode": "7172",
+        "daerah": "Kota Bitung"
+    },
+    {
+        "kode": "7173",
+        "daerah": "Kota Tomohon"
+    },
+    {
+        "kode": "7174",
+        "daerah": "Kota Kotamobagu"
+    },
+    {
+        "kode": "7200",
+        "daerah": "SULAWESI TENGAH"
+    },
+    {
+        "kode": "7201",
+        "daerah": "Banggai Kepulauan"
+    },
+    {
+        "kode": "7202",
+        "daerah": "Banggai"
+    },
+    {
+        "kode": "7203",
+        "daerah": "Morowali"
+    },
+    {
+        "kode": "7204",
+        "daerah": "Poso"
+    },
+    {
+        "kode": "7205",
+        "daerah": "Donggala"
+    },
+    {
+        "kode": "7206",
+        "daerah": "Toli-Toli"
+    },
+    {
+        "kode": "7207",
+        "daerah": "Buol"
+    },
+    {
+        "kode": "7208",
+        "daerah": "Parigi Moutong"
+    },
+    {
+        "kode": "7209",
+        "daerah": "Tojo Una-Una"
+    },
+    {
+        "kode": "7210",
+        "daerah": "Sigi"
+    },
+    {
+        "kode": "7211",
+        "daerah": "Banggai Laut"
+    },
+    {
+        "kode": "7212",
+        "daerah": "Morowali Utara"
+    },
+    {
+        "kode": "7271",
+        "daerah": "Kota Palu"
+    },
+    {
+        "kode": "7300",
+        "daerah": "SULAWESI SELATAN"
+    },
+    {
+        "kode": "7301",
+        "daerah": "Kepulauan Selayar"
+    },
+    {
+        "kode": "7302",
+        "daerah": "Bulukumba"
+    },
+    {
+        "kode": "7303",
+        "daerah": "Bantaeng"
+    },
+    {
+        "kode": "7304",
+        "daerah": "Jeneponto"
+    },
+    {
+        "kode": "7305",
+        "daerah": "Takalar"
+    },
+    {
+        "kode": "7306",
+        "daerah": "Gowa"
+    },
+    {
+        "kode": "7307",
+        "daerah": "Sinjai"
+    },
+    {
+        "kode": "7308",
+        "daerah": "Maros"
+    },
+    {
+        "kode": "7309",
+        "daerah": "Pangkajene dan Kepulauan"
+    },
+    {
+        "kode": "7310",
+        "daerah": "Barru"
+    },
+    {
+        "kode": "7311",
+        "daerah": "Bone"
+    },
+    {
+        "kode": "7312",
+        "daerah": "Soppeng"
+    },
+    {
+        "kode": "7313",
+        "daerah": "Wajo"
+    },
+    {
+        "kode": "7314",
+        "daerah": "Sidenreng Rappang"
+    },
+    {
+        "kode": "7315",
+        "daerah": "Pinrang"
+    },
+    {
+        "kode": "7316",
+        "daerah": "Enrekang"
+    },
+    {
+        "kode": "7317",
+        "daerah": "Luwu"
+    },
+    {
+        "kode": "7318",
+        "daerah": "Tana Toraja"
+    },
+    {
+        "kode": "7322",
+        "daerah": "Luwu Utara"
+    },
+    {
+        "kode": "7325",
+        "daerah": "Luwu Timur"
+    },
+    {
+        "kode": "7326",
+        "daerah": "Toraja Utara"
+    },
+    {
+        "kode": "7371",
+        "daerah": "Kota Makasar"
+    },
+    {
+        "kode": "7372",
+        "daerah": "Kota Parepare"
+    },
+    {
+        "kode": "7373",
+        "daerah": "Kota Palopo"
+    },
+    {
+        "kode": "7400",
+        "daerah": "SULAWESI TENGGARA"
+    },
+    {
+        "kode": "7401",
+        "daerah": "Buton"
+    },
+    {
+        "kode": "7402",
+        "daerah": "Muna"
+    },
+    {
+        "kode": "7403",
+        "daerah": "Konawe"
+    },
+    {
+        "kode": "7404",
+        "daerah": "Kolaka"
+    },
+    {
+        "kode": "7405",
+        "daerah": "Konawe Selatan"
+    },
+    {
+        "kode": "7406",
+        "daerah": "Bombana"
+    },
+    {
+        "kode": "7407",
+        "daerah": "Wakatobi"
+    },
+    {
+        "kode": "7408",
+        "daerah": "Kolaka Utara"
+    },
+    {
+        "kode": "7409",
+        "daerah": "Buton Utara"
+    },
+    {
+        "kode": "7410",
+        "daerah": "Konawe Utara"
+    },
+    {
+        "kode": "7411",
+        "daerah": "Kolaka Timur"
+    },
+    {
+        "kode": "7412",
+        "daerah": "Konawe Kepulauan"
+    },
+    {
+        "kode": "7413",
+        "daerah": "Muna Barat"
+    },
+    {
+        "kode": "7414",
+        "daerah": "Buton Tengah"
+    },
+    {
+        "kode": "7415",
+        "daerah": "Buton Selatan"
+    },
+    {
+        "kode": "7471",
+        "daerah": "Kota Kendari"
+    },
+    {
+        "kode": "7472",
+        "daerah": "Kota Baubau"
+    },
+    {
+        "kode": "7500",
+        "daerah": "GORONTALO"
+    },
+    {
+        "kode": "7501",
+        "daerah": "Boalemo"
+    },
+    {
+        "kode": "7502",
+        "daerah": "Gorontalo"
+    },
+    {
+        "kode": "7503",
+        "daerah": "Pohuwato"
+    },
+    {
+        "kode": "7504",
+        "daerah": "Bone Bolango"
+    },
+    {
+        "kode": "7505",
+        "daerah": "Gorontalo Utara"
+    },
+    {
+        "kode": "7571",
+        "daerah": "Kota Gorontalo"
+    },
+    {
+        "kode": "7600",
+        "daerah": "SULAWESI BARAT"
+    },
+    {
+        "kode": "7601",
+        "daerah": "Majene"
+    },
+    {
+        "kode": "7602",
+        "daerah": "Polewali Mandar"
+    },
+    {
+        "kode": "7603",
+        "daerah": "Mamasa"
+    },
+    {
+        "kode": "7604",
+        "daerah": "Mamuju"
+    },
+    {
+        "kode": "7605",
+        "daerah": "Pasangkayu"
+    },
+    {
+        "kode": "7606",
+        "daerah": "Mamuju Tengah"
+    },
+    {
+        "kode": "8100",
+        "daerah": "MALUKU"
+    },
+    {
+        "kode": "8101",
+        "daerah": "Kepulauan Tanimbar"
+    },
+    {
+        "kode": "8102",
+        "daerah": "Maluku Tenggara"
+    },
+    {
+        "kode": "8103",
+        "daerah": "Maluku Tengah"
+    },
+    {
+        "kode": "8104",
+        "daerah": "Buru"
+    },
+    {
+        "kode": "8105",
+        "daerah": "Kepulauan Aru"
+    },
+    {
+        "kode": "8106",
+        "daerah": "Seram Bagian Barat"
+    },
+    {
+        "kode": "8107",
+        "daerah": "Seram Bagian Timur"
+    },
+    {
+        "kode": "8108",
+        "daerah": "Maluku Barat Daya"
+    },
+    {
+        "kode": "8109",
+        "daerah": "Buru Selatan"
+    },
+    {
+        "kode": "8171",
+        "daerah": "Kota Ambon"
+    },
+    {
+        "kode": "8172",
+        "daerah": "Kota Tual"
+    },
+    {
+        "kode": "8200",
+        "daerah": "MALUKU UTARA"
+    },
+    {
+        "kode": "8201",
+        "daerah": "Halmahera Barat"
+    },
+    {
+        "kode": "8202",
+        "daerah": "Halmahera Tengah"
+    },
+    {
+        "kode": "8203",
+        "daerah": "Kepulauan Sula"
+    },
+    {
+        "kode": "8204",
+        "daerah": "Halmahera Selatan"
+    },
+    {
+        "kode": "8205",
+        "daerah": "Halmahera Utara"
+    },
+    {
+        "kode": "8206",
+        "daerah": "Halmahera Timur"
+    },
+    {
+        "kode": "8207",
+        "daerah": "Pulau Morotai"
+    },
+    {
+        "kode": "8208",
+        "daerah": "Pulau Taliabu"
+    },
+    {
+        "kode": "8271",
+        "daerah": "Kota Ternate"
+    },
+    {
+        "kode": "8272",
+        "daerah": "Kota Tidore Kepulauan"
+    },
+    {
+        "kode": "9100",
+        "daerah": "PAPUA BARAT"
+    },
+    {
+        "kode": "9101",
+        "daerah": "Fakfak"
+    },
+    {
+        "kode": "9102",
+        "daerah": "Kaimana"
+    },
+    {
+        "kode": "9103",
+        "daerah": "Teluk Wondama"
+    },
+    {
+        "kode": "9104",
+        "daerah": "Teluk Bintuni"
+    },
+    {
+        "kode": "9105",
+        "daerah": "Manokwari"
+    },
+    {
+        "kode": "9111",
+        "daerah": "Manokwari Selatan"
+    },
+    {
+        "kode": "9112",
+        "daerah": "Pegunungan Arfak"
+    },
+    {
+        "kode": "9200",
+        "daerah": "PAPUA BARAT DAYA"
+    },
+    {
+        "kode": "9201",
+        "daerah": "Raja Ampat"
+    },
+    {
+        "kode": "9202",
+        "daerah": "Sorong"
+    },
+    {
+        "kode": "9203",
+        "daerah": "Sorong Selatan"
+    },
+    {
+        "kode": "9204",
+        "daerah": "Maybrat"
+    },
+    {
+        "kode": "9205",
+        "daerah": "Tambrauw"
+    },
+    {
+        "kode": "9271",
+        "daerah": "Kota Sorong"
+    },
+    {
+        "kode": "9400",
+        "daerah": "PAPUA"
+    },
+    {
+        "kode": "9403",
+        "daerah": "Jayapura"
+    },
+    {
+        "kode": "9408",
+        "daerah": "Kepulauan Yapen"
+    },
+    {
+        "kode": "9409",
+        "daerah": "Biak Numfor"
+    },
+    {
+        "kode": "9419",
+        "daerah": "Sarmi"
+    },
+    {
+        "kode": "9420",
+        "daerah": "Keerom"
+    },
+    {
+        "kode": "9426",
+        "daerah": "Waropen"
+    },
+    {
+        "kode": "9427",
+        "daerah": "Supiori"
+    },
+    {
+        "kode": "9428",
+        "daerah": "Mamberamo Raya"
+    },
+    {
+        "kode": "9471",
+        "daerah": "Kota Jayapura"
+    },
+    {
+        "kode": "9500",
+        "daerah": "PAPUA SELATAN"
+    },
+    {
+        "kode": "9501",
+        "daerah": "Merauke"
+    },
+    {
+        "kode": "9502",
+        "daerah": "Boven Digoel"
+    },
+    {
+        "kode": "9503",
+        "daerah": "Mappi"
+    },
+    {
+        "kode": "9504",
+        "daerah": "Asmat"
+    },
+    {
+        "kode": "9600",
+        "daerah": "PAPUA TENGAH"
+    },
+    {
+        "kode": "9601",
+        "daerah": "Mimika"
+    },
+    {
+        "kode": "9602",
+        "daerah": "Dogiyai"
+    },
+    {
+        "kode": "9603",
+        "daerah": "Deiyai"
+    },
+    {
+        "kode": "9604",
+        "daerah": "Nabire"
+    },
+    {
+        "kode": "9605",
+        "daerah": "Paniai"
+    },
+    {
+        "kode": "9606",
+        "daerah": "Intan Jaya"
+    },
+    {
+        "kode": "9607",
+        "daerah": "Puncak"
+    },
+    {
+        "kode": "9608",
+        "daerah": "Puncak Jaya"
+    },
+    {
+        "kode": "9700",
+        "daerah": "PAPUA PEGUNUNGAN"
+    },
+    {
+        "kode": "9701",
+        "daerah": "Nduga"
+    },
+    {
+        "kode": "9702",
+        "daerah": "Jayawijaya"
+    },
+    {
+        "kode": "9703",
+        "daerah": "Lanny Jaya"
+    },
+    {
+        "kode": "9704",
+        "daerah": "Tolikara"
+    },
+    {
+        "kode": "9705",
+        "daerah": "Mamberamo Tengah"
+    },
+    {
+        "kode": "9706",
+        "daerah": "Yalimo"
+    },
+    {
+        "kode": "9707",
+        "daerah": "Yahukimo"
+    },
+    {
+        "kode": "9708",
+        "daerah": "Pegunungan Bintang"
+    },
+    {
+        "kode": "0000",
+        "daerah": "Nasional"
+    }
+]

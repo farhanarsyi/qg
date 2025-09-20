@@ -1,0 +1,23 @@
+# Quality Gates Dashboard - Production .htaccess
+
+# Enable error reporting for debugging
+php_flag display_errors On
+php_flag log_errors On
+php_value error_reporting "E_ALL"
+
+# Security headers
+Header always set X-Frame-Options DENY
+Header always set X-Content-Type-Options nosniff
+Header always set X-XSS-Protection "1; mode=block"
+
+# Force HTTPS (uncomment if needed)
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Default page redirect
+DirectoryIndex main.php index.php
+
+# Custom error pages
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html 
