@@ -1,21 +1,34 @@
 /* navbar.css - Unified navbar styling untuk Dashboard dan Monitoring */
 
+/* Ensure body has proper spacing for sticky navbar */
+body {
+  padding-top: 0; /* Reset any existing padding */
+}
+
+/* Add margin to main content to account for sticky navbar */
+main, .main-content, .container-fluid:not(.navbar .container-fluid) {
+  margin-top: 0.5rem; /* Small margin to separate from navbar */
+}
+
 /* Base navbar styles */
 .navbar {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
   box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
   border-bottom: none;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0; /* Reduce padding untuk lebih narrow */
   margin-bottom: 0.75rem;
-  min-height: 60px;
+  min-height: 45px; /* Reduce height */
+  position: sticky; /* Make navbar sticky */
+  top: 0; /* Stick to top */
+  z-index: 1030; /* Ensure navbar stays above other content */
 }
 
 .navbar-brand {
   font-weight: 600;
   font-size: 0.85rem; /* Kecilkan font brand */
   color: white !important;
-  padding-top: 0.2rem;
-  padding-bottom: 0.2rem;
+  padding-top: 0.1rem; /* Reduce padding */
+  padding-bottom: 0.1rem;
 }
 
 .navbar-brand i {
@@ -27,8 +40,8 @@
 .navbar-nav-tabs {
   display: flex;
   align-items: center;
-  gap: 0.4rem; /* Kurangi gap */
-  margin-left: 1.5rem; /* Kurangi margin */
+  gap: 0.25rem; /* Further reduce gap */
+  margin-left: 1rem; /* Further reduce margin */
 }
 
 .navbar-nav-tabs .nav-link {
@@ -36,7 +49,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
-  padding: 0.2rem 0.5rem; /* Kecilkan padding */
+  padding: 0.15rem 0.4rem; /* Further reduce padding */
   border-radius: 4px;
   position: relative;
   transition: all 0.3s ease;
@@ -68,7 +81,7 @@
 .user-info {
   display: flex;
   align-items: center;
-  gap: 0.4rem; /* Kurangi gap */
+  gap: 0.25rem; /* Further reduce gap */
 }
 
 .user-avatar {
@@ -125,7 +138,7 @@
   border: 1px solid rgba(255,255,255,0.3);
   color: white;
   border-radius: 4px;
-  padding: 0.15rem 0.4rem; /* Kecilkan padding logout */
+  padding: 0.1rem 0.3rem; /* Further reduce padding logout */
   font-size: 0.6rem; /* Kecilkan font logout */
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
@@ -171,8 +184,8 @@
 
 /* Container fluid adjustments for navbar */
 .navbar .container-fluid {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: 0.75rem; /* Reduce horizontal padding */
+  padding-right: 0.75rem;
 }
 
 /* Responsive adjustments */

@@ -2550,6 +2550,10 @@ $user_data = getUserData();
         $("#levelFilterCards").hide();
         $("#secondaryFilterCard").hide();
         $("#toggleAdvancedFiltersContainer").hide();
+        
+        // Hide activity name display
+        $('.activity-name-display').remove();
+        
         activityData = {}; // Clear activity data
         allActivityData = {}; // Clear all data
         activeLevelFilters.clear(); // Clear level filters
