@@ -1045,9 +1045,37 @@ try {
         // Load filter options dan data
         console.log('📊 [DEBUG] Loading filter options and dashboard data...');
         loadFilterOptions();
-        loadDashboardData();
+        // Tidak memanggil loadDashboardData() secara otomatis saat halaman dimuat
+        // loadDashboardData();
         
         return true;
+      };
+      
+      // Fungsi untuk memuat data dari localStorage saat halaman dimuat
+      const loadDataFromLocalStorage = () => {
+        if (!currentUser) return false;
+        
+        const savedData = localStorage.getItem('dashboardData');
+        const savedFilters = localStorage.getItem('dashboardFilters');
+        
+        if (savedData && savedFilters) {
+          try {
+            console.log('📂 [DEBUG] Loading data from localStorage on page load');
+            dashboardData = JSON.parse(savedData);
+            filteredData = [...dashboardData];
+            
+            // Terapkan filter yang tersimpan
+            const filters = JSON.parse(savedFilters);
+            
+            // Tampilkan data tanpa loading spinner
+            displayDashboardData();
+            return true;
+          } catch (e) {
+            console.error('❌ [ERROR] Failed to load data from localStorage:', e);
+            return false;
+          }
+        }
+        return false;
       };
       
       // Load data dashboard
@@ -1056,11 +1084,10 @@ try {
         
         // Cek apakah ada data tersimpan di localStorage dan tidak ada permintaan refresh paksa
         if (!forceRefresh) {
-          const savedData = localStorage.getItem('qg_dashboard_data');
-          const savedFilters = localStorage.getItem('qg_dashboard_filters');
-          const savedView = sessionStorage.getItem('qg_dashboard_view');
+          const savedData = localStorage.getItem('dashboardData');
+          const savedFilters = localStorage.getItem('dashboardFilters');
           
-          if (savedData && savedFilters && savedView === 'active') {
+          if (savedData && savedFilters) {
             try {
               console.log('📂 [DEBUG] Loading data from localStorage');
               dashboardData = JSON.parse(savedData);
@@ -1073,9 +1100,6 @@ try {
               
               // Tampilkan data tanpa loading spinner
               displayDashboardData();
-              
-              // Simpan data ke sessionStorage untuk mempertahankan tampilan saat navigasi
-              sessionStorage.setItem('qg_dashboard_view', 'active');
               return;
             } catch (e) {
               console.error('❌ [ERROR] Failed to load data from localStorage:', e);
@@ -1107,8 +1131,8 @@ try {
             filteredData = [...dashboardData];
             
             // Simpan data dan filter ke localStorage
-            localStorage.setItem('qg_dashboard_data', JSON.stringify(dashboardData));
-            localStorage.setItem('qg_dashboard_filters', JSON.stringify(filters));
+            localStorage.setItem('dashboardData', JSON.stringify(dashboardData));
+            localStorage.setItem('dashboardFilters', JSON.stringify(filters));
             
             displayDashboardData();
           } else {
@@ -1403,7 +1427,8 @@ try {
         const project = $("#filterProject").val();
         if (project) filters.filter_project = project;
         
-        loadDashboardData(filters);
+        // Paksa refresh data dari server
+        loadDashboardData(filters, true);
       });
       
       $("#clearFilters").on('click', function(){
@@ -1438,12 +1463,13 @@ try {
             'value',
             'text',
             (value, text) => {
-              // Auto apply filter when selection changes
-              const filters = {};
-              if (value) filters.filter_project = value;
-              loadDashboardData(filters);
+              // Tidak lagi otomatis memanggil loadDashboardData saat pemilihan berubah
+              // Hanya menyimpan nilai filter yang akan digunakan saat tombol "Tampilkan Data" diklik
             }
           );
+          
+          // Memuat data dari localStorage jika tersedia
+          loadDataFromLocalStorage();
           
           console.log('🎯 [DEBUG] Page initialization completed successfully!');
         } else {

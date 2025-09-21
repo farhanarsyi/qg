@@ -3091,6 +3091,12 @@ $user_data = getUserData();
           const savedFilters = localStorage.getItem('monitoringFilters');
           
           if (savedMonitoringData && savedRegions) {
+            // Pastikan daerahData sudah dimuat sebelum menampilkan data
+            if (daerahData.length === 0) {
+              // Jika daerahData belum dimuat, muat terlebih dahulu
+              return false;
+            }
+            
             // Parse data yang tersimpan
             activityData = JSON.parse(savedMonitoringData);
             allActivityData = JSON.parse(savedMonitoringData);
@@ -3124,7 +3130,11 @@ $user_data = getUserData();
       
       // Cek localStorage saat halaman dimuat
       $(document).ready(function() {
-        loadDataFromLocalStorage();
+        // Muat data daerah terlebih dahulu
+        loadDaerahData().then(() => {
+          // Setelah data daerah dimuat, baru coba load dari localStorage
+          loadDataFromLocalStorage();
+        });
       });
 
       $("#loadData").on('click', async function(){
