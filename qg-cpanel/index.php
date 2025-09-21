@@ -55,6 +55,8 @@ try {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- SheetJS for Excel export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Persistence Manager -->
+  <script src="persistence_manager.js"></script>
   <style>
     :root {
       --primary-color: #059669;   /* Emerald green */
@@ -1067,6 +1069,12 @@ try {
             // Terapkan filter yang tersimpan
             const filters = JSON.parse(savedFilters);
             
+            // Apply saved filters using persistence manager
+            if (window.persistenceManager) {
+              window.persistenceManager.applySavedFilters();
+              window.persistenceManager.showSavedActivityName();
+            }
+            
             // Tampilkan data tanpa loading spinner
             displayDashboardData();
             return true;
@@ -1427,6 +1435,12 @@ try {
         const project = $("#filterProject").val();
         if (project) filters.filter_project = project;
         
+        // Save filters using persistence manager
+        if (window.persistenceManager) {
+          window.persistenceManager.saveFilters(filters);
+          window.persistenceManager.updateActivityName();
+        }
+        
         // Paksa refresh data dari server
         loadDashboardData(filters, true);
       });
@@ -1473,6 +1487,12 @@ try {
           
           // Memuat data dari localStorage jika tersedia
           const dataLoaded = loadDataFromLocalStorage();
+          
+          // Apply saved filters and activity name on page load
+          if (window.persistenceManager) {
+            window.persistenceManager.applySavedFilters();
+            window.persistenceManager.showSavedActivityName();
+          }
           
           // Jika ini adalah load pertama kali dan tidak ada data di localStorage, 
           // maka tampilkan semua kegiatan secara otomatis

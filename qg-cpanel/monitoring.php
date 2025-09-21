@@ -28,6 +28,8 @@ $user_data = getUserData();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <!-- SheetJS for Excel export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Persistence Manager -->
+  <script src="persistence_manager.js"></script>
   <style>
     :root {
       --primary-color: #059669;   /* Emerald green */
@@ -3115,6 +3117,12 @@ $user_data = getUserData();
               });
             }
             
+            // Apply saved filters using persistence manager
+            if (window.persistenceManager) {
+              window.persistenceManager.applySavedFilters();
+              window.persistenceManager.showSavedActivityName();
+            }
+            
             // Tampilkan data
             displayResultTable(regions);
             currentDisplayRegions = regions;
@@ -3134,6 +3142,12 @@ $user_data = getUserData();
         loadDaerahData().then(() => {
           // Setelah data daerah dimuat, baru coba load dari localStorage
           loadDataFromLocalStorage();
+          
+          // Apply saved filters and activity name on page load
+          if (window.persistenceManager) {
+            window.persistenceManager.applySavedFilters();
+            window.persistenceManager.showSavedActivityName();
+          }
         });
       });
 
@@ -3238,6 +3252,19 @@ $user_data = getUserData();
             localStorage.setItem('monitoringData', JSON.stringify(activityData));
             localStorage.setItem('monitoringRegions', JSON.stringify(regionsToProcess));
             localStorage.setItem('monitoringFilters', JSON.stringify(secondaryFilters));
+            
+            // Save filters and activity name using persistence manager
+            if (window.persistenceManager) {
+              const filters = {
+                project: selectedProject,
+                projectName: $('#projectSearch').val(),
+                region: selectedRegion,
+                regionName: $('#regionSearch').val(),
+                secondary: secondaryFilters
+              };
+              window.persistenceManager.saveFilters(filters);
+              window.persistenceManager.updateActivityName();
+            }
           } catch (error) {
             console.error("Error saving data to localStorage:", error);
           }
