@@ -1429,21 +1429,78 @@ $user_data = getUserData();
       const loadDaerahData = async () => {
         try {
           const response = await fetch('daftar_daerah.json');
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not JSON');
+          }
+          
           daerahData = await response.json();
           console.log('🗺️ [MONITORING] Daerah data loaded:', daerahData.length, 'entries');
+          return true;
         } catch (error) {
           console.error('❌ [MONITORING] Failed to load daerah data:', error);
-          daerahData = [];
+          
+          // Show user-friendly error message
+          if (error.message.includes('403')) {
+            console.warn('⚠️ [MONITORING] Access denied to daftar_daerah.json - this may be a server configuration issue');
+          } else if (error.message.includes('404')) {
+            console.warn('⚠️ [MONITORING] daftar_daerah.json not found');
+          } else if (error.message.includes('Response is not JSON')) {
+            console.warn('⚠️ [MONITORING] Server returned non-JSON response (possibly HTML error page)');
+          }
+          
+          // Fallback: try to load from PHP endpoint or different path
+          try {
+            // Try PHP endpoint first
+            const phpResponse = await fetch('daftar_daerah.php');
+            if (phpResponse.ok) {
+              daerahData = await phpResponse.json();
+              console.log('🗺️ [MONITORING] Daerah data loaded from PHP endpoint:', daerahData.length, 'entries');
+              return true;
+            }
+          } catch (phpError) {
+            console.warn('⚠️ [MONITORING] PHP endpoint failed:', phpError);
+          }
+          
+          try {
+            // Try different path
+            const fallbackResponse = await fetch('./daftar_daerah.json');
+            if (fallbackResponse.ok) {
+              daerahData = await fallbackResponse.json();
+              console.log('🗺️ [MONITORING] Daerah data loaded from fallback path:', daerahData.length, 'entries');
+              return true;
+            }
+          } catch (fallbackError) {
+            console.warn('⚠️ [MONITORING] Fallback path also failed:', fallbackError);
+          }
+          
+          // Use minimal fallback data
+          daerahData = [
+            { "kode": "0000", "daerah": "Nasional" },
+            { "kode": "pusat", "daerah": "Pusat" }
+          ];
+          console.log('🗺️ [MONITORING] Using minimal fallback daerah data');
+          return false;
         }
       };
 
       // Get daerah name by kode
       const getDaerahName = (kode) => {
-        if (!kode || !daerahData.length) return 'Wilayah Tidak Diketahui';
+        if (!kode) return 'Wilayah Tidak Diketahui';
         
-        // Handle special cases
+        // Handle special cases first
         if (kode === 'pusat' || kode === '00' || kode === '0000') {
           return 'Pusat';
+        }
+        
+        // If daerahData is not loaded yet, return a fallback
+        if (!daerahData || daerahData.length === 0) {
+          return `Wilayah ${kode}`;
         }
         
         // Find exact match
@@ -3107,12 +3164,14 @@ $user_data = getUserData();
           const savedRegions = localStorage.getItem('monitoringRegions');
           const savedFilters = localStorage.getItem('monitoringFilters');
           
+          console.log('🔍 [MONITORING] Checking localStorage:', {
+            hasMonitoringData: !!savedMonitoringData,
+            hasRegions: !!savedRegions,
+            hasFilters: !!savedFilters
+          });
+          
           if (savedMonitoringData && savedRegions) {
-            // Pastikan daerahData sudah dimuat sebelum menampilkan data
-            if (daerahData.length === 0) {
-              // Jika daerahData belum dimuat, muat terlebih dahulu
-              return false;
-            }
+            // Data tersimpan ditemukan, lanjutkan loading
             
             // Parse data yang tersimpan
             activityData = JSON.parse(savedMonitoringData);
@@ -3139,10 +3198,18 @@ $user_data = getUserData();
             }
             
             // Tampilkan data
+            console.log('✅ [MONITORING] Successfully loaded data from localStorage:', {
+              activities: Object.keys(activityData).length,
+              regions: regions.length,
+              currentDisplayRegions: regions.length
+            });
+            
             displayResultTable(regions);
             currentDisplayRegions = regions;
             
             return true;
+          } else {
+            console.log('ℹ️ [MONITORING] No saved data found in localStorage');
           }
         } catch (error) {
           console.error("Error loading data from localStorage:", error);
@@ -3154,8 +3221,25 @@ $user_data = getUserData();
       // Cek localStorage saat halaman dimuat
       $(document).ready(function() {
         // Muat data daerah terlebih dahulu
-        loadDaerahData().then(() => {
-          // Setelah data daerah dimuat, baru coba load dari localStorage
+        loadDaerahData().then((success) => {
+          if (success) {
+            console.log('✅ [MONITORING] Daerah data loaded successfully');
+          } else {
+            console.warn('⚠️ [MONITORING] Daerah data loaded with fallback');
+          }
+          
+          // Setelah data daerah dimuat (atau fallback), coba load dari localStorage
+          loadDataFromLocalStorage();
+          
+          // Apply saved filters and activity name on page load
+          if (window.persistenceManager) {
+            window.persistenceManager.applySavedFilters();
+            window.persistenceManager.showSavedActivityName();
+          }
+        }).catch((error) => {
+          console.error('❌ [MONITORING] Failed to load daerah data:', error);
+          
+          // Even if daerah data fails, try to load from localStorage
           loadDataFromLocalStorage();
           
           // Apply saved filters and activity name on page load

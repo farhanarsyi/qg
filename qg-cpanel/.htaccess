@@ -10,10 +10,13 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
 RewriteRule ^$ index.php [L]
 
 # Allow specific files
-RewriteRule ^(sso_callback|sso_login|sso_logout|index|main|monitoring|profile|api|debug|debug_helper|test_session)\.php$ - [L]
+RewriteRule ^(sso_callback|sso_login|sso_logout|index|main|monitoring|profile|api|debug|debug_helper|test_session|daftar_daerah)\.php$ - [L]
 
-# Allow assets (CSS, JS, images)
+# Allow assets (CSS, JS, images, JSON)
 RewriteRule ^assets/ - [L]
+
+# Allow JSON files
+RewriteRule ^.*\.json$ - [L]
 
 # Block access to sensitive files
 RewriteRule ^(vendor|composer\.json|composer\.lock|\.git|\.env) - [F,L]
