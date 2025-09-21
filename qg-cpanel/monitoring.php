@@ -415,9 +415,9 @@ $user_data = getUserData();
     .table-monitoring td:nth-child(1) {
       position: sticky !important;
       left: 0px !important;
-      width: 140px;
-      min-width: 140px;
-      max-width: 140px;
+      width: 75px;
+      min-width: 75px;
+      max-width: 75 px;
       z-index: 15 !important;
     }
     
@@ -431,10 +431,10 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(2),
     .table-monitoring td:nth-child(2) {
       position: sticky !important;
-      left: 140px !important;
-      width: 160px;
-      min-width: 160px;
-      max-width: 160px;
+      left: 75px !important;
+      width: 75px;
+      min-width: 75px;
+      max-width: 75px;
       z-index: 14 !important;
     }
     
@@ -448,10 +448,10 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(3),
     .table-monitoring td:nth-child(3) {
       position: sticky !important;
-      left: 300px !important;
-      width: 100px;
-      min-width: 100px;
-      max-width: 100px;
+      left: 150px !important;
+      width: 75px;
+      min-width: 75px;
+      max-width: 75px;
       text-align: center;
       z-index: 13 !important;
     }
@@ -466,10 +466,10 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(4),
     .table-monitoring td:nth-child(4) {
       position: sticky !important;
-      left: 400px !important;
-      width: 180px;
-      min-width: 180px;
-      max-width: 180px;
+      left: 225px !important;
+      width: 250px;
+      min-width: 250px;
+      max-width: 250px;
       word-wrap: break-word;
       white-space: normal;
       line-height: 1.2;
@@ -486,10 +486,10 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(5),
     .table-monitoring td:nth-child(5) {
       position: sticky !important;
-      left: 580px !important;
-      width: 50px;
-      min-width: 50px;
-      max-width: 50px;
+      left: 475px !important;
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
       text-align: center;
       font-size: 0.65rem;
       white-space: nowrap;
@@ -506,10 +506,10 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(6),
     .table-monitoring td:nth-child(6) {
       position: sticky !important;
-      left: 630px !important;
-      width: 55px;
-      min-width: 55px;
-      max-width: 55px;
+      left: 535px !important;
+      width: 65px;
+      min-width: 65px;
+      max-width: 65px;
       text-align: center;
       font-size: 0.65rem;
       white-space: nowrap;
@@ -520,10 +520,10 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(7),
     .table-monitoring td:nth-child(7) {
       position: sticky !important;
-      left: 685px !important;
-      width: 60px;
-      min-width: 60px;
-      max-width: 60px;
+      left: 600px !important;
+      width: 65px;
+      min-width: 65px;
+      max-width: 65px;
       text-align: center;
       font-size: 0.65rem;
       white-space: nowrap;
@@ -539,7 +539,7 @@ $user_data = getUserData();
     /* Animasi kedap-kedip untuk tanggal yang sedang berlangsung */
     @keyframes blink {
       0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0.3; }
+      51%, 100% { opacity: 0.2; }
     }
     
     .date-in-range {
@@ -1725,30 +1725,31 @@ $user_data = getUserData();
         return datePart;
       };
       
-      // Function to calculate days until deadline
-      const calculateDaysUntilDeadline = (endDateStr) => {
-        if (!endDateStr || endDateStr === '-') return '-';
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time to start of day
-        
-        const parts = endDateStr.split('-');
-        if (parts.length !== 3) return '-';
-        
-        const endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-        endDate.setHours(23, 59, 59, 999); // Set to end of day
-        
-        const diffTime = endDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays < 0) {
-          return `+${Math.abs(diffDays)}`; // Overdue (positive number)
-        } else if (diffDays === 0) {
-          return '0'; // Today
-        } else {
-          return diffDays.toString(); // Days remaining
-        }
-      };
+// Function to calculate days until deadline
+const calculateDaysUntilDeadline = (endDateStr) => {
+  if (!endDateStr || endDateStr === '-') return '-';
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day
+  
+  const parts = endDateStr.split('-');
+  if (parts.length !== 3) return '-';
+  
+  const endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+  endDate.setHours(23, 59, 59, 999); // Set to end of day
+  
+  const diffTime = endDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays > 0) {
+    return `-${diffDays}`; // Deadline not yet passed (negative number)
+  } else if (diffDays === 0) {
+    return '0'; // Today
+  } else {
+    return `+${Math.abs(diffDays)}`; // Deadline already passed (positive number)
+  }
+};
+
       
       // Function to check if date is within range
       const isDateInRange = (startDateStr, endDateStr) => {
@@ -1821,7 +1822,7 @@ $user_data = getUserData();
         }
         // Gabungkan "Tidak perlu" dan "Tidak tersedia" menjadi satu dengan logo abu-abu dan tulisan "NA"
         if (status === 'Tidak perlu' || status.includes('Tidak ada aksi') || status === 'Tidak tersedia') {
-          return `<div class="status-icon status-neutral" title="NA">
+          return `<div class="status-icon status-neutral" title="Tidak Perlu">
                     <div class="status-circle">
                       <i class="fas fa-ban"></i>
                     </div>
@@ -2060,7 +2061,7 @@ $user_data = getUserData();
             <td><span class="activity-number">${activityNumber}</span><span class="activity-text">${data.activity}</span></td>
             <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
             <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
-            <td class="date-column">${calculateDaysUntilDeadline(endDate)}</td>
+            <td class="date-column">H${calculateDaysUntilDeadline(endDate)}</td>
           `;
           
           // Tambahkan status untuk setiap wilayah
