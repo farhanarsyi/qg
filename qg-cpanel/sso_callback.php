@@ -13,6 +13,7 @@ error_reporting(E_ALL);
 
 require_once 'vendor/autoload.php';
 require_once 'sso_config.php';
+require_once 'sso_logging.php';
 
 use JKD\SSO\Client\Provider\Keycloak;
 
@@ -157,6 +158,22 @@ try {
     error_log('SSO Session Saved - Prov Code: ' . $prov_code);
     error_log('SSO Session Saved - Kab Code: ' . $kab_code);
     error_log('SSO Session Saved - Unit Kerja: ' . $unit_kerja_data['level']);
+    
+    // Simpan log login ke database
+    $log_data = array(
+        'username' => $username,
+        'nama' => $nama,
+        'provinsi' => $provinsi,
+        'kabupaten' => $kabupaten,
+        'waktu_login' => date('Y-m-d H:i:s') // Generate waktu login saat ini
+    );
+    
+    $log_result = saveSSOLoginLog($log_data);
+    if ($log_result) {
+        error_log('SSO Login logged to database successfully - Log ID: ' . $log_result);
+    } else {
+        error_log('SSO Login logging failed - check database connection');
+    }
     
     // Cleanup
     unset($_SESSION['oauth2state']);
