@@ -2570,12 +2570,12 @@ $user_data = getUserData();
           $filterActivity.append(`<option value="${activity}">${activity}</option>`);
         });
         
-        // Populate Status dropdown
+        // Populate Status dropdown with simple options
         const $filterStatus = $("#filterStatus");
         $filterStatus.empty().append('<option value="">Semua Status</option>');
-        Array.from(statuses).sort().forEach(status => {
-          $filterStatus.append(`<option value="${status}">${status}</option>`);
-        });
+        $filterStatus.append('<option value="Sudah">Sudah</option>');
+        $filterStatus.append('<option value="Belum">Belum</option>');
+        $filterStatus.append('<option value="Tidak Perlu">Tidak Perlu</option>');
         
         // Restore selected values and visual feedback
         setTimeout(() => {
@@ -2665,11 +2665,26 @@ $user_data = getUserData();
             }
           }
           
-          // Filter by Status (any region matches)
+          // Filter by Status (any region matches) - simplified to Sudah/Belum/Tidak Perlu
           if (include && secondaryFilters.status.length > 0) {
-            const hasMatchingStatus = Object.values(data.statuses).some(status => 
-              secondaryFilters.status.includes(status)
-            );
+            const hasMatchingStatus = Object.values(data.statuses).some(status => {
+              // Map complex statuses to simple categories
+              if (secondaryFilters.status.includes('Sudah')) {
+                return status.includes('Sudah') || status.includes('sudah') || 
+                       status.includes('Selesai') || status.includes('selesai') ||
+                       status.includes('Ditentukan') || status.includes('ditentukan') ||
+                       status.includes('Sudah ditentukan') || status.includes('sudah ditentukan');
+              }
+              if (secondaryFilters.status.includes('Belum')) {
+                return status.includes('Belum') || status.includes('belum') ||
+                       status.includes('Belum ditentukan') || status.includes('belum ditentukan');
+              }
+              if (secondaryFilters.status.includes('Tidak Perlu')) {
+                return status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
+                       status.includes('Tidak perlu') || status.includes('tidak Perlu');
+              }
+              return secondaryFilters.status.includes(status);
+            });
             if (!hasMatchingStatus) {
               include = false;
             }
@@ -3157,6 +3172,9 @@ $user_data = getUserData();
         localStorage.removeItem('monitoringRegions');
         localStorage.removeItem('monitoringFilters');
         
+        // Hide activity name when filter is applied
+        $(".activity-name-display").remove();
+        
         if (!selectedProject) {
           showError("Silakan pilih kegiatan terlebih dahulu");
           return;
@@ -3322,6 +3340,15 @@ $user_data = getUserData();
               
               // Hide table and stats when project changes
               hideTableAndStats();
+              
+              // Reset toggle filter lanjutan to show state
+              const $toggleBtn = $('#toggleAdvancedFilters');
+              const $icon = $toggleBtn.find('i');
+              const $text = $toggleBtn.contents().filter(function() {
+                return this.nodeType === 3; // Text nodes
+              }).last();
+              $icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+              $text.replaceWith(' Filter Lanjutan');
               
               if (currentUser.prov === "00" && currentUser.kab === "00") {
                 regionDropdown.clear();

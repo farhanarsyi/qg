@@ -182,10 +182,15 @@ class PersistenceManager {
             // Dashboard filters
             const projectFilter = $('#filterProject').val();
             const projectSearch = $('#filterProjectSearch').val();
+            const statusFilter = $('#filterStatus').val();
             
             if (projectFilter) {
                 filters.project = projectFilter;
                 filters.projectName = projectSearch;
+            }
+            
+            if (statusFilter) {
+                filters.status = statusFilter;
             }
         } else if (this.currentPage === 'monitoring') {
             // Monitoring filters
@@ -247,6 +252,10 @@ class PersistenceManager {
         if (filters.project && filters.projectName) {
             $('#filterProject').val(filters.project);
             $('#filterProjectSearch').val(filters.projectName);
+        }
+        
+        if (filters.status) {
+            $('#filterStatus').val(filters.status);
         }
     }
 

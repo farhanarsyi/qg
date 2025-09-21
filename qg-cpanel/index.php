@@ -419,22 +419,22 @@ try {
     }
     
     .dropdown-search-input {
-      border-radius: 0 0 8px 8px !important;
-      border-top: 1px solid var(--border-color) !important;
+      border-radius: 4px 4px 0 0 !important;
+      border-bottom: 1px solid var(--border-color) !important;
     }
     .dropdown-options {
       position: absolute;
-      bottom: 100%;
+      top: 100%;
       left: 0;
       right: 0;
       background: white;
       border: 1px solid var(--border-color);
-      border-bottom: none;
-      border-radius: 4px 4px 0 0;
+      border-top: none;
+      border-radius: 0 0 4px 4px;
       max-height: 200px;
       overflow-y: auto;
       z-index: 99999;
-      box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     }
     
     .dropdown-option {
@@ -650,16 +650,25 @@ try {
 
   <div class="container-fluid">
     <!-- Filters -->
-    <div class="card" id="filtersCard" style="margin-bottom: 0.75rem;">
+    <div class="card" id="filtersCard" style="margin-bottom: 0.75rem; position: relative; z-index: 1000;">
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-md-10">
+          <div class="col-md-8">
             <label for="filterProjectSearch" class="form-label">Kegiatan</label>
             <div class="searchable-dropdown">
               <input type="text" class="form-control dropdown-search-input" id="filterProjectSearch" placeholder="Cari kegiatan..." value="Semua Kegiatan">
               <div class="dropdown-options" id="filterProjectOptions" style="display: none;"></div>
               <input type="hidden" id="filterProject">
             </div>
+          </div>
+          <div class="col-md-2">
+            <label for="filterStatus" class="form-label">Status</label>
+            <select id="filterStatus" class="form-select">
+              <option value="">Semua Status</option>
+              <option value="active">Sedang Berlangsung</option>
+              <option value="upcoming">Akan Datang</option>
+              <option value="completed">Selesai</option>
+            </select>
           </div>
           <div class="col-md-2 d-flex align-items-end">
             <button id="applyFilters" class="btn btn-primary w-100">
@@ -1106,6 +1115,14 @@ try {
                 filters = JSON.parse(savedFilters);
               }
               
+              // Apply status filter if present
+              if (filters.filter_status) {
+                filteredData = filteredData.filter(gate => {
+                  const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+                  return dateStatus.status === filters.filter_status;
+                });
+              }
+              
               // Tampilkan data tanpa loading spinner
               displayDashboardData();
               return;
@@ -1137,6 +1154,14 @@ try {
           if (response.status && response.data) {
             dashboardData = response.data;
             filteredData = [...dashboardData];
+            
+            // Apply status filter if present
+            if (filters.filter_status) {
+              filteredData = filteredData.filter(gate => {
+                const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+                return dateStatus.status === filters.filter_status;
+              });
+            }
             
             // Simpan data dan filter ke localStorage
             localStorage.setItem('dashboardData', JSON.stringify(dashboardData));
@@ -1299,6 +1324,22 @@ try {
         $("#initialState").hide();
         $("#dashboardTableHeader").show();
         
+        // Show "Semua Kegiatan" if no specific project is selected
+        const selectedProject = $("#filterProject").val();
+        if (!selectedProject) {
+          // Show "Semua Kegiatan" text
+          $(".activity-name-display").remove();
+          const activityDisplay = $(`
+            <div class="activity-name-display">
+              <h4 class="activity-title">
+                <i class="fas fa-project-diagram me-2"></i>
+                Semua Kegiatan
+              </h4>
+            </div>
+          `);
+          $('#filtersCard').after(activityDisplay);
+        }
+        
         // Calculate statistics
         calculateStatistics();
         
@@ -1435,6 +1476,14 @@ try {
         const project = $("#filterProject").val();
         if (project) filters.filter_project = project;
         
+        const status = $("#filterStatus").val();
+        if (status) filters.filter_status = status;
+        
+        // Hide table and activity name when filter is applied
+        $("#dashboardTableHeader").hide();
+        $("#statsCards").hide();
+        $(".activity-name-display").remove();
+        
         // Save filters using persistence manager
         if (window.persistenceManager) {
           window.persistenceManager.saveFilters(filters);
@@ -1447,6 +1496,7 @@ try {
       
       $("#clearFilters").on('click', function(){
         filterProjectDropdown.clear();
+        $("#filterStatus").val("");
         loadDashboardData();
       });
       
