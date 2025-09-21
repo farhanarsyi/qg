@@ -1313,28 +1313,28 @@ $user_data = getUserData();
     <!-- Secondary Universal Filter -->
     <div class="card" id="secondaryFilterCard" style="display: none; margin-bottom: 0.3rem;">
       <div class="card-header d-flex justify-content-between align-items-center" style="padding: 0.3rem 0.4rem;">
-        <span style="font-size: 0.6rem;"><i class="fas fa-filter me-1"></i>Filter Lanjutan</span>
-        <button id="clearSecondaryFilters" class="btn btn-sm btn-outline-secondary" style="font-size: 0.55rem; padding: 0.15rem 0.4rem;">
+        <span style="font-size: 0.65rem;"><i class="fas fa-filter me-1"></i>Filter Lanjutan</span>
+        <button id="clearSecondaryFilters" class="btn btn-sm btn-outline-secondary" style="font-size: 0.65rem; padding: 0.15rem 0.4rem;">
           <i class="fas fa-times me-1"></i>Reset
         </button>
       </div>
       <div class="card-body" style="padding: 0.4rem;">
         <div class="row g-1">
           <div class="col-md-2">
-            <label for="filterGate" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Gate</label>
-            <select id="filterGate" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
+            <label for="filterGate" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">Gate</label>
+            <select id="filterGate" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Gate</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterUK" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">UK</label>
-            <select id="filterUK" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
+            <label for="filterUK" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">UK</label>
+            <select id="filterUK" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua UK</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterLevel" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Level</label>
-            <select id="filterLevel" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
+            <label for="filterLevel" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">Level</label>
+            <select id="filterLevel" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Level</option>
               <option value="1">Pusat</option>
               <option value="2">Provinsi</option>
@@ -1342,20 +1342,20 @@ $user_data = getUserData();
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterActivity" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Aktivitas</label>
-            <select id="filterActivity" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
+            <label for="filterActivity" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">Aktivitas</label>
+            <select id="filterActivity" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Aktivitas</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterStatus" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Status</label>
-            <select id="filterStatus" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
+            <label for="filterStatus" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">Status</label>
+            <select id="filterStatus" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Status</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterDeadline" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Deadline</label>
-            <select id="filterDeadline" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
+            <label for="filterDeadline" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">Deadline</label>
+            <select id="filterDeadline" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Deadline</option>
               <option value="3days">3 hari</option>
               <option value="week">Minggu ini</option>
@@ -2109,7 +2109,7 @@ $user_data = getUserData();
                 <table class="table-monitoring">
                   <thead>
                     <tr>
-                      <th class="sortable-header" data-sort="gate" style="width: 60px;">UK<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="gate" style="width: 60px;">Gate<i class="fas fa-sort sort-icon"></i></th>
                       <th class="sortable-header" data-sort="uk" style="width: 80px;">UK<i class="fas fa-sort sort-icon"></i></th>
                       <th class="sortable-header" data-sort="level">Level<i class="fas fa-sort sort-icon"></i></th>
                       <th class="sortable-header" data-sort="activity">Aktivitas<i class="fas fa-sort sort-icon"></i></th>

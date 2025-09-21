@@ -125,10 +125,10 @@ function renderSSONavbar($active_page = 'dashboard') {
             <!-- Navigation Tabs in Navbar -->
             <div class="navbar-nav-tabs">
                 <a href="index.php" class="nav-link ' . ($active_page === 'dashboard' ? 'active' : '') . '">
-                    <i class="fas fa-tachometer-alt"></i>Dashboard
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
                 <a href="monitoring.php" class="nav-link ' . ($active_page === 'monitoring' ? 'active' : '') . '">
-                    <i class="fas fa-monitor-heart-rate"></i>Monitoring
+                    <i class="fas fa-tasks"></i> Monitoring
                 </a>
             </div>
             

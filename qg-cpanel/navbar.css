@@ -2,7 +2,7 @@
 
 /* Ensure body has proper spacing for fixed navbar */
 body {
-  padding-top: 55px !important; /* Add padding to account for fixed navbar */
+  padding-top: 60px !important; /* Add padding to account for fixed navbar */
 }
 
 /* Add margin to main content to account for fixed navbar */
@@ -29,14 +29,14 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 
 .navbar-brand {
   font-weight: 600;
-  font-size: 0.7rem; /* Further reduce font brand */
+  font-size: 0.8rem; /* Further reduce font brand */
   color: white !important;
   padding-top: 0.02rem; /* Further reduce padding */
   padding-bottom: 0.02rem;
 }
 
 .navbar-brand i {
-  font-size: 0.7rem; /* Icon brand lebih kecil */
+  font-size: 1rem; /* Icon brand lebih kecil */
   margin-right: 0.3rem;
 }
 
@@ -58,7 +58,7 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   position: relative;
   transition: all 0.3s ease;
   text-decoration: none;
-  font-size: 0.55rem; /* Further reduce font nav links */
+  font-size: 0.8rem; /* Further reduce font nav links */
   backdrop-filter: blur(10px);
   line-height: 1.0;
 }
@@ -89,8 +89,8 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .user-avatar {
-  width: 16px; /* Further reduce avatar size */
-  height: 16px;
+  width: 30px; /* Further reduce avatar size */
+  height: 30px;
   background: rgba(255,255,255,0.2);
   border-radius: 3px;
   display: flex;
@@ -99,7 +99,7 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   color: white;
   font-weight: 600;
   backdrop-filter: blur(10px);
-  font-size: 0.45rem; /* Further reduce font avatar */
+  font-size: 0.8rem; /* Further reduce font avatar */
 }
 
 .user-details {
@@ -110,7 +110,7 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 .user-name {
   font-weight: 600;
   color: white;
-  font-size: 0.5rem; /* Further reduce font nama */
+  font-size: 0.6rem; /* Further reduce font nama */
   line-height: 1;
 }
 
@@ -122,7 +122,7 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 
 /* Wilayah info section */
 .wilayah-info {
-  font-size: 0.55rem; /* Kecilkan font wilayah info */
+  font-size: 0.4rem; /* Kecilkan font wilayah info */
   text-align: right;
   line-height: 1.0;
 }
@@ -155,12 +155,12 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .btn-logout i {
-  font-size: 0.5rem; /* Kecilkan icon logout */
+  font-size: 1rem; /* Kecilkan icon logout */
 }
 
 /* Dropdown menu styles */
 .dropdown-menu {
-  font-size: 0.6rem; /* Kecilkan font dropdown */
+  font-size: 0.8rem; /* Kecilkan font dropdown */
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
   border: none;
@@ -182,7 +182,7 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .dropdown-item i {
-  font-size: 0.55rem; /* Kecilkan icon dropdown */
+  font-size: 0.8rem; /* Kecilkan icon dropdown */
   width: 12px; /* Fixed width untuk alignment */
 }
 
@@ -204,15 +204,15 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   }
   
   .user-name {
-    font-size: 0.55rem;
+    font-size: 0.7rem;
   }
   
   .user-role {
-    font-size: 0.45rem;
+    font-size: 0.7rem;
   }
   
   .wilayah-info {
-    font-size: 0.55rem;
+    font-size: 0.7rem;
   }
 }
 
