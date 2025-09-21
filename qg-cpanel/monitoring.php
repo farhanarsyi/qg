@@ -2702,7 +2702,6 @@ $user_data = getUserData();
         
         // Check if advanced status filter is enabled
         if (window.appConfig && window.appConfig.advancedStatusFilter) {
-          $filterStatus.append('<option value="semua">Semua</option>');
           $filterStatus.append('<option value="sudah">Sudah</option>');
           $filterStatus.append('<option value="belum">Belum</option>');
         } else {
