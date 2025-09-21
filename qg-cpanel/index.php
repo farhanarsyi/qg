@@ -739,7 +739,7 @@ try {
     </div>
 
     <!-- Results -->
-    <div class="card">
+    <div class="card" id="resultsContainer">
       <div class="card-header d-flex justify-content-between align-items-center" id="dashboardTableHeader" style="display: none;">
         <span>Data Dashboard</span>
         <div class="table-header-actions">
@@ -1314,7 +1314,8 @@ try {
           $dashboardTableBody.empty();
           $emptyState.show();
           $("#initialState").hide();
-          $("#dashboardTableHeader").hide();
+          $("#resultsContainer").show();
+          $("#dashboardTableHeader").show();
           $resultCount.text("0 data");
           $("#statsCards").hide();
           return;
@@ -1322,6 +1323,7 @@ try {
         
         $emptyState.hide();
         $("#initialState").hide();
+        $("#resultsContainer").show();
         $("#dashboardTableHeader").show();
         
         // Show "Semua Kegiatan" if no specific project is selected
@@ -1480,7 +1482,7 @@ try {
         if (status) filters.filter_status = status;
         
         // Hide table and activity name when filter is applied
-        $("#dashboardTableHeader").hide();
+        $("#resultsContainer").hide();
         $("#statsCards").hide();
         $(".activity-name-display").remove();
         
@@ -1511,6 +1513,14 @@ try {
         exportToExcel();
       });
       
+      // Status filter change handler
+      $(document).on('change', '#filterStatus', function(){
+        // Hide dashboard elements immediately when status filter changes
+        $("#resultsContainer").hide();
+        $("#statsCards").hide();
+        $(".activity-name-display").remove();
+      });
+      
       // Inisialisasi
       console.log('🚀 [DEBUG] Starting page initialization...');
       
@@ -1530,8 +1540,10 @@ try {
             'value',
             'text',
             (value, text) => {
-              // Tidak lagi otomatis memanggil loadDashboardData saat pemilihan berubah
-              // Hanya menyimpan nilai filter yang akan digunakan saat tombol "Tampilkan Data" diklik
+              // Hide dashboard elements immediately when activity selection changes
+              $("#resultsContainer").hide();
+              $("#statsCards").hide();
+              $(".activity-name-display").remove();
             }
           );
           
