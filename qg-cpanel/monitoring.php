@@ -26,6 +26,8 @@ $user_data = getUserData();
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary-color: #059669;   /* Emerald green */
@@ -497,9 +499,36 @@ $user_data = getUserData();
     .table-monitoring th:nth-child(6),
     .table-monitoring td:nth-child(6) {
       position: sticky !important;
-      
       left: 630px !important;
-      
+      width: 55px;
+      min-width: 55px;
+      max-width: 55px;
+      text-align: center;
+      font-size: 0.65rem;
+      white-space: nowrap;
+      z-index: 10 !important;
+    }
+    
+    /* Column 7: Deadline */
+    .table-monitoring th:nth-child(7),
+    .table-monitoring td:nth-child(7) {
+      position: sticky !important;
+      left: 685px !important;
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+      text-align: center;
+      font-size: 0.65rem;
+      white-space: nowrap;
+      z-index: 9 !important;
+    }
+    
+    .table-monitoring th:nth-child(7) {
+      background-color: var(--primary-color) !important;
+      top: 0 !important;
+      z-index: 19 !important;
+    }
+    
     /* Animasi kedap-kedip untuk tanggal yang sedang berlangsung */
     @keyframes blink {
       0%, 50% { opacity: 1; }
@@ -510,14 +539,6 @@ $user_data = getUserData();
       color: #10b981 !important;
       font-weight: 600 !important;
       animation: blink 2s infinite !important;
-    }
-      width: 55px;
-      min-width: 55px;
-      max-width: 55px;
-      text-align: center;
-      font-size: 0.65rem;
-      white-space: nowrap;
-      z-index: 10 !important;
     }
     
     .table-monitoring th:nth-child(6) {
@@ -532,7 +553,8 @@ $user_data = getUserData();
     .table-monitoring tbody tr:nth-child(even) td:nth-child(3),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(4),
     .table-monitoring tbody tr:nth-child(even) td:nth-child(5),
-    .table-monitoring tbody tr:nth-child(even) td:nth-child(6) {
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(6),
+    .table-monitoring tbody tr:nth-child(even) td:nth-child(7) {
       background-color: #f9fafb !important;
     }
     
@@ -882,6 +904,147 @@ $user_data = getUserData();
     .uk-badge-13 { background: #fce7f3; color: #be185d; border-color: #fbcfe8; }
     .uk-badge-14 { background: #f0fdf4; color: #059669; border-color: #bbf7d0; }
     .uk-badge-15 { background: #f1f5f9; color: #0369a1; border-color: #bae6fd; }
+
+    /* Level badge styles */
+    .level-badge {
+      display: inline-block;
+      border-radius: 10px;
+      font-weight: bold;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+      box-shadow: none;
+      margin-bottom: 2px;
+      cursor: default;
+      transition: none;
+      text-align: center;
+      min-width: 60px;
+    }
+    
+    .level-badge:hover {
+      background: inherit;
+      color: inherit;
+    }
+    
+    /* Level badge colors */
+    .level-badge-pusat { 
+      background: #fed7aa; /* orange pastel */
+      color: #c2410c; 
+      border: 1px solid #fdba74; 
+    }
+    .level-badge-provinsi { 
+      background: #dbeafe; /* blue pastel */
+      color: #1e40af; 
+      border: 1px solid #bfdbfe; 
+    }
+    .level-badge-kabkot { 
+      background: #d1fae5; /* green pastel */
+      color: #047857; 
+      border: 1px solid #a7f3d0; 
+    }
+
+    /* Download button styles */
+    .download-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    
+    .download-btn:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .download-btn:active {
+      transform: translateY(0);
+    }
+    
+    .table-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Sorting styles */
+    .sortable-header {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .sortable-header:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .sort-icon {
+      margin-left: 0.5rem;
+      opacity: 0.5;
+      transition: opacity 0.2s ease;
+      font-size: 0.6rem;
+    }
+    
+    .sortable-header:hover .sort-icon {
+      opacity: 1;
+    }
+    
+    .sortable-header.sorted .sort-icon {
+      opacity: 1;
+      color: #fff;
+    }
+    
+    .sortable-header.sorted:hover .sort-icon {
+      color: #fff;
+    }
+
+    /* Secondary Filter Styles */
+    #secondaryFilterCard .form-select[multiple] {
+      min-height: 80px;
+      font-size: 0.7rem;
+    }
+    
+    #secondaryFilterCard .form-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+    
+    #secondaryFilterCard .card-header {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border-bottom: 1px solid #cbd5e1;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    #secondaryFilterCard .btn-sm {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.5rem;
+    }
+    
+    .filter-option {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+    }
+    
+    .filter-count {
+      background: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      padding: 0.1rem 0.3rem;
+      font-size: 0.6rem;
+      margin-left: 0.3rem;
+    }
   </style>
 </head>
 <body>
@@ -996,7 +1159,65 @@ $user_data = getUserData();
             <span>Provinsi</span>
           </div>
           <div class="level-filter-card" data-level="3">
-            <span>Kabupaten/Kota</span>
+            <span>Kabkot</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Universal Filter -->
+    <div class="card" id="secondaryFilterCard" style="display: none; margin-bottom: 0.5rem;">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-filter me-2"></i>Filter Lanjutan</span>
+        <button id="clearSecondaryFilters" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-times me-1"></i>Reset
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-2">
+            <label for="filterGate" class="form-label">Gate</label>
+            <select id="filterGate" class="form-select" multiple>
+              <option value="">Semua Gate</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="filterUK" class="form-label">UK</label>
+            <select id="filterUK" class="form-select" multiple>
+              <option value="">Semua UK</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="filterLevel" class="form-label">Level</label>
+            <select id="filterLevel" class="form-select" multiple>
+              <option value="">Semua Level</option>
+              <option value="1">Pusat</option>
+              <option value="2">Provinsi</option>
+              <option value="3">Kabkot</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="filterActivity" class="form-label">Aktivitas</label>
+            <select id="filterActivity" class="form-select" multiple>
+              <option value="">Semua Aktivitas</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="filterStatus" class="form-label">Status</label>
+            <select id="filterStatus" class="form-select" multiple>
+              <option value="">Semua Status</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="filterDeadline" class="form-label">Deadline</label>
+            <select id="filterDeadline" class="form-select" multiple>
+              <option value="">Semua Deadline</option>
+              <option value="overdue">Terlambat</option>
+              <option value="today">Hari ini</option>
+              <option value="week">Minggu ini</option>
+              <option value="month">Bulan ini</option>
+              <option value="future">Masa depan</option>
+            </select>
           </div>
         </div>
       </div>
@@ -1033,6 +1254,18 @@ $user_data = getUserData();
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
       let currentUser = null; // User yang sedang login
       let activeLevelFilters = new Set(); // Track active level filters
+      let currentDisplayRegions = []; // Simpan regions yang sedang ditampilkan di tabel
+      let sortColumn = null; // Kolom yang sedang di-sort
+      let sortDirection = 'asc'; // Arah sorting (asc/desc)
+      let secondaryFilters = {
+        gate: [],
+        uk: [],
+        level: [],
+        activity: [],
+        status: [],
+        deadline: []
+      }; // Secondary filter values
+      let allActivityData = {}; // Simpan semua data untuk filtering
 
       // Cache selector DOM
       const $yearSelect    = $("#yearSelect");
@@ -1242,6 +1475,31 @@ $user_data = getUserData();
         return datePart;
       };
       
+      // Function to calculate days until deadline
+      const calculateDaysUntilDeadline = (endDateStr) => {
+        if (!endDateStr || endDateStr === '-') return '-';
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        const parts = endDateStr.split('-');
+        if (parts.length !== 3) return '-';
+        
+        const endDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        endDate.setHours(23, 59, 59, 999); // Set to end of day
+        
+        const diffTime = endDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) {
+          return `+${Math.abs(diffDays)}`; // Overdue (positive number)
+        } else if (diffDays === 0) {
+          return '0'; // Today
+        } else {
+          return diffDays.toString(); // Days remaining
+        }
+      };
+      
       // Function to check if date is within range
       const isDateInRange = (startDateStr, endDateStr) => {
         if (!startDateStr || !endDateStr || startDateStr === '-' || endDateStr === '-') return false;
@@ -1337,7 +1595,7 @@ $user_data = getUserData();
         let result;
         if (level === 1) result = "Pusat";
         else if (level === 2) result = "Provinsi";
-        else if (level === 3) result = "Kabupaten";
+        else if (level === 3) result = "Kabkot";
         else result = "Tidak diketahui";
         
         return result;
@@ -1421,19 +1679,26 @@ $user_data = getUserData();
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span>Hasil Monitoring</span>
-              <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+              <div class="table-header-actions">
+                <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+                <button id="downloadExcel" class="download-btn" style="display: none;">
+                  <i class="fas fa-file-excel"></i>
+                  Download Excel
+                </button>
+              </div>
             </div>
             <div class="card-body p-0">
               <div class="table-wrapper">
                 <table class="table-monitoring">
                   <thead>
                     <tr>
-                      <th>Gate</th>
-                      <th>Ukuran Kualitas</th>
-                      <th>Level</th>
-                      <th>Aktivitas</th>
-                      <th class="date-column">Mulai</th>
-                      <th class="date-column">Selesai</th>
+                      <th class="sortable-header" data-sort="gate">Gate<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="uk">Ukuran Kualitas<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="level">Level<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="activity">Aktivitas<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header date-column" data-sort="start">Mulai<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header date-column" data-sort="end">Selesai<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header date-column" data-sort="deadline">Deadline<i class="fas fa-sort sort-icon"></i></th>
         `;
         
         // Tambahkan kolom status untuk setiap wilayah
@@ -1482,27 +1747,39 @@ $user_data = getUserData();
           "Upload bukti pelaksanaan aksi korektif": 6
         };
         
-        // 3. Urutkan seluruh aktivitas berdasarkan gate, UK, dan proses
-        orderedActivities.sort((a, b) => {
-          // Ekstrak nomor gate
-          const gateNumA = parseInt(a.gate.match(/GATE(\d+)/)[1]);
-          const gateNumB = parseInt(b.gate.match(/GATE(\d+)/)[1]);
-          
-          if (gateNumA !== gateNumB) {
-            return gateNumA - gateNumB;
-          }
-          
-          // Ekstrak nomor UK
-          const ukNumA = parseInt(a.uk.match(/UK(\d+)/)[1]);
-          const ukNumB = parseInt(b.uk.match(/UK(\d+)/)[1]);
-          
-          if (ukNumA !== ukNumB) {
-            return ukNumA - ukNumB;
-          }
-          
-          // Urutkan berdasarkan proses
-          return activityOrder[a.activity] - activityOrder[b.activity];
-        });
+        // 3. Urutkan seluruh aktivitas berdasarkan sorting yang dipilih
+        if (sortColumn) {
+          orderedActivities.sort((a, b) => {
+            const valueA = getSortValue(a, sortColumn);
+            const valueB = getSortValue(b, sortColumn);
+            
+            if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+            if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+          });
+        } else {
+          // Default sorting berdasarkan gate, UK, dan proses
+          orderedActivities.sort((a, b) => {
+            // Ekstrak nomor gate
+            const gateNumA = parseInt(a.gate.match(/GATE(\d+)/)[1]);
+            const gateNumB = parseInt(b.gate.match(/GATE(\d+)/)[1]);
+            
+            if (gateNumA !== gateNumB) {
+              return gateNumA - gateNumB;
+            }
+            
+            // Ekstrak nomor UK
+            const ukNumA = parseInt(a.uk.match(/UK(\d+)/)[1]);
+            const ukNumB = parseInt(b.uk.match(/UK(\d+)/)[1]);
+            
+            if (ukNumA !== ukNumB) {
+              return ukNumA - ukNumB;
+            }
+            
+            // Urutkan berdasarkan proses
+            return activityOrder[a.activity] - activityOrder[b.activity];
+          });
+        }
         
         // 4. Buat baris untuk setiap aktivitas (tanpa merge)
         for (let i = 0; i < orderedActivities.length; i++) {
@@ -1517,7 +1794,7 @@ $user_data = getUserData();
           let levelLabel;
           if (rawLevel === 1) levelLabel = "Pusat";
           else if (rawLevel === 2) levelLabel = "Provinsi";
-          else if (rawLevel === 3) levelLabel = "Kabupaten";
+          else if (rawLevel === 3) levelLabel = "Kabkot";
           else levelLabel = "Tidak diketahui";
           
           // Ambil nomor gate dan uk untuk badge warna
@@ -1542,7 +1819,11 @@ $user_data = getUserData();
                 UK ${ukNum}
               </span>
             </td>
-            <td style="text-align: center;">${levelLabel}</td>
+            <td style="text-align: center;">
+              <span class="level-badge level-badge-${levelLabel.toLowerCase()}" title="${levelLabel}">
+                ${levelLabel}
+              </span>
+            </td>
           `;
           
           // Tentukan apakah tanggal dalam rentang aktif
@@ -1563,6 +1844,7 @@ $user_data = getUserData();
             <td><span class="activity-number">${activityNumber}</span><span class="activity-text">${data.activity}</span></td>
             <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
             <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
+            <td class="date-column">${calculateDaysUntilDeadline(endDate)}</td>
           `;
           
           // Tambahkan status untuk setiap wilayah
@@ -1584,8 +1866,21 @@ $user_data = getUserData();
         
         $resultsContainer.html(tableHtml);
         
+        // Simpan regions yang sedang ditampilkan untuk export Excel
+        currentDisplayRegions = [...regions];
+        
+        // Update sort icons
+        updateSortIcons();
+        
         // Update result count with filtered activities
         $("#resultCount").text(`${orderedActivities.length} aktivitas`);
+        
+        // Show download button
+        $("#downloadExcel").show();
+        
+        // Show secondary filter and populate it
+        $("#secondaryFilterCard").show();
+        populateSecondaryFilters();
         
         // Calculate and display statistics using filtered data
         calculateMonitoringStatistics(regions);
@@ -1869,6 +2164,7 @@ $user_data = getUserData();
       const processData = async (regions) => {
         // Reset data
         activityData = {};
+        allActivityData = {};
         
         // Panggil API baru yang mengambil semua data sekaligus
         const monitoringResponse = await makeAjaxRequest(API_URL, {
@@ -1954,7 +2250,7 @@ $user_data = getUserData();
               
               // Simpan info aktivitas
               if (!activityData[activityKey]) {
-                activityData[activityKey] = {
+                const activityInfo = {
                   gate: gateName,
                   uk: ukName,
                   ukLevel: ukLevel,
@@ -1964,6 +2260,8 @@ $user_data = getUserData();
                   end: activity.end,
                   statuses: {}
                 };
+                activityData[activityKey] = activityInfo;
+                allActivityData[activityKey] = JSON.parse(JSON.stringify(activityInfo)); // Deep copy
               }
               
               // Untuk setiap wilayah, tentukan status
@@ -1989,6 +2287,7 @@ $user_data = getUserData();
                 );
                 
                 activityData[activityKey].statuses[region.id] = status;
+                allActivityData[activityKey].statuses[region.id] = status;
               }
             }
           }
@@ -2064,9 +2363,383 @@ $user_data = getUserData();
         $resultsContainer.empty();
         $("#statsCards").hide();
         $("#levelFilterCards").hide();
+        $("#secondaryFilterCard").hide();
         activityData = {}; // Clear activity data
+        allActivityData = {}; // Clear all data
         activeLevelFilters.clear(); // Clear level filters
         $('.level-filter-card').removeClass('active'); // Reset level filter cards
+        sortColumn = null; // Reset sorting
+        sortDirection = 'asc';
+        // Reset secondary filters
+        Object.keys(secondaryFilters).forEach(key => {
+          secondaryFilters[key] = [];
+        });
+      };
+
+      // --- Secondary Filter Functions ---
+      const populateSecondaryFilters = () => {
+        // Populate Gate filter
+        const gates = new Set();
+        const uks = new Set();
+        const activities = new Set();
+        const statuses = new Set();
+        
+        Object.values(allActivityData).forEach(data => {
+          // Extract gate number
+          const gateMatch = data.gate.match(/GATE\s?(\d+)/i);
+          if (gateMatch) gates.add(parseInt(gateMatch[1]));
+          
+          // Extract UK number
+          const ukMatch = data.uk.match(/UK\s?(\d+)/i);
+          if (ukMatch) uks.add(parseInt(ukMatch[1]));
+          
+          // Add activity
+          activities.add(data.activity);
+          
+          // Add all statuses from all regions
+          Object.values(data.statuses).forEach(status => {
+            if (status && status !== "Tidak tersedia") {
+              statuses.add(status);
+            }
+          });
+        });
+        
+        // Populate Gate dropdown
+        const $filterGate = $("#filterGate");
+        $filterGate.empty().append('<option value="">Semua Gate</option>');
+        Array.from(gates).sort((a, b) => a - b).forEach(gateNum => {
+          $filterGate.append(`<option value="${gateNum}">GATE ${gateNum}</option>`);
+        });
+        
+        // Populate UK dropdown
+        const $filterUK = $("#filterUK");
+        $filterUK.empty().append('<option value="">Semua UK</option>');
+        Array.from(uks).sort((a, b) => a - b).forEach(ukNum => {
+          $filterUK.append(`<option value="${ukNum}">UK ${ukNum}</option>`);
+        });
+        
+        // Populate Activity dropdown
+        const $filterActivity = $("#filterActivity");
+        $filterActivity.empty().append('<option value="">Semua Aktivitas</option>');
+        const activityOrder = {
+          "Pengisian nama pelaksana aksi preventif": 1,
+          "Upload bukti pelaksanaan aksi preventif": 2,
+          "Penilaian ukuran kualitas": 3,
+          "Approval Gate oleh Sign-off": 4,
+          "Pengisian pelaksana aksi korektif": 5,
+          "Upload bukti pelaksanaan aksi korektif": 6
+        };
+        Array.from(activities).sort((a, b) => (activityOrder[a] || 0) - (activityOrder[b] || 0)).forEach(activity => {
+          $filterActivity.append(`<option value="${activity}">${activity}</option>`);
+        });
+        
+        // Populate Status dropdown
+        const $filterStatus = $("#filterStatus");
+        $filterStatus.empty().append('<option value="">Semua Status</option>');
+        Array.from(statuses).sort().forEach(status => {
+          $filterStatus.append(`<option value="${status}">${status}</option>`);
+        });
+      };
+
+      const applySecondaryFilters = () => {
+        // Filter activityData based on secondary filters
+        const filteredData = {};
+        
+        Object.entries(allActivityData).forEach(([key, data]) => {
+          let include = true;
+          
+          // Filter by Gate
+          if (secondaryFilters.gate.length > 0) {
+            const gateMatch = data.gate.match(/GATE\s?(\d+)/i);
+            const gateNum = gateMatch ? parseInt(gateMatch[1]) : 0;
+            if (!secondaryFilters.gate.includes(gateNum.toString())) {
+              include = false;
+            }
+          }
+          
+          // Filter by UK
+          if (include && secondaryFilters.uk.length > 0) {
+            const ukMatch = data.uk.match(/UK\s?(\d+)/i);
+            const ukNum = ukMatch ? parseInt(ukMatch[1]) : 0;
+            if (!secondaryFilters.uk.includes(ukNum.toString())) {
+              include = false;
+            }
+          }
+          
+          // Filter by Level
+          if (include && secondaryFilters.level.length > 0) {
+            const level = data.assessmentLevel || 1;
+            if (!secondaryFilters.level.includes(level.toString())) {
+              include = false;
+            }
+          }
+          
+          // Filter by Activity
+          if (include && secondaryFilters.activity.length > 0) {
+            if (!secondaryFilters.activity.includes(data.activity)) {
+              include = false;
+            }
+          }
+          
+          // Filter by Status (any region matches)
+          if (include && secondaryFilters.status.length > 0) {
+            const hasMatchingStatus = Object.values(data.statuses).some(status => 
+              secondaryFilters.status.includes(status)
+            );
+            if (!hasMatchingStatus) {
+              include = false;
+            }
+          }
+          
+          // Filter by Deadline
+          if (include && secondaryFilters.deadline.length > 0) {
+            const deadline = calculateDaysUntilDeadline(data.end);
+            let deadlineCategory = '';
+            
+            if (deadline === '-') {
+              deadlineCategory = 'future';
+            } else {
+              const days = parseInt(deadline.replace('+', '')) || 0;
+              if (days < 0) {
+                deadlineCategory = 'overdue';
+              } else if (days === 0) {
+                deadlineCategory = 'today';
+              } else if (days <= 7) {
+                deadlineCategory = 'week';
+              } else if (days <= 30) {
+                deadlineCategory = 'month';
+              } else {
+                deadlineCategory = 'future';
+              }
+            }
+            
+            if (!secondaryFilters.deadline.includes(deadlineCategory)) {
+              include = false;
+            }
+          }
+          
+          if (include) {
+            filteredData[key] = data;
+          }
+        });
+        
+        // Update activityData with filtered results
+        activityData = filteredData;
+        
+        // Re-display table with filtered data
+        if (currentDisplayRegions.length > 0) {
+          displayResultTable(currentDisplayRegions);
+        }
+      };
+
+      // --- Sorting Functions ---
+      const sortData = (column) => {
+        if (sortColumn === column) {
+          sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortColumn = column;
+          sortDirection = 'asc';
+        }
+        
+        updateSortIcons();
+        displayResultTable(currentDisplayRegions);
+      };
+
+      const updateSortIcons = () => {
+        $('.sortable-header').removeClass('sorted');
+        $('.sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
+        
+        if (sortColumn) {
+          const $th = $(`.sortable-header[data-sort="${sortColumn}"]`);
+          $th.addClass('sorted');
+          const $icon = $th.find('.sort-icon');
+          $icon.removeClass('fa-sort').addClass(sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
+        }
+      };
+
+      const getSortValue = (data, column) => {
+        switch(column) {
+          case 'gate':
+            const gateMatch = data.gate.match(/GATE\s?(\d+)/i);
+            return gateMatch ? parseInt(gateMatch[1]) : 0;
+          case 'uk':
+            const ukMatch = data.uk.match(/UK\s?(\d+)/i);
+            return ukMatch ? parseInt(ukMatch[1]) : 0;
+          case 'level':
+            return data.assessmentLevel || 1;
+          case 'activity':
+            const activityOrder = {
+              "Pengisian nama pelaksana aksi preventif": 1,
+              "Upload bukti pelaksanaan aksi preventif": 2,
+              "Penilaian ukuran kualitas": 3,
+              "Approval Gate oleh Sign-off": 4,
+              "Pengisian pelaksana aksi korektif": 5,
+              "Upload bukti pelaksanaan aksi korektif": 6
+            };
+            return activityOrder[data.activity] || 0;
+          case 'start':
+            return data.start ? new Date(data.start) : new Date('1900-01-01');
+          case 'end':
+            return data.end ? new Date(data.end) : new Date('1900-01-01');
+          case 'deadline':
+            const deadline = calculateDaysUntilDeadline(data.end);
+            if (deadline === '-') return 999999;
+            return parseInt(deadline.replace('+', '')) || 0;
+          default:
+            return '';
+        }
+      };
+
+      // --- Excel Export Function ---
+      const exportToExcel = () => {
+        if (Object.keys(activityData).length === 0) {
+          showError("Tidak ada data untuk diekspor");
+          return;
+        }
+
+        try {
+          // Prepare data for export
+          const exportData = [];
+          
+          // Gunakan regions yang sama dengan yang ditampilkan di tabel
+          const currentRegions = currentDisplayRegions.map(region => ({
+            id: region.id,
+            name: region.name
+          }));
+
+          // Create header row
+          const headerRow = [
+            'Gate',
+            'Ukuran Kualitas', 
+            'Level',
+            'Aktivitas',
+            'Tanggal Mulai',
+            'Tanggal Selesai',
+            'Deadline (Hari)',
+            ...currentRegions.map(region => region.name)
+          ];
+          exportData.push(headerRow);
+
+          // Add data rows
+          const orderedActivities = [];
+          for (const key in activityData) {
+            const data = activityData[key];
+            
+            // Apply level filter if active
+            if (activeLevelFilters.size > 0) {
+              const rawLevel = data.assessmentLevel || 1;
+              if (!activeLevelFilters.has(rawLevel)) {
+                continue;
+              }
+            }
+            
+            orderedActivities.push(data);
+          }
+
+
+          // Sort activities
+          const activityOrder = {
+            "Pengisian nama pelaksana aksi preventif": 1,
+            "Upload bukti pelaksanaan aksi preventif": 2,
+            "Penilaian ukuran kualitas": 3,
+            "Approval Gate oleh Sign-off": 4,
+            "Pengisian pelaksana aksi korektif": 5,
+            "Upload bukti pelaksanaan aksi korektif": 6
+          };
+
+          orderedActivities.sort((a, b) => {
+            const gateNumA = parseInt(a.gate.match(/GATE(\d+)/)[1]);
+            const gateNumB = parseInt(b.gate.match(/GATE(\d+)/)[1]);
+            
+            if (gateNumA !== gateNumB) {
+              return gateNumA - gateNumB;
+            }
+            
+            const ukNumA = parseInt(a.uk.match(/UK(\d+)/)[1]);
+            const ukNumB = parseInt(b.uk.match(/UK(\d+)/)[1]);
+            
+            if (ukNumA !== ukNumB) {
+              return ukNumA - ukNumB;
+            }
+            
+            return activityOrder[a.activity] - activityOrder[b.activity];
+          });
+
+          // Add data rows
+          orderedActivities.forEach(data => {
+            const activityNumber = activityOrder[data.activity];
+            const rawLevel = data.assessmentLevel || 1;
+            let levelLabel;
+            if (rawLevel === 1) levelLabel = "Pusat";
+            else if (rawLevel === 2) levelLabel = "Provinsi";
+            else if (rawLevel === 3) levelLabel = "Kabkot";
+            else levelLabel = "Tidak diketahui";
+
+            const row = [
+              data.gate,
+              data.uk,
+              levelLabel,
+              `${activityNumber}. ${data.activity}`,
+              data.start || '-',
+              data.end || '-',
+              calculateDaysUntilDeadline(data.end),
+              ...currentRegions.map(region => {
+                // Gunakan data status yang sama dengan yang ditampilkan di tabel
+                const status = data.statuses[region.id] || "Tidak tersedia";
+                return status;
+              })
+            ];
+            exportData.push(row);
+          });
+
+          // Create workbook and worksheet
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.aoa_to_sheet(exportData);
+
+          // Set column widths
+          const colWidths = [
+            { wch: 20 }, // Gate
+            { wch: 20 }, // UK
+            { wch: 12 }, // Level
+            { wch: 40 }, // Aktivitas
+            { wch: 15 }, // Mulai
+            { wch: 15 }, // Selesai
+            { wch: 12 }, // Deadline
+            ...currentRegions.map(() => ({ wch: 20 })) // Region columns
+          ];
+          ws['!cols'] = colWidths;
+
+          // Add worksheet to workbook
+          XLSX.utils.book_append_sheet(wb, ws, 'Monitoring Data');
+
+          // Generate filename with timestamp
+          const now = new Date();
+          const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+          const filename = `Monitoring_Quality_Gates_${timestamp}.xlsx`;
+
+          // Save file
+          XLSX.writeFile(wb, filename);
+
+          // Show success message
+          const toast = $(`
+            <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 100px; right: 20px; z-index: 10000; min-width: 250px; font-size: 0.8rem;">
+              <i class="fas fa-check-circle me-2"></i>
+              <strong style="font-size: 0.85rem;">Excel berhasil diekspor!</strong><br>
+              <small style="font-size: 0.7rem;">File: ${filename}</small>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.7rem;"></button>
+            </div>
+          `);
+          $('body').append(toast);
+          
+          // Auto remove after 4 seconds
+          setTimeout(() => {
+            toast.fadeOut(300, function() { $(this).remove(); });
+          }, 4000);
+
+        } catch (error) {
+          console.error('Excel export error:', error);
+          showError("Terjadi kesalahan saat mengekspor ke Excel: " + error.message);
+        }
       };
 
       // --- Event Handlers ---
@@ -2095,6 +2768,44 @@ $user_data = getUserData();
         // Re-filter table if data is already loaded
         if (Object.keys(activityData).length > 0) {
           applyLevelFilter();
+        }
+      });
+
+      // Download Excel handler
+      $(document).on('click', '#downloadExcel', function(){
+        exportToExcel();
+      });
+
+      // Table sorting event handlers
+      $(document).on('click', '.sortable-header', function(){
+        const column = $(this).data('sort');
+        sortData(column);
+      });
+
+      // Secondary filter event handlers
+      $(document).on('change', '#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline', function(){
+        const filterType = $(this).attr('id').replace('filter', '').toLowerCase();
+        const selectedValues = Array.from($(this).val() || []);
+        secondaryFilters[filterType] = selectedValues;
+        applySecondaryFilters();
+      });
+
+      // Clear secondary filters
+      $(document).on('click', '#clearSecondaryFilters', function(){
+        // Reset all filter dropdowns
+        $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline').val([]);
+        
+        // Reset secondary filters object
+        Object.keys(secondaryFilters).forEach(key => {
+          secondaryFilters[key] = [];
+        });
+        
+        // Reset activityData to all data
+        activityData = JSON.parse(JSON.stringify(allActivityData));
+        
+        // Re-display table
+        if (currentDisplayRegions.length > 0) {
+          displayResultTable(currentDisplayRegions);
         }
       });
 

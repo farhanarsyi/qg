@@ -53,6 +53,8 @@ try {
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --primary-color: #059669;   /* Emerald green */
@@ -600,10 +602,44 @@ try {
         font-size: 0.5rem;
       }
       
-      #statsCards h3 {
-        font-size: 0.85rem;
-      }
+    #statsCards h3 {
+      font-size: 0.85rem;
     }
+  }
+
+  /* Download button styles */
+  .download-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  .download-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  .download-btn:active {
+    transform: translateY(0);
+  }
+  
+  .table-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
   </style>
 </head>
 <body>
@@ -693,6 +729,16 @@ try {
 
     <!-- Results -->
     <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center" id="dashboardTableHeader" style="display: none;">
+        <span>Data Dashboard</span>
+        <div class="table-header-actions">
+          <span id="resultCount" class="badge bg-primary rounded-pill">0 data</span>
+          <button id="downloadExcel" class="download-btn">
+            <i class="fas fa-file-excel"></i>
+            Download Excel
+          </button>
+        </div>
+      </div>
       <div class="card-body p-0">
         <div class="table-wrapper">
           <table class="table-dashboard">
@@ -1126,7 +1172,7 @@ try {
         });
         
         $dashboardTableBody.html(tableHtml);
-        $resultCount.text(`${filteredData.length} gate`);
+        $resultCount.text(`${filteredData.length} data`);
       };
       
       // Calculate and display statistics
@@ -1176,6 +1222,7 @@ try {
           $dashboardTableBody.empty();
           $emptyState.show();
           $("#initialState").hide();
+          $("#dashboardTableHeader").hide();
           $resultCount.text("0 data");
           $("#statsCards").hide();
           return;
@@ -1183,6 +1230,7 @@ try {
         
         $emptyState.hide();
         $("#initialState").hide();
+        $("#dashboardTableHeader").show();
         
         // Calculate statistics
         calculateStatistics();
@@ -1194,6 +1242,88 @@ try {
         }
         
         sortData(sortColumn);
+      };
+
+      // --- Excel Export Function ---
+      const exportToExcel = () => {
+        if (filteredData.length === 0) {
+          showError("Tidak ada data untuk diekspor");
+          return;
+        }
+
+        try {
+          // Prepare data for export
+          const exportData = [];
+          
+          // Create header row
+          const headerRow = [
+            'Kegiatan',
+            'Gate',
+            'Tanggal Mulai',
+            'Tanggal Selesai',
+            'Status'
+          ];
+          exportData.push(headerRow);
+
+          // Add data rows
+          filteredData.forEach(gate => {
+            const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+            
+            const row = [
+              gate.project_name,
+              `GATE${gate.gate_number}: ${gate.gate_name}`,
+              gate.prev_insert_start || '-',
+              gate.cor_upload_end || '-',
+              dateStatus.text
+            ];
+            exportData.push(row);
+          });
+
+          // Create workbook and worksheet
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.aoa_to_sheet(exportData);
+
+          // Set column widths
+          const colWidths = [
+            { wch: 30 }, // Kegiatan
+            { wch: 40 }, // Gate
+            { wch: 15 }, // Tanggal Mulai
+            { wch: 15 }, // Tanggal Selesai
+            { wch: 20 }  // Status
+          ];
+          ws['!cols'] = colWidths;
+
+          // Add worksheet to workbook
+          XLSX.utils.book_append_sheet(wb, ws, 'Dashboard Data');
+
+          // Generate filename with timestamp
+          const now = new Date();
+          const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+          const filename = `Dashboard_Quality_Gates_${timestamp}.xlsx`;
+
+          // Save file
+          XLSX.writeFile(wb, filename);
+
+          // Show success message
+          const toast = $(`
+            <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 100px; right: 20px; z-index: 10000; min-width: 250px; font-size: 0.8rem;">
+              <i class="fas fa-check-circle me-2"></i>
+              <strong style="font-size: 0.85rem;">Excel berhasil diekspor!</strong><br>
+              <small style="font-size: 0.7rem;">File: ${filename}</small>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.7rem;"></button>
+            </div>
+          `);
+          $('body').append(toast);
+          
+          // Auto remove after 4 seconds
+          setTimeout(() => {
+            toast.fadeOut(300, function() { $(this).remove(); });
+          }, 4000);
+
+        } catch (error) {
+          console.error('Excel export error:', error);
+          showError("Terjadi kesalahan saat mengekspor ke Excel: " + error.message);
+        }
       };
       
       // Load filter options
@@ -1250,6 +1380,11 @@ try {
       $(document).on('click', '.table-dashboard th[data-sort]', function() {
         const column = $(this).data('sort');
         sortData(column);
+      });
+
+      // Download Excel handler
+      $(document).on('click', '#downloadExcel', function(){
+        exportToExcel();
       });
       
       // Inisialisasi
