@@ -8,6 +8,7 @@ error_reporting(E_ALL);
 
 try {
     require_once 'sso_integration.php';
+    require_once 'app_config.php';
     
     // Log untuk debugging
     error_log('index.php accessed - checking SSO login');
@@ -57,6 +58,8 @@ try {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- Persistence Manager -->
   <script src="persistence_manager.js"></script>
+  <!-- App Configuration -->
+  <script><?php echo getCardConfigJS(); ?></script>
   <style>
     :root {
       --primary-color: #059669;   /* Emerald green */
@@ -680,6 +683,7 @@ try {
     </div>
 
     <!-- Statistics Cards -->
+    <?php if (shouldShowDashboardCards()): ?>
     <div class="row" id="statsCards" style="display: none; margin-bottom: 0rem;">
       <div class="col-md-2">
         <div class="card border-0 bg-dark bg-opacity-10">
@@ -737,6 +741,7 @@ try {
         </div>
       </div>
     </div>
+    <?php endif; ?>
 
     <!-- Results -->
     <div class="card" id="resultsContainer">
@@ -1269,43 +1274,46 @@ try {
       
       // Calculate and display statistics
       const calculateStatistics = () => {
-        const stats = {
-          active: 0,
-          upcoming: 0,
-          completed: 0,
-          total: filteredData.length,
-          projects: new Set()
-        };
-        
-        filteredData.forEach(gate => {
-          // Add project to set for unique count
-          stats.projects.add(gate.project_id);
+        // Only calculate statistics if dashboard cards are enabled
+        if (window.appConfig && window.appConfig.showDashboardCards) {
+          const stats = {
+            active: 0,
+            upcoming: 0,
+            completed: 0,
+            total: filteredData.length,
+            projects: new Set()
+          };
           
-          // Get date status
-          const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+          filteredData.forEach(gate => {
+            // Add project to set for unique count
+            stats.projects.add(gate.project_id);
+            
+            // Get date status
+            const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+            
+            switch(dateStatus.status) {
+              case 'active':
+                stats.active++;
+                break;
+              case 'upcoming':
+                stats.upcoming++;
+                break;
+              case 'completed':
+                stats.completed++;
+                break;
+            }
+          });
           
-          switch(dateStatus.status) {
-            case 'active':
-              stats.active++;
-              break;
-            case 'upcoming':
-              stats.upcoming++;
-              break;
-            case 'completed':
-              stats.completed++;
-              break;
-          }
-        });
-        
-        // Update UI
-        $("#statActive").text(stats.active);
-        $("#statUpcoming").text(stats.upcoming);
-        $("#statCompleted").text(stats.completed);
-        $("#statTotal").text(stats.total);
-        $("#statProjects").text(stats.projects.size);
-        
-        // Show stats cards
-        $("#statsCards").show();
+          // Update UI
+          $("#statActive").text(stats.active);
+          $("#statUpcoming").text(stats.upcoming);
+          $("#statCompleted").text(stats.completed);
+          $("#statTotal").text(stats.total);
+          $("#statProjects").text(stats.projects.size);
+          
+          // Show stats cards
+          $("#statsCards").show();
+        }
       };
 
       // Tampilkan data dashboard

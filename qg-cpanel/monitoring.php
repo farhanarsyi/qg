@@ -2810,9 +2810,9 @@ $user_data = getUserData();
               if (secondaryFilters.status.includes('semua')) {
                 hasMatchingStatus = true; // Show all records
               } else if (secondaryFilters.status.includes('sudah')) {
-                // Show only records where ALL statuses are "sudah" or "tidak perlu"
+                // Show records where minimal 1 "sudah" AND tidak ada "belum"
                 const allStatuses = Object.values(data.statuses);
-                hasMatchingStatus = allStatuses.every(status => {
+                const hasSudah = allStatuses.some(status => {
                   return status.includes('Sudah') || status.includes('sudah') || 
                          status.includes('Selesai') || status.includes('selesai') ||
                          status.includes('Ditentukan') || status.includes('ditentukan') ||
@@ -2820,8 +2820,13 @@ $user_data = getUserData();
                          status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
                          status.includes('Tidak perlu') || status.includes('tidak Perlu');
                 });
+                const hasBelum = allStatuses.some(status => {
+                  return status.includes('Belum') || status.includes('belum') ||
+                         status.includes('Belum ditentukan') || status.includes('belum ditentukan');
+                });
+                hasMatchingStatus = hasSudah && !hasBelum;
               } else if (secondaryFilters.status.includes('belum')) {
-                // Show records where at least ONE status is "belum"
+                // Show records where minimal 1 "belum"
                 const allStatuses = Object.values(data.statuses);
                 hasMatchingStatus = allStatuses.some(status => {
                   return status.includes('Belum') || status.includes('belum') ||

@@ -6,10 +6,10 @@
 // ========================================
 
 // Konfigurasi untuk menampilkan/menyembunyikan card monitoring
-define('SHOW_MONITORING_CARDS', true); // Set ke false untuk menyembunyikan card monitoring
+define('SHOW_MONITORING_CARDS', false); // Set ke false untuk menyembunyikan card monitoring
 
 // Konfigurasi untuk menampilkan/menyembunyikan card dashboard
-define('SHOW_DASHBOARD_CARDS', true); // Set ke false untuk menyembunyikan card dashboard
+define('SHOW_DASHBOARD_CARDS', false); // Set ke false untuk menyembunyikan card dashboard
 
 // ========================================
 // KONFIGURASI DEBUG MODE
