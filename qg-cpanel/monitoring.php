@@ -1020,6 +1020,23 @@ $user_data = getUserData();
       margin-bottom: 0.3rem;
     }
     
+    /* Active Filter Styles */
+    .filter-active {
+      border-color: #059669 !important;
+      background-color: #f0fdf4 !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    .filter-label-active {
+      color: #059669 !important;
+      font-weight: 700 !important;
+    }
+    
+    .filter-active:focus {
+      border-color: #047857 !important;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3) !important;
+    }
+    
     #secondaryFilterCard .card-header {
       background: linear-gradient(135deg, #f8fafc, #e2e8f0);
       border-bottom: 1px solid #cbd5e1;
@@ -2441,6 +2458,31 @@ $user_data = getUserData();
         });
       };
 
+      // Function to update visual feedback for filters
+      const updateFilterVisualFeedback = (filterType, values) => {
+        const $select = $(`#filter${filterType.charAt(0).toUpperCase() + filterType.slice(1)}`);
+        const $label = $select.prev('label');
+        
+        // Remove existing active class
+        $select.removeClass('filter-active');
+        $label.removeClass('filter-label-active');
+        
+        if (values.length > 0) {
+          // Add active styling
+          $select.addClass('filter-active');
+          $label.addClass('filter-label-active');
+          
+          // Update label text to show active filters
+          const originalText = $label.text().split(' (')[0];
+          const displayText = values.length === 1 ? values[0] : `${values.length} selected`;
+          $label.text(`${originalText} (${displayText})`);
+        } else {
+          // Reset label text
+          const originalText = $label.text().split(' (')[0];
+          $label.text(originalText);
+        }
+      };
+
       const applySecondaryFilters = () => {
         // Filter activityData based on secondary filters
         const filteredData = {};
@@ -2785,8 +2827,20 @@ $user_data = getUserData();
       // Secondary filter event handlers
       $(document).on('change', '#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline', function(){
         const filterType = $(this).attr('id').replace('filter', '').toLowerCase();
-        const selectedValues = Array.from($(this).val() || []);
-        secondaryFilters[filterType] = selectedValues;
+        let selectedValues = $(this).val() || [];
+        
+        // Handle multiple select - if it's not an array, make it one
+        if (!Array.isArray(selectedValues)) {
+          selectedValues = [selectedValues];
+        }
+        
+        // Remove empty string values (for "Semua" options)
+        const cleanValues = selectedValues.filter(val => val !== '' && val !== null);
+        secondaryFilters[filterType] = cleanValues;
+        
+        // Update visual feedback
+        updateFilterVisualFeedback(filterType, cleanValues);
+        
         applySecondaryFilters();
       });
 
@@ -2798,6 +2852,12 @@ $user_data = getUserData();
         // Reset secondary filters object
         Object.keys(secondaryFilters).forEach(key => {
           secondaryFilters[key] = [];
+        });
+        
+        // Reset visual feedback for all filters
+        $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline').each(function(){
+          const filterType = $(this).attr('id').replace('filter', '').toLowerCase();
+          updateFilterVisualFeedback(filterType, []);
         });
         
         // Reset activityData to all data
