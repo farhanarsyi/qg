@@ -1012,6 +1012,32 @@ $user_data = getUserData();
     #secondaryFilterCard .form-select[multiple] {
       min-height: 80px;
       font-size: 0.7rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      background-color: white;
+    }
+    
+    #secondaryFilterCard .form-select[multiple]:focus {
+      border-color: #059669;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+      outline: none;
+    }
+    
+    /* Make all filter options green when selected */
+    #secondaryFilterCard .form-select[multiple] option {
+      padding: 0.3rem 0.5rem;
+      background-color: white;
+      color: #374151;
+    }
+    
+    #secondaryFilterCard .form-select[multiple] option:checked {
+      background-color: #059669 !important;
+      color: white !important;
+    }
+    
+    #secondaryFilterCard .form-select[multiple] option:hover {
+      background-color: #f0fdf4 !important;
+      color: #059669 !important;
     }
     
     #secondaryFilterCard .form-label {
@@ -1052,6 +1078,23 @@ $user_data = getUserData();
     .filter-option {
       font-size: 0.7rem;
       padding: 0.2rem 0.4rem;
+    }
+    
+    /* Ensure all filter selects have consistent styling */
+    select[multiple] option {
+      padding: 0.3rem 0.5rem;
+      background-color: white;
+      color: #374151;
+    }
+    
+    select[multiple] option:checked {
+      background-color: #059669 !important;
+      color: white !important;
+    }
+    
+    select[multiple] option:hover {
+      background-color: #f0fdf4 !important;
+      color: #059669 !important;
     }
     
     .filter-count {
@@ -1165,21 +1208,12 @@ $user_data = getUserData();
       </div>
     </div>
 
-    <!-- Level Filter Cards -->
-    <div class="row" id="levelFilterCards" style="display: none; margin-bottom: 0.3rem;">
-      <div class="col-md-12">
-        <div class="d-flex justify-content-start gap-2">
-          <div class="level-filter-card" data-level="1">
-            <span>Pusat</span>
-          </div>
-          <div class="level-filter-card" data-level="2">
-            <span>Provinsi</span>
-          </div>
-          <div class="level-filter-card" data-level="3">
-            <span>Kabkot</span>
-          </div>
-        </div>
-      </div>
+
+    <!-- Toggle Advanced Filters Button -->
+    <div class="mb-2" id="toggleAdvancedFiltersContainer" style="display: none;">
+      <button id="toggleAdvancedFilters" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;">
+        <i class="fas fa-chevron-down me-1"></i>Filter Lanjutan
+      </button>
     </div>
 
     <!-- Secondary Universal Filter -->
@@ -1229,11 +1263,9 @@ $user_data = getUserData();
             <label for="filterDeadline" class="form-label">Deadline</label>
             <select id="filterDeadline" class="form-select" multiple>
               <option value="">Semua Deadline</option>
-              <option value="overdue">Terlambat</option>
-              <option value="today">Hari ini</option>
+              <option value="3days">3 hari</option>
               <option value="week">Minggu ini</option>
               <option value="month">Bulan ini</option>
-              <option value="future">Masa depan</option>
             </select>
           </div>
         </div>
@@ -1895,8 +1927,8 @@ $user_data = getUserData();
         // Show download button
         $("#downloadExcel").show();
         
-        // Show secondary filter and populate it
-        $("#secondaryFilterCard").show();
+        // Show toggle button and secondary filter, then populate it
+        $("#toggleAdvancedFiltersContainer").show();
         populateSecondaryFilters();
         
         // Calculate and display statistics using filtered data
@@ -2381,6 +2413,7 @@ $user_data = getUserData();
         $("#statsCards").hide();
         $("#levelFilterCards").hide();
         $("#secondaryFilterCard").hide();
+        $("#toggleAdvancedFiltersContainer").hide();
         activityData = {}; // Clear activity data
         allActivityData = {}; // Clear all data
         activeLevelFilters.clear(); // Clear level filters
@@ -2474,7 +2507,32 @@ $user_data = getUserData();
           
           // Update label text to show active filters
           const originalText = $label.text().split(' (')[0];
-          const displayText = values.length === 1 ? values[0] : `${values.length} selected`;
+          let displayText;
+          
+          // Special handling for different filter types
+          if (filterType === 'uk') {
+            displayText = values.length === 1 ? `UK ${values[0]}` : `UK ${values.join(', UK ')}`;
+          } else if (filterType === 'level') {
+            const levelLabels = {
+              '1': 'Pusat',
+              '2': 'Provinsi', 
+              '3': 'Kabkot'
+            };
+            displayText = values.length === 1 ? levelLabels[values[0]] || values[0] : 
+              values.map(v => levelLabels[v] || v).join(', ');
+          } else if (filterType === 'deadline') {
+            const deadlineLabels = {
+              '3days': '3 hari',
+              'week': 'Minggu ini',
+              'month': 'Bulan ini',
+              'all': 'Semua deadline'
+            };
+            displayText = values.length === 1 ? deadlineLabels[values[0]] || values[0] : 
+              values.map(v => deadlineLabels[v] || v).join(', ');
+          } else {
+            displayText = values.length === 1 ? values[0] : `${values.length} selected`;
+          }
+          
           $label.text(`${originalText} (${displayText})`);
         } else {
           // Reset label text
@@ -2539,19 +2597,19 @@ $user_data = getUserData();
             let deadlineCategory = '';
             
             if (deadline === '-') {
-              deadlineCategory = 'future';
+              deadlineCategory = 'all';
             } else {
               const days = parseInt(deadline.replace('+', '')) || 0;
               if (days < 0) {
                 deadlineCategory = 'overdue';
-              } else if (days === 0) {
-                deadlineCategory = 'today';
+              } else if (days <= 3) {
+                deadlineCategory = '3days';
               } else if (days <= 7) {
                 deadlineCategory = 'week';
               } else if (days <= 30) {
                 deadlineCategory = 'month';
               } else {
-                deadlineCategory = 'future';
+                deadlineCategory = 'all';
               }
             }
             
@@ -2866,6 +2924,25 @@ $user_data = getUserData();
         // Re-display table
         if (currentDisplayRegions.length > 0) {
           displayResultTable(currentDisplayRegions);
+        }
+      });
+
+      // Toggle advanced filters
+      $(document).on('click', '#toggleAdvancedFilters', function(){
+        const $card = $('#secondaryFilterCard');
+        const $icon = $(this).find('i');
+        const $text = $(this).contents().filter(function() {
+          return this.nodeType === 3; // Text nodes
+        }).last();
+        
+        if ($card.is(':visible')) {
+          $card.slideUp(300);
+          $icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+          $text.replaceWith(' Filter Lanjutan');
+        } else {
+          $card.slideDown(300);
+          $icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+          $text.replaceWith(' Sembunyikan Filter');
         }
       });
 
