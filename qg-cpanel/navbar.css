@@ -1,13 +1,14 @@
 /* navbar.css - Unified navbar styling untuk Dashboard dan Monitoring */
 
-/* Ensure body has proper spacing for sticky navbar */
+/* Ensure body has proper spacing for fixed navbar */
 body {
-  padding-top: 0; /* Reset any existing padding */
+  padding-top: 50px !important; /* Add padding to account for fixed navbar */
 }
 
-/* Add margin to main content to account for sticky navbar */
+/* Add margin to main content to account for fixed navbar */
 main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   margin-top: 0.5rem; /* Small margin to separate from navbar */
+  padding-top: 0.5rem; /* Additional padding for better spacing */
 }
 
 /* Base navbar styles */
@@ -15,20 +16,23 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
   box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
   border-bottom: none;
-  padding: 0.25rem 0; /* Reduce padding untuk lebih narrow */
-  margin-bottom: 0.75rem;
-  min-height: 45px; /* Reduce height */
-  position: sticky; /* Make navbar sticky */
-  top: 0; /* Stick to top */
-  z-index: 1030; /* Ensure navbar stays above other content */
+  padding: 0.15rem 0; /* Further reduce padding untuk lebih narrow */
+  margin-bottom: 0.5rem; /* Reduce margin */
+  min-height: 35px; /* Further reduce height */
+  position: fixed !important; /* Force fixed positioning */
+  top: 0 !important; /* Stick to top */
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important; /* Higher z-index to ensure it stays on top */
 }
 
 .navbar-brand {
   font-weight: 600;
-  font-size: 0.85rem; /* Kecilkan font brand */
+  font-size: 0.75rem; /* Further reduce font brand */
   color: white !important;
-  padding-top: 0.1rem; /* Reduce padding */
-  padding-bottom: 0.1rem;
+  padding-top: 0.05rem; /* Further reduce padding */
+  padding-bottom: 0.05rem;
 }
 
 .navbar-brand i {
@@ -49,14 +53,14 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
-  padding: 0.15rem 0.4rem; /* Further reduce padding */
+  padding: 0.1rem 0.3rem; /* Further reduce padding */
   border-radius: 4px;
   position: relative;
   transition: all 0.3s ease;
   text-decoration: none;
-  font-size: 0.65rem; /* Kecilkan font nav links */
+  font-size: 0.6rem; /* Further reduce font nav links */
   backdrop-filter: blur(10px);
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .navbar-nav-tabs .nav-link:hover {
@@ -85,8 +89,8 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .user-avatar {
-  width: 22px; /* Kecilkan avatar */
-  height: 22px;
+  width: 18px; /* Further reduce avatar size */
+  height: 18px;
   background: rgba(255,255,255,0.2);
   border-radius: 4px;
   display: flex;
@@ -95,7 +99,7 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   color: white;
   font-weight: 600;
   backdrop-filter: blur(10px);
-  font-size: 0.6rem; /* Kecilkan font avatar */
+  font-size: 0.5rem; /* Further reduce font avatar */
 }
 
 .user-details {
@@ -106,12 +110,12 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 .user-name {
   font-weight: 600;
   color: white;
-  font-size: 0.6rem; /* Kecilkan font nama */
+  font-size: 0.55rem; /* Further reduce font nama */
   line-height: 1;
 }
 
 .user-role {
-  font-size: 0.5rem; /* Kecilkan font role */
+  font-size: 0.45rem; /* Further reduce font role */
   color: rgba(255,255,255,0.8);
   line-height: 1;
 }
@@ -138,8 +142,8 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   border: 1px solid rgba(255,255,255,0.3);
   color: white;
   border-radius: 4px;
-  padding: 0.1rem 0.3rem; /* Further reduce padding logout */
-  font-size: 0.6rem; /* Kecilkan font logout */
+  padding: 0.05rem 0.25rem; /* Further reduce padding logout */
+  font-size: 0.55rem; /* Further reduce font logout */
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
 }
@@ -184,8 +188,8 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 
 /* Container fluid adjustments for navbar */
 .navbar .container-fluid {
-  padding-left: 0.75rem; /* Reduce horizontal padding */
-  padding-right: 0.75rem;
+  padding-left: 0.5rem; /* Further reduce horizontal padding */
+  padding-right: 0.5rem;
 }
 
 /* Responsive adjustments */
