@@ -1450,6 +1450,9 @@ try {
       // Inisialisasi
       console.log('🚀 [DEBUG] Starting page initialization...');
       
+      // Variabel untuk menandai apakah ini adalah load pertama kali
+      let isFirstLoad = !localStorage.getItem('dashboardHasLoaded');
+      
       try {
         if (initUser()) {
           console.log('✅ [DEBUG] User initialization successful, setting up dropdown...');
@@ -1469,7 +1472,17 @@ try {
           );
           
           // Memuat data dari localStorage jika tersedia
-          loadDataFromLocalStorage();
+          const dataLoaded = loadDataFromLocalStorage();
+          
+          // Jika ini adalah load pertama kali dan tidak ada data di localStorage, 
+          // maka tampilkan semua kegiatan secara otomatis
+          if (isFirstLoad && !dataLoaded) {
+            console.log('🔄 [DEBUG] First page load detected, loading all activities automatically...');
+            // Tandai bahwa halaman sudah pernah dimuat
+            localStorage.setItem('dashboardHasLoaded', 'true');
+            // Muat semua kegiatan (tanpa filter)
+            loadDashboardData({}, true);
+          }
           
           console.log('🎯 [DEBUG] Page initialization completed successfully!');
         } else {
