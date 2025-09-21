@@ -1416,11 +1416,43 @@ $user_data = getUserData();
       
       let projectData = [];
       let regionDropdownData = []; // Renamed to avoid conflict
+      let daerahData = []; // Data dari daftar_daerah.json
       
       // Initialize searchable dropdowns
       let projectDropdown, regionDropdown;
 
       // --- Helper Functions ---
+
+      // Load daerah data from JSON file
+      const loadDaerahData = async () => {
+        try {
+          const response = await fetch('daftar_daerah.json');
+          daerahData = await response.json();
+          console.log('🗺️ [MONITORING] Daerah data loaded:', daerahData.length, 'entries');
+        } catch (error) {
+          console.error('❌ [MONITORING] Failed to load daerah data:', error);
+          daerahData = [];
+        }
+      };
+
+      // Get daerah name by kode
+      const getDaerahName = (kode) => {
+        if (!kode || !daerahData.length) return 'Wilayah Tidak Diketahui';
+        
+        // Handle special cases
+        if (kode === 'pusat' || kode === '00' || kode === '0000') {
+          return 'Pusat';
+        }
+        
+        // Find exact match
+        const daerah = daerahData.find(d => d.kode === kode);
+        if (daerah) {
+          return daerah.daerah;
+        }
+        
+        // If not found, return original kode
+        return `Wilayah ${kode}`;
+      };
 
       // Searchable Dropdown Implementation
       const createSearchableDropdown = (searchInput, optionsContainer, hiddenInput, data, valueKey, textKey, onSelect) => {
@@ -1839,14 +1871,9 @@ $user_data = getUserData();
         
         // Tambahkan kolom status untuk setiap wilayah
         regions.forEach(region => {
-          // Capitalize each word in region name, handle null case
-          let capitalizedName = "Wilayah Tidak Diketahui";
-          if (region.name && region.name.trim() !== '') {
-            capitalizedName = region.name.split(' ').map(word => 
-              word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            ).join(' ');
-          }
-          tableHtml += `<th class="status-column region-header">${capitalizedName}</th>`;
+          // Use getDaerahName function to get proper name from daftar_daerah.json
+          let regionName = getDaerahName(region.id);
+          tableHtml += `<th class="status-column region-header">${regionName}</th>`;
         });
         
         tableHtml += `
@@ -2032,8 +2059,11 @@ $user_data = getUserData();
           if (name === "Pusat") {
             currentRegions.push({ id: "pusat", prov: "00", kab: "00", name: "Pusat" });
           } else {
-            // For other regions, try to find from coverageData
-            const region = coverageData.find(r => r.name && r.name.toLowerCase() === name.toLowerCase());
+            // For other regions, try to find from coverageData by matching the displayed name
+            const region = coverageData.find(r => {
+              const regionName = getDaerahName(r.id);
+              return regionName === name;
+            });
             if (region) {
               currentRegions.push(region);
             }
@@ -2113,7 +2143,7 @@ $user_data = getUserData();
                 id: `${cov.prov}${cov.kab}`,
                 prov: cov.prov,
                 kab: cov.kab,
-                name: cov.name
+                name: getDaerahName(`${cov.prov}${cov.kab}`)
               }));
               coverageData = [...coverageData, ...apiData];
             }
@@ -2136,37 +2166,8 @@ $user_data = getUserData();
             Object.keys(kabupatenByProv).forEach(provCode => {
               const existingProvince = provinces.find(p => p.prov === provCode);
               if (!existingProvince) {
-                // Buat virtual province
-                const firstKab = kabupatenByProv[provCode][0];
-                let provinceName = `Provinsi ${provCode}`;
-                
-                // Coba ekstrak nama provinsi dari nama kabupaten
-                if (firstKab && firstKab.name && firstKab.name.trim() !== '') {
-                  const kabName = firstKab.name;
-                  if (kabName.includes(' - ')) {
-                    // Format: "Nama Provinsi - Nama Kabupaten"
-                    provinceName = kabName.split(' - ')[0];
-                  } else {
-                    // Coba beberapa pattern umum nama kabupaten
-                    const provNames = {
-                      '11': 'ACEH', '12': 'SUMATERA UTARA', '13': 'SUMATERA BARAT', 
-                      '14': 'RIAU', '15': 'JAMBI', '16': 'SUMATERA SELATAN',
-                      '17': 'BENGKULU', '18': 'LAMPUNG', '19': 'KEPULAUAN BANGKA BELITUNG',
-                      '21': 'KEPULAUAN RIAU', '31': 'DKI JAKARTA', '32': 'JAWA BARAT',
-                      '33': 'JAWA TENGAH', '34': 'DI YOGYAKARTA', '35': 'JAWA TIMUR',
-                      '36': 'BANTEN', '51': 'BALI', '52': 'NUSA TENGGARA BARAT',
-                      '53': 'NUSA TENGGARA TIMUR', '61': 'KALIMANTAN BARAT',
-                      '62': 'KALIMANTAN TENGAH', '63': 'KALIMANTAN SELATAN',
-                      '64': 'KALIMANTAN TIMUR', '65': 'KALIMANTAN UTARA',
-                      '71': 'SULAWESI UTARA', '72': 'SULAWESI TENGAH',
-                      '73': 'SULAWESI SELATAN', '74': 'SULAWESI TENGGARA',
-                      '75': 'GORONTALO', '76': 'SULAWESI BARAT',
-                      '81': 'MALUKU', '82': 'MALUKU UTARA',
-                      '91': 'PAPUA BARAT', '94': 'PAPUA'
-                    };
-                    provinceName = provNames[provCode] || `Provinsi ${provCode}`;
-                  }
-                }
+                // Buat virtual province dengan nama dari daftar_daerah.json
+                const provinceName = getDaerahName(`${provCode}00`);
                 
                 const virtualProvince = {
                   id: `${provCode}00`,
@@ -2189,7 +2190,7 @@ $user_data = getUserData();
               { value: "pusat", text: "Pusat - Nasional" },
               ...provinces.map(province => ({
                 value: province.id,
-                text: province.name
+                text: getDaerahName(province.id)
               }))
             ];
             
@@ -2211,7 +2212,7 @@ $user_data = getUserData();
                 id: `${cov.prov}${cov.kab}`,
                 prov: cov.prov,
                 kab: cov.kab,
-                name: cov.name
+                name: getDaerahName(`${cov.prov}${cov.kab}`)
               }));
               coverageData = apiData;
               
@@ -2231,19 +2232,8 @@ $user_data = getUserData();
                 );
                 
                 if (firstKabupaten) {
-                  // Buat virtual provinsi entry
-                  // Ekstrak nama provinsi dari nama kabupaten
-                  let provinceName = `Prov. ${currentUser.prov}`;
-                  
-                  // Coba ekstrak dari nama kabupaten
-                  const kabName = firstKabupaten.name;
-                  if (kabName && kabName.trim() !== '' && kabName.includes(' - ')) {
-                    // Format: "Nama Provinsi - Nama Kabupaten"
-                    provinceName = kabName.split(' - ')[0];
-                  } else {
-                    // Jika tidak ada format khusus, gunakan nama generik
-                    provinceName = `Provinsi (${currentUser.prov})`;
-                  }
+                  // Buat virtual provinsi entry dengan nama dari daftar_daerah.json
+                  const provinceName = getDaerahName(`${currentUser.prov}00`);
                   
                   const virtualProvince = {
                     id: `${currentUser.prov}00`,
@@ -2275,7 +2265,7 @@ $user_data = getUserData();
                 id: `${cov.prov}${cov.kab}`,
                 prov: cov.prov,
                 kab: cov.kab,
-                name: cov.name
+                name: getDaerahName(`${cov.prov}${cov.kab}`)
               }));
               coverageData = apiData;
               
@@ -2796,7 +2786,7 @@ $user_data = getUserData();
           // Gunakan regions yang sama dengan yang ditampilkan di tabel
           const currentRegions = currentDisplayRegions.map(region => ({
             id: region.id,
-            name: region.name
+            name: getDaerahName(region.id)
           }));
 
           // Create header row
@@ -3217,53 +3207,61 @@ $user_data = getUserData();
       });
 
       // Inisialisasi
-      if (initUser()) {
-        // Initialize searchable dropdowns
-        projectDropdown = createSearchableDropdown(
-          '#projectSearch', 
-          '#projectOptions', 
-          '#projectSelect',
-          [],
-          'value',
-          'text',
-          async (value, text) => {
-            selectedProject = value;
-            selectedRegion = null;
-            
-            // Hide table and stats when project changes
-            hideTableAndStats();
-            
-            if (currentUser.prov === "00" && currentUser.kab === "00") {
-              regionDropdown.clear();
-              regionDropdown.disable();
+      const initializeApp = async () => {
+        if (initUser()) {
+          // Load daerah data first
+          await loadDaerahData();
+          
+          // Initialize searchable dropdowns
+          projectDropdown = createSearchableDropdown(
+            '#projectSearch', 
+            '#projectOptions', 
+            '#projectSelect',
+            [],
+            'value',
+            'text',
+            async (value, text) => {
+              selectedProject = value;
+              selectedRegion = null;
+              
+              // Hide table and stats when project changes
+              hideTableAndStats();
+              
+              if (currentUser.prov === "00" && currentUser.kab === "00") {
+                regionDropdown.clear();
+                regionDropdown.disable();
+              }
+              
+              if (selectedProject) await loadRegions();
             }
-            
-            if (selectedProject) await loadRegions();
+          );
+          
+          regionDropdown = createSearchableDropdown(
+            '#regionSearch',
+            '#regionOptions', 
+            '#regionSelect',
+            [],
+            'value',
+            'text',
+            (value, text) => {
+              selectedRegion = value;
+              
+              // Hide table and stats when region changes
+              hideTableAndStats();
+            }
+          );
+          
+          year = $yearSelect.val() || "2025";
+          
+          // Load projects untuk tahun yang sudah terpilih (default 2025)
+          if (year) {
+            loadProjects();
           }
-        );
-        
-        regionDropdown = createSearchableDropdown(
-          '#regionSearch',
-          '#regionOptions', 
-          '#regionSelect',
-          [],
-          'value',
-          'text',
-          (value, text) => {
-            selectedRegion = value;
-            
-            // Hide table and stats when region changes
-            hideTableAndStats();
-          }
-        );
-        
-        year = $yearSelect.val() || "2025";
-        
-        // Load projects untuk tahun yang sudah terpilih (default 2025)
-        if (year) {
-          loadProjects();
         }
-      }
+      };
+      
+      // Start initialization
+      initializeApp();
       $spinner.hide();
     });
   </script>
