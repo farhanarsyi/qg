@@ -1747,8 +1747,21 @@ $user_data = getUserData();
 
       // Ubah fungsi getStatusBadge agar menerima endDateStr
       const getStatusBadge = (status, endDateStr) => {
+        // Extract progress information from status if available
+        const progressMatch = status.match(/\((\d+)\/(\d+)\)/);
+        let tooltipText = status;
+        let progressInfo = '';
+        
+        if (progressMatch) {
+          const uploaded = parseInt(progressMatch[1]);
+          const total = parseInt(progressMatch[2]);
+          const percentage = Math.round((uploaded / total) * 100);
+          progressInfo = ` (${percentage}% selesai)`;
+          tooltipText = status + progressInfo;
+        }
+        
         if (status.startsWith('Sudah')) {
-          return `<div class="status-icon status-success" title="${status}">
+          return `<div class="status-icon status-success" title="${tooltipText}">
                     <div class="status-circle">
                       <i class="fas fa-check"></i>
                     </div>
@@ -1769,28 +1782,28 @@ $user_data = getUserData();
           }
           if (isOverdue) {
             // Sudah lewat deadline, merah
-            return `<div class="status-icon status-danger" title="${status} (Terlambat)">
+            return `<div class="status-icon status-danger" title="${tooltipText} (Terlambat)">
                       <div class="status-circle">
                         <i class="fas fa-minus"></i>
                       </div>
                     </div>`;
           } else {
             // Belum lewat deadline, orange
-            return `<div class="status-icon status-warning" title="${status} (Masih dalam tenggat)">
+            return `<div class="status-icon status-warning" title="${tooltipText} (Masih dalam tenggat)">
                       <div class="status-circle">
                         <i class="fas fa-exclamation"></i>
                       </div>
                     </div>`;
           }
         }
-        if (status === 'Tidak perlu') {
-          return `<div class="status-icon status-neutral" title="${status}">
+        if (status === 'Tidak perlu' || status.includes('Tidak ada aksi')) {
+          return `<div class="status-icon status-neutral" title="${tooltipText}">
                     <div class="status-circle">
                       <i class="fas fa-ban"></i>
                     </div>
                   </div>`;
         }
-        return `<div class="status-icon status-warning" title="${status}">
+        return `<div class="status-icon status-warning" title="${tooltipText}">
                   <div class="status-circle">
                     <i class="fas fa-clock"></i>
                   </div>
@@ -2443,7 +2456,9 @@ $user_data = getUserData();
                   activity: activity.name,
                   start: activity.start,
                   end: activity.end,
-                  statuses: {}
+                  statuses: {},
+                  totalPreventives: {},
+                  totalCorrectives: {}
                 };
                 activityData[activityKey] = activityInfo;
                 allActivityData[activityKey] = JSON.parse(JSON.stringify(activityInfo)); // Deep copy
@@ -2466,6 +2481,12 @@ $user_data = getUserData();
                   continue;
                 }
                 
+                // Simpan data total untuk region ini
+                activityData[activityKey].totalPreventives[region.id] = regionData.total_preventives[measurement.id] || 0;
+                activityData[activityKey].totalCorrectives[region.id] = regionData.total_correctives[measurement.id] || 0;
+                allActivityData[activityKey].totalPreventives[region.id] = regionData.total_preventives[measurement.id] || 0;
+                allActivityData[activityKey].totalCorrectives[region.id] = regionData.total_correctives[measurement.id] || 0;
+                
                 // Tentukan status berdasarkan aktivitas
                 const status = determineActivityStatusFromData(
                   regionData, measurement, activity.name
@@ -2486,6 +2507,8 @@ $user_data = getUserData();
         const correctiveCount = regionData.correctives[measurement.id] || 0;
         const docPreventiveCount = regionData.doc_preventives[measurement.id] || 0;
         const docCorrectiveCount = regionData.doc_correctives[measurement.id] || 0;
+        const totalPreventiveCount = regionData.total_preventives[measurement.id] || 0;
+        const totalCorrectiveCount = regionData.total_correctives[measurement.id] || 0;
         
         // Cek status assessment
         let assessmentValue = null;
@@ -2514,7 +2537,16 @@ $user_data = getUserData();
             
           case "Upload bukti pelaksanaan aksi preventif":
             if (preventiveCount === 0) return "Belum ditentukan";
-            return docPreventiveCount > 0 ? "Sudah diunggah" : "Belum diunggah";
+            if (totalPreventiveCount === 0) return "Tidak ada aksi preventif";
+            
+            // Bandingkan jumlah yang diupload dengan total yang seharusnya
+            if (docPreventiveCount >= totalPreventiveCount) {
+              return `Sudah diunggah (${docPreventiveCount}/${totalPreventiveCount})`;
+            } else if (docPreventiveCount > 0) {
+              return `Belum diunggah (${docPreventiveCount}/${totalPreventiveCount})`;
+            } else {
+              return `Belum diunggah (0/${totalPreventiveCount})`;
+            }
             
           case "Penilaian ukuran kualitas":
             if (!isAssessed) return "Belum dinilai";
@@ -2536,7 +2568,16 @@ $user_data = getUserData();
             if (!isApproved) return "Belum disetujui";
             if (assessmentValue === "3" || assessmentValue === 3) return "Tidak perlu";
             if (correctiveCount === 0) return "Belum ditentukan";
-            return docCorrectiveCount > 0 ? "Sudah diunggah" : "Belum diunggah";
+            if (totalCorrectiveCount === 0) return "Tidak ada aksi korektif";
+            
+            // Bandingkan jumlah yang diupload dengan total yang seharusnya
+            if (docCorrectiveCount >= totalCorrectiveCount) {
+              return `Sudah diunggah (${docCorrectiveCount}/${totalCorrectiveCount})`;
+            } else if (docCorrectiveCount > 0) {
+              return `Belum diunggah (${docCorrectiveCount}/${totalCorrectiveCount})`;
+            } else {
+              return `Belum diunggah (0/${totalCorrectiveCount})`;
+            }
             
           default:
             return "Tidak tersedia";

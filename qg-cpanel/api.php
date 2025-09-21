@@ -950,7 +950,23 @@ if(isset($_POST['action'])){
                         foreach ($measurements as $measurement) {
                             $measurement_id = $measurement['id'];
                             
-                            // Check preventives existence (only need to know if exists)
+                            // Check total preventives that should exist (from project_preventives table)
+                            $totalPreventivesQuery = "SELECT COUNT(*) as [count] FROM [project_preventives] 
+                                                     WHERE [id_project] = ? AND [id_gate] = ? 
+                                                     AND [id_measurement] = ? AND [is_deleted] IS NULL";
+                            
+                            $totalPreventivesStmt = sqlsrv_query($conn, $totalPreventivesQuery, 
+                                [$id_project, $gate_id, $measurement_id]);
+                            
+                            $totalPreventiveCount = 0;
+                            if ($totalPreventivesStmt !== false) {
+                                if ($row = sqlsrv_fetch_array($totalPreventivesStmt, SQLSRV_FETCH_ASSOC)) {
+                                    $totalPreventiveCount = (int)$row['count'];
+                                }
+                                sqlsrv_free_stmt($totalPreventivesStmt);
+                            }
+                            
+                            // Check preventives existence for this region (only need to know if exists)
                             $preventivesQuery = "SELECT COUNT(*) as [count] FROM [project_preventives] 
                                                WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
                                                AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
@@ -968,7 +984,23 @@ if(isset($_POST['action'])){
                                 $result['monitoring_data'][$region_id][$gate_key]['preventives'][$measurement_id] = $preventiveCount;
                             }
                             
-                            // Check correctives existence (only need to know if exists)
+                            // Check total correctives that should exist (from project_correctives table)
+                            $totalCorrectivesQuery = "SELECT COUNT(*) as [count] FROM [project_correctives] 
+                                                     WHERE [id_project] = ? AND [id_gate] = ? 
+                                                     AND [id_measurement] = ? AND [is_deleted] IS NULL";
+                            
+                            $totalCorrectivesStmt = sqlsrv_query($conn, $totalCorrectivesQuery, 
+                                [$id_project, $gate_id, $measurement_id]);
+                            
+                            $totalCorrectiveCount = 0;
+                            if ($totalCorrectivesStmt !== false) {
+                                if ($row = sqlsrv_fetch_array($totalCorrectivesStmt, SQLSRV_FETCH_ASSOC)) {
+                                    $totalCorrectiveCount = (int)$row['count'];
+                                }
+                                sqlsrv_free_stmt($totalCorrectivesStmt);
+                            }
+                            
+                            // Check correctives existence for this region (only need to know if exists)
                             $correctivesQuery = "SELECT COUNT(*) as [count] FROM [project_correctives] 
                                                WHERE [year] = ? AND [id_project] = ? AND [id_gate] = ? 
                                                AND [id_measurement] = ? AND [prov] = ? AND [kab] = ? 
@@ -1023,6 +1055,10 @@ if(isset($_POST['action'])){
                                 sqlsrv_free_stmt($docCorStmt);
                                 $result['monitoring_data'][$region_id][$gate_key]['doc_correctives'][$measurement_id] = $docCorrectiveCount;
                             }
+                            
+                            // Store total counts for comparison
+                            $result['monitoring_data'][$region_id][$gate_key]['total_preventives'][$measurement_id] = $totalPreventiveCount;
+                            $result['monitoring_data'][$region_id][$gate_key]['total_correctives'][$measurement_id] = $totalCorrectiveCount;
                         }
                     }
                 }
