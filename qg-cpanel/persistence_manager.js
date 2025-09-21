@@ -355,17 +355,17 @@ class PersistenceManager {
 const activityNameCSS = `
 <style>
 .activity-name-display {
-    margin: 1rem 0;
-    padding: 0.75rem 1rem;
+    margin: 0.3rem 0;
+    padding: 0.3rem 0.5rem;
     background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
     border: 1px solid #d1fae5;
-    border-radius: 8px;
-    border-left: 4px solid #059669;
+    border-radius: 6px;
+    border-left: 3px solid #059669;
 }
 
 .activity-title {
     color: #059669;
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     font-weight: 600;
     margin: 0;
     display: flex;
@@ -374,12 +374,12 @@ const activityNameCSS = `
 
 .activity-title i {
     color: #059669;
-    font-size: 1rem;
+    font-size: 0.7rem;
 }
 
 @media (max-width: 768px) {
     .activity-title {
-        font-size: 1rem;
+        font-size: 0.75rem;
     }
 }
 </style>

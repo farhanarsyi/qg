@@ -90,54 +90,54 @@ try {
     .container-fluid {
       max-width: 95vw;
       margin: 0 auto;
-      padding: 1rem;
+      padding: 0.5rem;
     }
     
     h1 {
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       color: var(--dark-color);
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
     
     .dashboard-subtitle {
       color: var(--neutral-color);
-      margin-bottom: 2rem;
-      font-size: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
     }
     
-    .card {      border-radius: 12px;      box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);      border: none;      margin-bottom: 1rem;      background-color: #ffffff;      overflow: visible;      transform: translateY(0);      transition: all 0.3s ease;    }        .card:hover {      transform: translateY(-2px);      box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.08);    }        .card-body {      overflow: visible;    }
+    .card {      border-radius: 8px;      box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);      border: none;      margin-bottom: 0.5rem;      background-color: #ffffff;      overflow: visible;      transform: translateY(0);      transition: all 0.3s ease;    }        .card:hover {      transform: translateY(-1px);      box-shadow: 0 6px 20px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);    }        .card-body {      overflow: visible;    }
     
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.5rem 0.6rem;
+      padding: 0.3rem 0.4rem;
       font-weight: 500;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: var(--dark-color);
-      line-height: 1.2;
+      line-height: 1.1;
     }
     
     .card-body {
-      padding: 0.6rem;
+      padding: 0.4rem;
     }
     
     .form-label {
       font-weight: 500;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.15rem;
       color: var(--dark-color);
-      font-size: 0.7rem;
-      line-height: 1.2;
+      font-size: 0.6rem;
+      line-height: 1.1;
     }
     
     .form-control, .form-select {
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      padding: 0.3rem 0.5rem;
-      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+      font-size: 0.6rem;
       background-color: #fff;
       transition: all 0.2s ease;
-      line-height: 1.2;
+      line-height: 1.1;
     }
     
     .form-control:focus, .form-select:focus {
@@ -150,9 +150,9 @@ try {
       background-color: var(--primary-color);
       border-color: var(--primary-color);
       border-radius: 4px;
-      padding: 0.4rem 0.8rem;
+      padding: 0.3rem 0.6rem;
       font-weight: 500;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       transition: all 0.2s ease;
     }
     
@@ -183,8 +183,8 @@ try {
     .table-dashboard th {
       background: linear-gradient(135deg, var(--primary-light) 0%, #e6fffa 100%);
       font-weight: 600;
-      padding: 0.65rem 0.85rem;
-      font-size: 0.65rem;
+      padding: 0.4rem 0.5rem;
+      font-size: 0.6rem;
       color: var(--primary-color);
       white-space: nowrap;
       position: sticky;
@@ -193,16 +193,16 @@ try {
       text-align: left;
       border-bottom: 2px solid var(--primary-color);
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
     }
     
     .table-dashboard td {
-      padding: 0.65rem 0.85rem;
+      padding: 0.4rem 0.5rem;
       vertical-align: middle;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       border-bottom: 1px solid var(--border-color);
     }
     
@@ -482,30 +482,30 @@ try {
     }
     
     #statsCards .card-body {
-      padding: 0.4rem 0.15rem !important;
+      padding: 0.3rem 0.1rem !important;
     }
     
     #statsCards h6 {
-      font-size: 0.5rem;
-      margin-bottom: 0.025rem;
+      font-size: 0.45rem;
+      margin-bottom: 0.02rem;
       line-height: 1.0;
       font-weight: 600;
     }
     
     #statsCards h3 {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       margin-bottom: 0;
       font-weight: 700;
     }
     
     #statsCards .d-flex {
-      margin-bottom: 0.05rem;
+      margin-bottom: 0.03rem;
       align-items: center;
     }
     
     #statsCards i {
-      font-size: 0.55rem;
-      margin-right: 0.1rem !important;
+      font-size: 0.5rem;
+      margin-right: 0.08rem !important;
     }
 
     /* Zoom and Resolution optimizations */

@@ -2,23 +2,23 @@
 
 /* Ensure body has proper spacing for fixed navbar */
 body {
-  padding-top: 50px !important; /* Add padding to account for fixed navbar */
+  padding-top: 55px !important; /* Add padding to account for fixed navbar */
 }
 
 /* Add margin to main content to account for fixed navbar */
 main, .main-content, .container-fluid:not(.navbar .container-fluid) {
-  margin-top: 0.5rem; /* Small margin to separate from navbar */
-  padding-top: 0.5rem; /* Additional padding for better spacing */
+  margin-top: 0.2rem; /* Small margin to separate from navbar */
+  padding-top: 0.2rem; /* Additional padding for better spacing */
 }
 
 /* Base navbar styles */
 .navbar {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--success-color) 100%);
-  box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
+  box-shadow: 0 2px 10px rgba(5, 150, 105, 0.15);
   border-bottom: none;
-  padding: 0.15rem 0; /* Further reduce padding untuk lebih narrow */
-  margin-bottom: 0.5rem; /* Reduce margin */
-  min-height: 35px; /* Further reduce height */
+  padding: 0.1rem 0; /* Further reduce padding untuk lebih narrow */
+  margin-bottom: 0.2rem; /* Reduce margin */
+  min-height: 30px; /* Further reduce height */
   position: fixed !important; /* Force fixed positioning */
   top: 0 !important; /* Stick to top */
   left: 0 !important;
@@ -29,15 +29,15 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 
 .navbar-brand {
   font-weight: 600;
-  font-size: 0.75rem; /* Further reduce font brand */
+  font-size: 0.7rem; /* Further reduce font brand */
   color: white !important;
-  padding-top: 0.05rem; /* Further reduce padding */
-  padding-bottom: 0.05rem;
+  padding-top: 0.02rem; /* Further reduce padding */
+  padding-bottom: 0.02rem;
 }
 
 .navbar-brand i {
-  font-size: 0.8rem; /* Icon brand lebih kecil */
-  margin-right: 0.4rem;
+  font-size: 0.7rem; /* Icon brand lebih kecil */
+  margin-right: 0.3rem;
 }
 
 /* Navigation tabs in navbar */
@@ -53,14 +53,14 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
-  padding: 0.1rem 0.3rem; /* Further reduce padding */
-  border-radius: 4px;
+  padding: 0.05rem 0.2rem; /* Further reduce padding */
+  border-radius: 3px;
   position: relative;
   transition: all 0.3s ease;
   text-decoration: none;
-  font-size: 0.6rem; /* Further reduce font nav links */
+  font-size: 0.55rem; /* Further reduce font nav links */
   backdrop-filter: blur(10px);
-  line-height: 1.1;
+  line-height: 1.0;
 }
 
 .navbar-nav-tabs .nav-link:hover {
@@ -77,8 +77,8 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .navbar-nav-tabs .nav-link i {
-  margin-right: 0.2rem; /* Kurangi margin icon */
-  font-size: 0.6rem; /* Kecilkan icon nav */
+  margin-right: 0.1rem; /* Kurangi margin icon */
+  font-size: 0.55rem; /* Kecilkan icon nav */
 }
 
 /* User info section */
@@ -89,17 +89,17 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .user-avatar {
-  width: 18px; /* Further reduce avatar size */
-  height: 18px;
+  width: 16px; /* Further reduce avatar size */
+  height: 16px;
   background: rgba(255,255,255,0.2);
-  border-radius: 4px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 600;
   backdrop-filter: blur(10px);
-  font-size: 0.5rem; /* Further reduce font avatar */
+  font-size: 0.45rem; /* Further reduce font avatar */
 }
 
 .user-details {
@@ -110,21 +110,21 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 .user-name {
   font-weight: 600;
   color: white;
-  font-size: 0.55rem; /* Further reduce font nama */
+  font-size: 0.5rem; /* Further reduce font nama */
   line-height: 1;
 }
 
 .user-role {
-  font-size: 0.45rem; /* Further reduce font role */
+  font-size: 0.4rem; /* Further reduce font role */
   color: rgba(255,255,255,0.8);
   line-height: 1;
 }
 
 /* Wilayah info section */
 .wilayah-info {
-  font-size: 0.6rem; /* Kecilkan font wilayah info */
+  font-size: 0.55rem; /* Kecilkan font wilayah info */
   text-align: right;
-  line-height: 1.1;
+  line-height: 1.0;
 }
 
 .wilayah-info div:first-child {
@@ -141,9 +141,9 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.3);
   color: white;
-  border-radius: 4px;
-  padding: 0.05rem 0.25rem; /* Further reduce padding logout */
-  font-size: 0.55rem; /* Further reduce font logout */
+  border-radius: 3px;
+  padding: 0.03rem 0.2rem; /* Further reduce padding logout */
+  font-size: 0.5rem; /* Further reduce font logout */
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
 }
@@ -155,19 +155,19 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .btn-logout i {
-  font-size: 0.55rem; /* Kecilkan icon logout */
+  font-size: 0.5rem; /* Kecilkan icon logout */
 }
 
 /* Dropdown menu styles */
 .dropdown-menu {
-  font-size: 0.65rem; /* Kecilkan font dropdown */
-  border-radius: 6px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  font-size: 0.6rem; /* Kecilkan font dropdown */
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
   border: none;
 }
 
 .dropdown-item {
-  padding: 0.4rem 0.8rem; /* Adjust dropdown item padding */
+  padding: 0.3rem 0.6rem; /* Adjust dropdown item padding */
   transition: all 0.2s ease;
 }
 
@@ -182,14 +182,14 @@ main, .main-content, .container-fluid:not(.navbar .container-fluid) {
 }
 
 .dropdown-item i {
-  font-size: 0.6rem; /* Kecilkan icon dropdown */
-  width: 14px; /* Fixed width untuk alignment */
+  font-size: 0.55rem; /* Kecilkan icon dropdown */
+  width: 12px; /* Fixed width untuk alignment */
 }
 
 /* Container fluid adjustments for navbar */
 .navbar .container-fluid {
-  padding-left: 0.5rem; /* Further reduce horizontal padding */
-  padding-right: 0.5rem;
+  padding-left: 0.3rem; /* Further reduce horizontal padding */
+  padding-right: 0.3rem;
 }
 
 /* Responsive adjustments */

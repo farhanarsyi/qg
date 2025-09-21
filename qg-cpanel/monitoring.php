@@ -61,23 +61,23 @@ $user_data = getUserData();
     .container-fluid {
       max-width: 95vw; /* Much wider container, responsive to viewport */
       margin: 0 auto;
-      padding: 1rem;
+      padding: 0.5rem;
     }
     
     h1 {
       font-weight: 600;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
       color: var(--dark-color);
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
     
 
 
     .card {
-      border-radius: 12px;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+      border-radius: 8px;
+      box-shadow: 0 1px 10px rgba(0,0,0,0.04);
       border: none;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       background-color: #ffffff;
       overflow: visible;
     }
@@ -89,28 +89,28 @@ $user_data = getUserData();
     .card-header {
       background-color: #fff;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.5rem 0.6rem;
+      padding: 0.3rem 0.4rem;
       font-weight: 500;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       color: var(--dark-color);
     }
     
     .card-body {
-      padding: 0.6rem;
+      padding: 0.4rem;
     }
     
     .form-label {
       font-weight: 500;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.15rem;
       color: var(--dark-color);
-      font-size: 0.7rem;
+      font-size: 0.6rem;
     }
     
     .form-control, .form-select {
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      padding: 0.3rem 0.5rem;
-      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+      font-size: 0.6rem;
       background-color: #fff;
       transition: all 0.2s ease;
       will-change: auto;
@@ -127,9 +127,9 @@ $user_data = getUserData();
       background-color: var(--primary-color);
       border-color: var(--primary-color);
       border-radius: 4px;
-      padding: 0.4rem 0.8rem;
+      padding: 0.3rem 0.6rem;
       font-weight: 500;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       transition: all 0.2s ease;
     }
     
@@ -161,25 +161,25 @@ $user_data = getUserData();
     }
     
     .table-monitoring th {
-      padding: 8px 6px;
+      padding: 4px 3px;
       text-align: center;
       font-weight: 600;
       background-color: var(--primary-color);
       color: white;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       position: sticky;
       top: 0;
       z-index: 1;
       border: none;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       white-space: nowrap;
     }
     
     .table-monitoring td {
-      padding: 8px 6px;
+      padding: 4px 3px;
       vertical-align: middle;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       border: none;
       background-color: white;
     }
@@ -1304,37 +1304,37 @@ $user_data = getUserData();
 
 
     <!-- Toggle Advanced Filters Button -->
-    <div class="mb-2" id="toggleAdvancedFiltersContainer" style="display: none;">
-      <button id="toggleAdvancedFilters" class="btn btn-sm btn-outline-success" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;">
+    <div class="mb-1" id="toggleAdvancedFiltersContainer" style="display: none;">
+      <button id="toggleAdvancedFilters" class="btn btn-sm btn-outline-secondary" style="font-size: 0.6rem; padding: 0.2rem 0.5rem;">
         <i class="fas fa-chevron-down me-1"></i>Filter Lanjutan
       </button>
     </div>
 
     <!-- Secondary Universal Filter -->
-    <div class="card" id="secondaryFilterCard" style="display: none; margin-bottom: 0.5rem;">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-filter me-2"></i>Filter Lanjutan</span>
-        <button id="clearSecondaryFilters" class="btn btn-sm btn-outline-secondary">
+    <div class="card" id="secondaryFilterCard" style="display: none; margin-bottom: 0.3rem;">
+      <div class="card-header d-flex justify-content-between align-items-center" style="padding: 0.3rem 0.4rem;">
+        <span style="font-size: 0.6rem;"><i class="fas fa-filter me-1"></i>Filter Lanjutan</span>
+        <button id="clearSecondaryFilters" class="btn btn-sm btn-outline-secondary" style="font-size: 0.55rem; padding: 0.15rem 0.4rem;">
           <i class="fas fa-times me-1"></i>Reset
         </button>
       </div>
-      <div class="card-body">
-        <div class="row g-3">
+      <div class="card-body" style="padding: 0.4rem;">
+        <div class="row g-1">
           <div class="col-md-2">
-            <label for="filterGate" class="form-label">Gate</label>
-            <select id="filterGate" class="form-select" multiple>
+            <label for="filterGate" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Gate</label>
+            <select id="filterGate" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Gate</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterUK" class="form-label">UK</label>
-            <select id="filterUK" class="form-select" multiple>
+            <label for="filterUK" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">UK</label>
+            <select id="filterUK" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua UK</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterLevel" class="form-label">Level</label>
-            <select id="filterLevel" class="form-select" multiple>
+            <label for="filterLevel" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Level</label>
+            <select id="filterLevel" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Level</option>
               <option value="1">Pusat</option>
               <option value="2">Provinsi</option>
@@ -1342,20 +1342,20 @@ $user_data = getUserData();
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterActivity" class="form-label">Aktivitas</label>
-            <select id="filterActivity" class="form-select" multiple>
+            <label for="filterActivity" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Aktivitas</label>
+            <select id="filterActivity" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Aktivitas</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterStatus" class="form-label">Status</label>
-            <select id="filterStatus" class="form-select" multiple>
+            <label for="filterStatus" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Status</label>
+            <select id="filterStatus" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Status</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label for="filterDeadline" class="form-label">Deadline</label>
-            <select id="filterDeadline" class="form-select" multiple>
+            <label for="filterDeadline" class="form-label" style="font-size: 0.55rem; margin-bottom: 0.1rem;">Deadline</label>
+            <select id="filterDeadline" class="form-select" multiple style="font-size: 0.55rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Deadline</option>
               <option value="3days">3 hari</option>
               <option value="week">Minggu ini</option>
@@ -1466,15 +1466,15 @@ $user_data = getUserData();
           debugLog('🗺️ [MONITORING] Daerah data loaded: ' + daerahData.length + ' entries');
           return true;
         } catch (error) {
-          console.error('❌ [MONITORING] Failed to load daerah data:', error);
+          debugLog('❌ [MONITORING] Failed to load daerah data: ' + error.message, 'error');
           
           // Show user-friendly error message
           if (error.message.includes('403')) {
-            console.warn('⚠️ [MONITORING] Access denied to daftar_daerah.json - this may be a server configuration issue');
+            debugLog('⚠️ [MONITORING] Access denied to daftar_daerah.json - this may be a server configuration issue', 'warn');
           } else if (error.message.includes('404')) {
-            console.warn('⚠️ [MONITORING] daftar_daerah.json not found');
+            debugLog('⚠️ [MONITORING] daftar_daerah.json not found', 'warn');
           } else if (error.message.includes('Response is not JSON')) {
-            console.warn('⚠️ [MONITORING] Server returned non-JSON response (possibly HTML error page)');
+            debugLog('⚠️ [MONITORING] Server returned non-JSON response (possibly HTML error page)', 'warn');
           }
           
           // Fallback: try to load from PHP endpoint or different path
@@ -1483,11 +1483,11 @@ $user_data = getUserData();
             const phpResponse = await fetch('daftar_daerah.php');
             if (phpResponse.ok) {
               daerahData = await phpResponse.json();
-              console.log('🗺️ [MONITORING] Daerah data loaded from PHP endpoint:', daerahData.length, 'entries');
+              debugLog('🗺️ [MONITORING] Daerah data loaded from PHP endpoint: ' + daerahData.length + ' entries');
               return true;
             }
           } catch (phpError) {
-            console.warn('⚠️ [MONITORING] PHP endpoint failed:', phpError);
+            debugLog('⚠️ [MONITORING] PHP endpoint failed: ' + phpError.message, 'warn');
           }
           
           try {
@@ -1495,11 +1495,11 @@ $user_data = getUserData();
             const fallbackResponse = await fetch('./daftar_daerah.json');
             if (fallbackResponse.ok) {
               daerahData = await fallbackResponse.json();
-              console.log('🗺️ [MONITORING] Daerah data loaded from fallback path:', daerahData.length, 'entries');
+              debugLog('🗺️ [MONITORING] Daerah data loaded from fallback path: ' + daerahData.length + ' entries');
               return true;
             }
           } catch (fallbackError) {
-            console.warn('⚠️ [MONITORING] Fallback path also failed:', fallbackError);
+            debugLog('⚠️ [MONITORING] Fallback path also failed: ' + fallbackError.message, 'warn');
           }
           
           // Use minimal fallback data
@@ -1507,7 +1507,7 @@ $user_data = getUserData();
             { "kode": "0000", "daerah": "Nasional" },
             { "kode": "pusat", "daerah": "Pusat" }
           ];
-          console.log('🗺️ [MONITORING] Using minimal fallback daerah data');
+          debugLog('🗺️ [MONITORING] Using minimal fallback daerah data');
           return false;
         }
       };
@@ -1640,7 +1640,7 @@ $user_data = getUserData();
         
         // Validasi data user dengan delay untuk mencegah infinite redirect
         if (!currentUser.username) {
-          console.error('❌ [MONITORING] Username kosong! Redirecting to SSO login...');
+          debugLog('❌ [MONITORING] Username kosong! Redirecting to SSO login...', 'error');
           alert('Session SSO tidak ditemukan. Akan diarahkan ke halaman login SSO.');
           setTimeout(() => {
             window.location.href = 'sso_login.php';
@@ -1678,7 +1678,7 @@ $user_data = getUserData();
       };
 
       const showError = message => {
-        console.error(message);
+        debugLog(message, 'error');
         Swal.fire({
           icon: 'error',
           title: 'Terjadi Kesalahan',
@@ -1819,8 +1819,9 @@ $user_data = getUserData();
                     </div>`;
           }
         }
-        if (status === 'Tidak perlu' || status.includes('Tidak ada aksi')) {
-          return `<div class="status-icon status-neutral" title="${tooltipText}">
+        // Gabungkan "Tidak perlu" dan "Tidak tersedia" menjadi satu dengan logo abu-abu dan tulisan "NA"
+        if (status === 'Tidak perlu' || status.includes('Tidak ada aksi') || status === 'Tidak tersedia') {
+          return `<div class="status-icon status-neutral" title="NA">
                     <div class="status-circle">
                       <i class="fas fa-ban"></i>
                     </div>
@@ -1926,8 +1927,8 @@ $user_data = getUserData();
         $("#levelFilterCards").show();
       };
 
-      // --- Fungsi untuk membuat dan menampilkan tabel hasil ---
-      const displayResultTable = (regions) => {
+      // --- Fungsi untuk merender body tabel saja (untuk filtering) ---
+      const renderTableBody = (regions) => {
         // Urutkan regions berdasarkan kode, bukan nama
         regions.sort((a, b) => {
           // Pusat selalu di awal
@@ -1937,46 +1938,6 @@ $user_data = getUserData();
           // Urutkan berdasarkan kode prov dan kab
           return a.id.localeCompare(b.id);
         });
-        
-        // Buat header tabel dengan kolom status untuk setiap wilayah
-        let tableHtml = `
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span>Hasil Monitoring</span>
-              <div class="table-header-actions">
-                <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
-                <button id="downloadExcel" class="download-btn" style="display: none;">
-                  <i class="fas fa-file-excel"></i>
-                  Download Excel
-                </button>
-              </div>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-wrapper">
-                <table class="table-monitoring">
-                  <thead>
-                    <tr>
-                      <th class="sortable-header" data-sort="gate">Gate<i class="fas fa-sort sort-icon"></i></th>
-                      <th class="sortable-header" data-sort="uk">Ukuran Kualitas<i class="fas fa-sort sort-icon"></i></th>
-                      <th class="sortable-header" data-sort="level">Level<i class="fas fa-sort sort-icon"></i></th>
-                      <th class="sortable-header" data-sort="activity">Aktivitas<i class="fas fa-sort sort-icon"></i></th>
-                      <th class="sortable-header date-column" data-sort="start">Mulai<i class="fas fa-sort sort-icon"></i></th>
-                      <th class="sortable-header date-column" data-sort="end">Selesai<i class="fas fa-sort sort-icon"></i></th>
-                      <th class="sortable-header date-column" data-sort="deadline">Deadline<i class="fas fa-sort sort-icon"></i></th>
-        `;
-        
-        // Tambahkan kolom status untuk setiap wilayah
-        regions.forEach(region => {
-          // Use getDaerahName function to get proper name from daftar_daerah.json
-          let regionName = getDaerahName(region.id);
-          tableHtml += `<th class="status-column region-header">${regionName}</th>`;
-        });
-        
-        tableHtml += `
-                    </tr>
-                  </thead>
-                  <tbody>
-        `;
         
         // Versi tabel tanpa merge - setiap baris menampilkan semua data lengkap
         const orderedActivities = [];
@@ -2041,6 +2002,7 @@ $user_data = getUserData();
         }
         
         // 4. Buat baris untuk setiap aktivitas (tanpa merge)
+        let tableBodyHtml = '';
         for (let i = 0; i < orderedActivities.length; i++) {
           const data = orderedActivities[i];
           const rowClass = i % 2 === 0 ? 'uk-group-even' : 'uk-group-odd';
@@ -2064,10 +2026,10 @@ $user_data = getUserData();
           const ukMatch = data.uk.match(/UK\s?(\d+)/i);
           if (ukMatch) ukNum = parseInt(ukMatch[1]);
           
-          tableHtml += `<tr class="${rowClass}">`;
+          tableBodyHtml += `<tr class="${rowClass}">`;
           
           // Tampilkan semua kolom untuk setiap baris (tanpa rowspan)
-          tableHtml += `
+          tableBodyHtml += `
             <td>
               <span class="gate-badge gate-badge-${gateNum}" title="${data.gate}">
                 GATE ${gateNum}
@@ -2090,16 +2052,11 @@ $user_data = getUserData();
           const endDate = data.end;
           const isInDateRange = isDateInRange(startDate, endDate);
           
-          // Debug: log untuk memastikan fungsi bekerja
-          if (isInDateRange) {
-            console.log('Tanggal dalam range:', startDate, endDate);
-          }
-          
           // Tambahkan class untuk tanggal yang dalam rentang
           const startDateClass = isInDateRange ? 'date-in-range' : '';
           const endDateClass = isInDateRange ? 'date-in-range' : '';
           
-          tableHtml += `
+          tableBodyHtml += `
             <td><span class="activity-number">${activityNumber}</span><span class="activity-text">${data.activity}</span></td>
             <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
             <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
@@ -2108,14 +2065,70 @@ $user_data = getUserData();
           
           // Tambahkan status untuk setiap wilayah
           regions.forEach(region => {
-            const status = data.statuses[region.id] || "Tidak tersedia";
-            tableHtml += `<td class="status-column">${getStatusBadge(status, data.end)}</td>`;
+            const status = data.statuses[region.id] || "Tidak perlu";
+            tableBodyHtml += `<td class="status-column">${getStatusBadge(status, data.end)}</td>`;
           });
           
-          tableHtml += `</tr>`;
+          tableBodyHtml += `</tr>`;
         }
         
+        // Update table body
+        $('.table-monitoring tbody').html(tableBodyHtml);
+        
+        // Update sort icons
+        updateSortIcons();
+      };
+
+      // --- Fungsi untuk membuat dan menampilkan tabel hasil ---
+      const displayResultTable = (regions) => {
+        // Urutkan regions berdasarkan kode, bukan nama
+        regions.sort((a, b) => {
+          // Pusat selalu di awal
+          if (a.id === "pusat") return -1;
+          if (b.id === "pusat") return 1;
+          
+          // Urutkan berdasarkan kode prov dan kab
+          return a.id.localeCompare(b.id);
+        });
+        
+        // Buat header tabel dengan kolom status untuk setiap wilayah
+        let tableHtml = `
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Hasil Monitoring</span>
+              <div class="table-header-actions">
+                <span id="resultCount" class="badge bg-primary rounded-pill">${Object.keys(activityData).length} aktivitas</span>
+                <button id="downloadExcel" class="download-btn" style="display: none;">
+                  <i class="fas fa-file-excel"></i>
+                  Download Excel
+                </button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-wrapper">
+                <table class="table-monitoring">
+                  <thead>
+                    <tr>
+                      <th class="sortable-header" data-sort="gate" style="width: 60px;">UK<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="uk" style="width: 80px;">UK<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="level">Level<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header" data-sort="activity">Aktivitas<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header date-column" data-sort="start">Mulai<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header date-column" data-sort="end">Selesai<i class="fas fa-sort sort-icon"></i></th>
+                      <th class="sortable-header date-column" data-sort="deadline">Deadline<i class="fas fa-sort sort-icon"></i></th>
+        `;
+        
+        // Tambahkan kolom status untuk setiap wilayah
+        regions.forEach(region => {
+          // Use getDaerahName function to get proper name from daftar_daerah.json
+          let regionName = getDaerahName(region.id);
+          tableHtml += `<th class="status-column region-header">${regionName}</th>`;
+        });
+        
         tableHtml += `
+                    </tr>
+                  </thead>
+                  <tbody>
                   </tbody>
                 </table>
               </div>
@@ -2128,10 +2141,14 @@ $user_data = getUserData();
         // Simpan regions yang sedang ditampilkan untuk export Excel
         currentDisplayRegions = [...regions];
         
+        // Render table body after HTML is displayed
+        renderTableBody(regions);
+        
         // Update sort icons
         updateSortIcons();
         
         // Update result count with filtered activities
+        const orderedActivities = Object.keys(activityData);
         $("#resultCount").text(`${orderedActivities.length} aktivitas`);
         
         // Show download button
@@ -2501,7 +2518,7 @@ $user_data = getUserData();
                 // Ambil data monitoring untuk region ini
                 const regionData = monitoringData[region.id] && monitoringData[region.id][gate.id];
                 if (!regionData) {
-                  activityData[activityKey].statuses[region.id] = "Tidak tersedia";
+                  activityData[activityKey].statuses[region.id] = "Tidak perlu";
                   continue;
                 }
                 
@@ -2604,7 +2621,7 @@ $user_data = getUserData();
             }
             
           default:
-            return "Tidak tersedia";
+            return "Tidak perlu";
         }
       };
 
@@ -2815,14 +2832,13 @@ $user_data = getUserData();
                   return status.includes('Sudah') || status.includes('sudah') || 
                          status.includes('Selesai') || status.includes('selesai') ||
                          status.includes('Ditentukan') || status.includes('ditentukan') ||
-                         status.includes('Sudah ditentukan') || status.includes('sudah ditentukan') ||
-                         status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
-                         status.includes('Tidak perlu') || status.includes('tidak Perlu');
+                         status.includes('Sudah ditentukan') || status.includes('sudah ditentukan');
                 });
                 const hasBelum = allStatuses.some(status => {
                   return status.includes('Belum') || status.includes('belum') ||
                          status.includes('Belum ditentukan') || status.includes('belum ditentukan');
                 });
+                // Hanya tampilkan jika ada minimal 1 "sudah" DAN tidak ada "belum" sama sekali
                 hasMatchingStatus = hasSudah && !hasBelum;
               } else if (secondaryFilters.status.includes('belum')) {
                 // Show records where minimal 1 "belum"
@@ -2834,23 +2850,33 @@ $user_data = getUserData();
               }
             } else {
               // Legacy status filtering logic
-              hasMatchingStatus = Object.values(data.statuses).some(status => {
-                if (secondaryFilters.status.includes('Sudah')) {
+              const allStatuses = Object.values(data.statuses);
+              if (secondaryFilters.status.includes('Sudah')) {
+                // Legacy: Show records where minimal 1 "sudah" AND tidak ada "belum"
+                const hasSudah = allStatuses.some(status => {
                   return status.includes('Sudah') || status.includes('sudah') || 
                          status.includes('Selesai') || status.includes('selesai') ||
                          status.includes('Ditentukan') || status.includes('ditentukan') ||
                          status.includes('Sudah ditentukan') || status.includes('sudah ditentukan');
-                }
-                if (secondaryFilters.status.includes('Belum')) {
+                });
+                const hasBelum = allStatuses.some(status => {
                   return status.includes('Belum') || status.includes('belum') ||
                          status.includes('Belum ditentukan') || status.includes('belum ditentukan');
-                }
-                if (secondaryFilters.status.includes('Tidak Perlu')) {
+                });
+                hasMatchingStatus = hasSudah && !hasBelum;
+              } else if (secondaryFilters.status.includes('Belum')) {
+                hasMatchingStatus = allStatuses.some(status => {
+                  return status.includes('Belum') || status.includes('belum') ||
+                         status.includes('Belum ditentukan') || status.includes('belum ditentukan');
+                });
+              } else if (secondaryFilters.status.includes('Tidak Perlu')) {
+                hasMatchingStatus = allStatuses.some(status => {
                   return status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
                          status.includes('Tidak perlu') || status.includes('tidak Perlu');
-                }
-                return secondaryFilters.status.includes(status);
-              });
+                });
+              } else {
+                hasMatchingStatus = allStatuses.some(status => secondaryFilters.status.includes(status));
+              }
             }
             
             if (!hasMatchingStatus) {
@@ -2893,9 +2919,16 @@ $user_data = getUserData();
         // Update activityData with filtered results
         activityData = filteredData;
         
-        // Re-display table with filtered data
+        // Re-display table with filtered data (only if we have regions to display)
         if (currentDisplayRegions.length > 0) {
-          displayResultTable(currentDisplayRegions);
+          // Re-render the table body only, not the entire table
+          renderTableBody(currentDisplayRegions);
+          
+          // Update statistics
+          calculateMonitoringStatistics(currentDisplayRegions);
+          
+          // Update result count
+          $("#resultCount").text(`${Object.keys(activityData).length} aktivitas`);
         }
       };
 
@@ -3104,7 +3137,7 @@ $user_data = getUserData();
           }, 4000);
 
         } catch (error) {
-          console.error('Excel export error:', error);
+          debugLog('Excel export error: ' + error.message, 'error');
           showError("Terjadi kesalahan saat mengekspor ke Excel: " + error.message);
         }
       };
@@ -3275,11 +3308,7 @@ $user_data = getUserData();
           const savedRegions = localStorage.getItem('monitoringRegions');
           const savedFilters = localStorage.getItem('monitoringFilters');
           
-          console.log('🔍 [MONITORING] Checking localStorage:', {
-            hasMonitoringData: !!savedMonitoringData,
-            hasRegions: !!savedRegions,
-            hasFilters: !!savedFilters
-          });
+          debugLog('🔍 [MONITORING] Checking localStorage: hasMonitoringData=' + !!savedMonitoringData + ', hasRegions=' + !!savedRegions + ', hasFilters=' + !!savedFilters);
           
           if (savedMonitoringData && savedRegions) {
             // Data tersimpan ditemukan, lanjutkan loading
@@ -3309,21 +3338,17 @@ $user_data = getUserData();
             }
             
             // Tampilkan data
-            console.log('✅ [MONITORING] Successfully loaded data from localStorage:', {
-              activities: Object.keys(activityData).length,
-              regions: regions.length,
-              currentDisplayRegions: regions.length
-            });
+            debugLog('✅ [MONITORING] Successfully loaded data from localStorage: activities=' + Object.keys(activityData).length + ', regions=' + regions.length + ', currentDisplayRegions=' + regions.length);
             
             displayResultTable(regions);
             currentDisplayRegions = regions;
             
             return true;
           } else {
-            console.log('ℹ️ [MONITORING] No saved data found in localStorage');
+            debugLog('ℹ️ [MONITORING] No saved data found in localStorage');
           }
         } catch (error) {
-          console.error("Error loading data from localStorage:", error);
+          debugLog("Error loading data from localStorage: " + error.message, 'error');
         }
         
         return false;
@@ -3334,9 +3359,9 @@ $user_data = getUserData();
         // Muat data daerah terlebih dahulu
         loadDaerahData().then((success) => {
           if (success) {
-            console.log('✅ [MONITORING] Daerah data loaded successfully');
+            debugLog('✅ [MONITORING] Daerah data loaded successfully');
           } else {
-            console.warn('⚠️ [MONITORING] Daerah data loaded with fallback');
+            debugLog('⚠️ [MONITORING] Daerah data loaded with fallback', 'warn');
           }
           
           // Setelah data daerah dimuat (atau fallback), coba load dari localStorage
@@ -3348,7 +3373,7 @@ $user_data = getUserData();
             window.persistenceManager.showSavedActivityName();
           }
         }).catch((error) => {
-          console.error('❌ [MONITORING] Failed to load daerah data:', error);
+          debugLog('❌ [MONITORING] Failed to load daerah data: ' + error.message, 'error');
           
           // Even if daerah data fails, try to load from localStorage
           loadDataFromLocalStorage();
@@ -3479,7 +3504,7 @@ $user_data = getUserData();
               window.persistenceManager.updateActivityName();
             }
           } catch (error) {
-            console.error("Error saving data to localStorage:", error);
+            debugLog("Error saving data to localStorage: " + error.message, 'error');
           }
           
           const loadTime = ((Date.now() - startTime) / 1000).toFixed(1);
