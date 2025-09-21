@@ -1051,8 +1051,38 @@ try {
       };
       
       // Load data dashboard
-      const loadDashboardData = async (filters = {}) => {
+      const loadDashboardData = async (filters = {}, forceRefresh = false) => {
         if (!currentUser) return;
+        
+        // Cek apakah ada data tersimpan di localStorage dan tidak ada permintaan refresh paksa
+        if (!forceRefresh) {
+          const savedData = localStorage.getItem('qg_dashboard_data');
+          const savedFilters = localStorage.getItem('qg_dashboard_filters');
+          const savedView = sessionStorage.getItem('qg_dashboard_view');
+          
+          if (savedData && savedFilters && savedView === 'active') {
+            try {
+              console.log('📂 [DEBUG] Loading data from localStorage');
+              dashboardData = JSON.parse(savedData);
+              filteredData = [...dashboardData];
+              
+              // Terapkan filter yang tersimpan jika tidak ada filter baru
+              if (Object.keys(filters).length === 0) {
+                filters = JSON.parse(savedFilters);
+              }
+              
+              // Tampilkan data tanpa loading spinner
+              displayDashboardData();
+              
+              // Simpan data ke sessionStorage untuk mempertahankan tampilan saat navigasi
+              sessionStorage.setItem('qg_dashboard_view', 'active');
+              return;
+            } catch (e) {
+              console.error('❌ [ERROR] Failed to load data from localStorage:', e);
+              // Lanjutkan dengan memuat data dari server jika terjadi kesalahan
+            }
+          }
+        }
         
         $spinner.show();
         $("#initialState").hide();
@@ -1075,6 +1105,11 @@ try {
           if (response.status && response.data) {
             dashboardData = response.data;
             filteredData = [...dashboardData];
+            
+            // Simpan data dan filter ke localStorage
+            localStorage.setItem('qg_dashboard_data', JSON.stringify(dashboardData));
+            localStorage.setItem('qg_dashboard_filters', JSON.stringify(filters));
+            
             displayDashboardData();
           } else {
             throw new Error(response.message || "Gagal memuat data dashboard");
@@ -1447,4 +1482,4 @@ try {
   }
   ?>
 </body>
-</html> 
+</html>

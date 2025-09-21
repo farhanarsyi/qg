@@ -3082,7 +3082,57 @@ $user_data = getUserData();
       
       // Region selection handler akan diatur saat inisialisasi dropdown
 
+      // Fungsi untuk memuat data dari localStorage jika tersedia
+      const loadDataFromLocalStorage = () => {
+        try {
+          // Cek apakah ada data monitoring tersimpan
+          const savedMonitoringData = localStorage.getItem('monitoringData');
+          const savedRegions = localStorage.getItem('monitoringRegions');
+          const savedFilters = localStorage.getItem('monitoringFilters');
+          
+          if (savedMonitoringData && savedRegions) {
+            // Parse data yang tersimpan
+            activityData = JSON.parse(savedMonitoringData);
+            allActivityData = JSON.parse(savedMonitoringData);
+            const regions = JSON.parse(savedRegions);
+            
+            // Jika ada filter tersimpan, terapkan
+            if (savedFilters) {
+              secondaryFilters = JSON.parse(savedFilters);
+              
+              // Update visual feedback untuk filter
+              Object.keys(secondaryFilters).forEach(key => {
+                if (secondaryFilters[key].length > 0) {
+                  $(`#filter${key.charAt(0).toUpperCase() + key.slice(1)}`).val(secondaryFilters[key]);
+                  updateFilterVisualFeedback(key, secondaryFilters[key]);
+                }
+              });
+            }
+            
+            // Tampilkan data
+            displayResultTable(regions);
+            currentDisplayRegions = regions;
+            
+            return true;
+          }
+        } catch (error) {
+          console.error("Error loading data from localStorage:", error);
+        }
+        
+        return false;
+      };
+      
+      // Cek localStorage saat halaman dimuat
+      $(document).ready(function() {
+        loadDataFromLocalStorage();
+      });
+
       $("#loadData").on('click', async function(){
+        // Hapus data tersimpan saat tombol "Tampilkan Data" diklik
+        localStorage.removeItem('monitoringData');
+        localStorage.removeItem('monitoringRegions');
+        localStorage.removeItem('monitoringFilters');
+        
         if (!selectedProject) {
           showError("Silakan pilih kegiatan terlebih dahulu");
           return;
@@ -3172,6 +3222,15 @@ $user_data = getUserData();
           $("#spinnerText").text("Menyiapkan tampilan tabel...");
           // Tampilkan hasil dalam format tabel
           displayResultTable(regionsToProcess);
+          
+          // Simpan data ke localStorage untuk digunakan saat berpindah halaman
+          try {
+            localStorage.setItem('monitoringData', JSON.stringify(activityData));
+            localStorage.setItem('monitoringRegions', JSON.stringify(regionsToProcess));
+            localStorage.setItem('monitoringFilters', JSON.stringify(secondaryFilters));
+          } catch (error) {
+            console.error("Error saving data to localStorage:", error);
+          }
           
           const loadTime = ((Date.now() - startTime) / 1000).toFixed(1);
           console.log(`✅ Data monitoring berhasil dimuat dalam ${loadTime} detik (${regionsToProcess.length} wilayah)`);
