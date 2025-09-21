@@ -108,6 +108,8 @@ $user_data = getUserData();
       font-size: 0.7rem;
       background-color: #fff;
       transition: all 0.2s ease;
+      will-change: auto;
+      transform: translateZ(0);
     }
     
     .form-control:focus, .form-select:focus {
@@ -1015,6 +1017,8 @@ $user_data = getUserData();
       border: 1px solid #e5e7eb;
       border-radius: 4px;
       background-color: white;
+      will-change: auto;
+      transform: translateZ(0);
     }
     
     #secondaryFilterCard .form-select[multiple]:focus {
@@ -1028,16 +1032,57 @@ $user_data = getUserData();
       padding: 0.3rem 0.5rem;
       background-color: white;
       color: #374151;
+      transition: all 0.2s ease;
     }
     
     #secondaryFilterCard .form-select[multiple] option:checked {
       background-color: #059669 !important;
       color: white !important;
+      font-weight: 600;
     }
     
     #secondaryFilterCard .form-select[multiple] option:hover {
       background-color: #f0fdf4 !important;
       color: #059669 !important;
+    }
+    
+    /* Additional styling for better visibility of selected options */
+    #secondaryFilterCard .form-select[multiple] option:checked:hover {
+      background-color: #047857 !important;
+      color: white !important;
+    }
+    
+    /* Ensure the select element itself shows active state when options are selected */
+    #secondaryFilterCard .form-select[multiple]:not([value=""]) {
+      border-color: #059669;
+      background-color: #ffffff;
+    }
+    
+    /* Enhanced styling for select elements with selected options */
+    #secondaryFilterCard .form-select[multiple].has-selected-options {
+      border-color: #059669 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    #secondaryFilterCard .form-select[multiple].has-selected-options:focus {
+      border-color: #047857 !important;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3) !important;
+    }
+    
+    /* Ensure has-selected-options state persists even after losing focus */
+    #secondaryFilterCard .form-select[multiple].has-selected-options:not(:focus) {
+      border-color: #059669 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    /* Style for when multiple options are selected */
+    #secondaryFilterCard .form-select[multiple][multiple] option:checked {
+      background: linear-gradient(135deg, #059669, #047857) !important;
+      color: white !important;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
     
     #secondaryFilterCard .form-label {
@@ -1049,18 +1094,60 @@ $user_data = getUserData();
     /* Active Filter Styles */
     .filter-active {
       border-color: #059669 !important;
-      background-color: #f0fdf4 !important;
+      background-color: #ffffff !important;
       box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+      will-change: auto;
+      transform: translateZ(0);
     }
     
     .filter-label-active {
-      color: #059669 !important;
+      color: #374151 !important;
       font-weight: 700 !important;
+      will-change: auto;
+      transform: translateZ(0);
     }
     
     .filter-active:focus {
       border-color: #047857 !important;
       box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3) !important;
+    }
+    
+    /* Override default form-select focus styles for active filters */
+    .filter-active:focus,
+    .filter-active:not(:focus) {
+      border-color: #059669 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    /* Ensure active state persists even after losing focus */
+    #secondaryFilterCard .form-select[multiple].filter-active {
+      border-color: #059669 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    #secondaryFilterCard .form-select[multiple].filter-active:focus {
+      border-color: #047857 !important;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3) !important;
+    }
+    
+    /* Override any conflicting styles with higher specificity */
+    #secondaryFilterCard .form-select[multiple].filter-active.has-selected-options {
+      border-color: #059669 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    #secondaryFilterCard .form-select[multiple].filter-active.has-selected-options:focus {
+      border-color: #047857 !important;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3) !important;
+    }
+    
+    #secondaryFilterCard .form-select[multiple].filter-active.has-selected-options:not(:focus) {
+      border-color: #059669 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
     }
     
     #secondaryFilterCard .card-header {
@@ -1211,7 +1298,7 @@ $user_data = getUserData();
 
     <!-- Toggle Advanced Filters Button -->
     <div class="mb-2" id="toggleAdvancedFiltersContainer" style="display: none;">
-      <button id="toggleAdvancedFilters" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;">
+      <button id="toggleAdvancedFilters" class="btn btn-sm btn-outline-success" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;">
         <i class="fas fa-chevron-down me-1"></i>Filter Lanjutan
       </button>
     </div>
@@ -2428,6 +2515,14 @@ $user_data = getUserData();
 
       // --- Secondary Filter Functions ---
       const populateSecondaryFilters = () => {
+        // Save current selected values before resetting dropdowns
+        const currentSelections = {
+          gate: $("#filterGate").val() || [],
+          uk: $("#filterUK").val() || [],
+          activity: $("#filterActivity").val() || [],
+          status: $("#filterStatus").val() || []
+        };
+        
         // Populate Gate filter
         const gates = new Set();
         const uks = new Set();
@@ -2489,6 +2584,34 @@ $user_data = getUserData();
         Array.from(statuses).sort().forEach(status => {
           $filterStatus.append(`<option value="${status}">${status}</option>`);
         });
+        
+        // Restore selected values and visual feedback
+        setTimeout(() => {
+          // Restore selections
+          $filterGate.val(currentSelections.gate);
+          $filterUK.val(currentSelections.uk);
+          $filterActivity.val(currentSelections.activity);
+          $filterStatus.val(currentSelections.status);
+          
+          // Restore visual feedback in a single batch to prevent flickering
+          const filtersToRestore = [
+            { type: 'gate', values: currentSelections.gate },
+            { type: 'uk', values: currentSelections.uk },
+            { type: 'activity', values: currentSelections.activity },
+            { type: 'status', values: currentSelections.status }
+          ];
+          
+          filtersToRestore.forEach(filter => {
+            if (filter.values.length > 0) {
+              const $select = $(`#filter${filter.type.charAt(0).toUpperCase() + filter.type.slice(1)}`);
+              const $label = $select.prev('label');
+              
+              // Apply visual feedback directly without calling updateFilterVisualFeedback
+              $select.addClass('filter-active has-selected-options');
+              $label.addClass('filter-label-active');
+            }
+          });
+        }, 5);
       };
 
       // Function to update visual feedback for filters
@@ -2497,47 +2620,16 @@ $user_data = getUserData();
         const $label = $select.prev('label');
         
         // Remove existing active class
-        $select.removeClass('filter-active');
+        $select.removeClass('filter-active has-selected-options');
         $label.removeClass('filter-label-active');
         
         if (values.length > 0) {
           // Add active styling
-          $select.addClass('filter-active');
+          $select.addClass('filter-active has-selected-options');
           $label.addClass('filter-label-active');
-          
-          // Update label text to show active filters
-          const originalText = $label.text().split(' (')[0];
-          let displayText;
-          
-          // Special handling for different filter types
-          if (filterType === 'uk') {
-            displayText = values.length === 1 ? `UK ${values[0]}` : `UK ${values.join(', UK ')}`;
-          } else if (filterType === 'level') {
-            const levelLabels = {
-              '1': 'Pusat',
-              '2': 'Provinsi', 
-              '3': 'Kabkot'
-            };
-            displayText = values.length === 1 ? levelLabels[values[0]] || values[0] : 
-              values.map(v => levelLabels[v] || v).join(', ');
-          } else if (filterType === 'deadline') {
-            const deadlineLabels = {
-              '3days': '3 hari',
-              'week': 'Minggu ini',
-              'month': 'Bulan ini',
-              'all': 'Semua deadline'
-            };
-            displayText = values.length === 1 ? deadlineLabels[values[0]] || values[0] : 
-              values.map(v => deadlineLabels[v] || v).join(', ');
-          } else {
-            displayText = values.length === 1 ? values[0] : `${values.length} selected`;
-          }
-          
-          $label.text(`${originalText} (${displayText})`);
         } else {
-          // Reset label text
-          const originalText = $label.text().split(' (')[0];
-          $label.text(originalText);
+          // Remove selected class when no values
+          $select.removeClass('has-selected-options');
         }
       };
 
@@ -2901,11 +2993,36 @@ $user_data = getUserData();
         
         applySecondaryFilters();
       });
+      
+      // Ensure visual feedback persists after losing focus
+      $(document).on('blur', '#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline', function(){
+        const filterType = $(this).attr('id').replace('filter', '').toLowerCase();
+        let selectedValues = $(this).val() || [];
+        
+        // Handle multiple select - if it's not an array, make it one
+        if (!Array.isArray(selectedValues)) {
+          selectedValues = [selectedValues];
+        }
+        
+        // Remove empty string values (for "Semua" options)
+        const cleanValues = selectedValues.filter(val => val !== '' && val !== null);
+        
+        // Re-apply visual feedback to ensure it persists
+        if (cleanValues.length > 0) {
+          const $select = $(this);
+          $select.addClass('filter-active has-selected-options');
+          $select.prev('label').addClass('filter-label-active');
+        }
+      });
 
       // Clear secondary filters
       $(document).on('click', '#clearSecondaryFilters', function(){
         // Reset all filter dropdowns
         $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline').val([]);
+        
+        // Remove all visual feedback classes
+        $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline').removeClass('filter-active has-selected-options');
+        $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline').prev('label').removeClass('filter-label-active');
         
         // Reset secondary filters object
         Object.keys(secondaryFilters).forEach(key => {
