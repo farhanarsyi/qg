@@ -951,9 +951,12 @@ if(isset($_POST['action'])){
                             $measurement_id = $measurement['id'];
                             
                             // Check total preventives that should exist (from project_preventives table)
-                            $totalPreventivesQuery = "SELECT COUNT(*) as [count] FROM [project_preventives] 
-                                                     WHERE [id_project] = ? AND [id_gate] = ? 
-                                                     AND [id_measurement] = ? AND [is_deleted] IS NULL";
+                            $totalPreventivesQuery = "SELECT COUNT(DISTINCT [index_action]) as [count]
+                                                        FROM [project_preventives]
+                                                        WHERE [id_project] = ? 
+                                                        AND [id_gate] = ? 
+                                                        AND [id_measurement] = ? 
+                                                        AND [is_deleted] IS NULL;";
                             
                             $totalPreventivesStmt = sqlsrv_query($conn, $totalPreventivesQuery, 
                                 [$id_project, $gate_id, $measurement_id]);
@@ -985,9 +988,13 @@ if(isset($_POST['action'])){
                             }
                             
                             // Check total correctives that should exist (from project_correctives table)
-                            $totalCorrectivesQuery = "SELECT COUNT(*) as [count] FROM [project_correctives] 
-                                                     WHERE [id_project] = ? AND [id_gate] = ? 
-                                                     AND [id_measurement] = ? AND [is_deleted] IS NULL";
+                            $totalCorrectivesQuery = "SELECT COUNT(DISTINCT [index_action]) as [count]
+                                                        FROM [project_corectives]
+                                                        WHERE [id_project] = ? 
+                                                        AND [id_gate] = ? 
+                                                        AND [id_measurement] = ? 
+                                                        AND [is_deleted] IS NULL;
+";
                             
                             $totalCorrectivesStmt = sqlsrv_query($conn, $totalCorrectivesQuery, 
                                 [$id_project, $gate_id, $measurement_id]);
