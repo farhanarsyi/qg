@@ -1,6 +1,7 @@
 <?php
 // monitoring.php
 require_once 'sso_integration.php';
+require_once 'app_config.php';
 
 // Pastikan user sudah login SSO
 requireSSOLogin('monitoring.php');
@@ -30,6 +31,8 @@ $user_data = getUserData();
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- Persistence Manager -->
   <script src="persistence_manager.js"></script>
+  <!-- App Configuration -->
+  <script><?php echo getCardConfigJS(); ?></script>
   <style>
     :root {
       --primary-color: #059669;   /* Emerald green */
@@ -1239,6 +1242,7 @@ $user_data = getUserData();
     </div>
 
     <!-- Statistics Cards -->
+    <?php if (shouldShowMonitoringCards()): ?>
     <div class="row" id="statsCards" style="display: none; margin-bottom: 0.3rem;">
       <div class="col-md-2">
         <div class="card border-0 bg-primary bg-opacity-10">
@@ -1296,6 +1300,7 @@ $user_data = getUserData();
         </div>
       </div>
     </div>
+    <?php endif; ?>
 
 
     <!-- Toggle Advanced Filters Button -->
@@ -1387,6 +1392,24 @@ $user_data = getUserData();
   <script>
     $(function(){
       const API_URL = "api.php";
+      
+      // Debug logging helper function
+      function debugLog(message, type = 'log') {
+        if (window.appConfig && window.appConfig.debugMode) {
+          const prefix = '🔍 [DEBUG] ';
+          switch (type) {
+            case 'warn':
+              console.warn(prefix + message);
+              break;
+            case 'error':
+              console.error(prefix + message);
+              break;
+            default:
+              console.log(prefix + message);
+              break;
+          }
+        }
+      }
       let selectedProject, year, selectedRegion = null;
       let coverageData = [];
       let activityData = {}; // Untuk menyimpan data status per aktivitas per wilayah
@@ -1440,7 +1463,7 @@ $user_data = getUserData();
           }
           
           daerahData = await response.json();
-          console.log('🗺️ [MONITORING] Daerah data loaded:', daerahData.length, 'entries');
+          debugLog('🗺️ [MONITORING] Daerah data loaded: ' + daerahData.length + ' entries');
           return true;
         } catch (error) {
           console.error('❌ [MONITORING] Failed to load daerah data:', error);
@@ -1593,7 +1616,7 @@ $user_data = getUserData();
 
       // Inisialisasi user dengan data SSO
       const initUser = () => {
-        console.log('🔍 [MONITORING] Initializing user...');
+        debugLog('🔍 [MONITORING] Initializing user...');
         
         // Data user sudah tersedia dari SSO PHP session
         currentUser = {
@@ -1606,14 +1629,14 @@ $user_data = getUserData();
           unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
         };
         
-        console.log('👤 [MONITORING] Current User Data:', currentUser);
-        console.log('🗺️ [MONITORING] Wilayah filter:', {
+        debugLog('👤 [MONITORING] Current User Data: ' + JSON.stringify(currentUser));
+        debugLog('🗺️ [MONITORING] Wilayah filter: ' + JSON.stringify({
           prov: currentUser.prov,
           kab: currentUser.kab,
           unit_kerja: currentUser.unit_kerja,
           prov_empty: !currentUser.prov,
           kab_empty: !currentUser.kab
-        });
+        }));
         
         // Validasi data user dengan delay untuk mencegah infinite redirect
         if (!currentUser.username) {
@@ -1891,14 +1914,15 @@ $user_data = getUserData();
         }
         
         // Update UI
-        $("#statSudah").text(stats.sudah);
-        $("#statBelum").text(stats.belum);
-        $("#statSedangBerjalan").text(stats.sedangBerjalan);
-        $("#statTidakPerlu").text(stats.tidakPerlu);
-        $("#statTotal").text(stats.total);
-        
-        // Show stats cards and level filter cards
-        $("#statsCards").show();
+        // Update stats cards only if monitoring cards are enabled
+        if (window.appConfig && window.appConfig.showMonitoringCards) {
+          $("#statSudah").text(stats.sudah);
+          $("#statBelum").text(stats.belum);
+          $("#statSedangBerjalan").text(stats.sedangBerjalan);
+          $("#statTidakPerlu").text(stats.tidakPerlu);
+          $("#statTotal").text(stats.total);
+          $("#statsCards").show();
+        }
         $("#levelFilterCards").show();
       };
 
@@ -2672,12 +2696,21 @@ $user_data = getUserData();
           $filterActivity.append(`<option value="${activity}">${activity}</option>`);
         });
         
-        // Populate Status dropdown with simple options
+        // Populate Status dropdown with advanced options
         const $filterStatus = $("#filterStatus");
         $filterStatus.empty().append('<option value="">Semua Status</option>');
-        $filterStatus.append('<option value="Sudah">Sudah</option>');
-        $filterStatus.append('<option value="Belum">Belum</option>');
-        $filterStatus.append('<option value="Tidak Perlu">Tidak Perlu</option>');
+        
+        // Check if advanced status filter is enabled
+        if (window.appConfig && window.appConfig.advancedStatusFilter) {
+          $filterStatus.append('<option value="semua">Semua</option>');
+          $filterStatus.append('<option value="sudah">Sudah</option>');
+          $filterStatus.append('<option value="belum">Belum</option>');
+        } else {
+          // Legacy options for backward compatibility
+          $filterStatus.append('<option value="Sudah">Sudah</option>');
+          $filterStatus.append('<option value="Belum">Belum</option>');
+          $filterStatus.append('<option value="Tidak Perlu">Tidak Perlu</option>');
+        }
         
         // Restore selected values and visual feedback
         setTimeout(() => {
@@ -2767,26 +2800,55 @@ $user_data = getUserData();
             }
           }
           
-          // Filter by Status (any region matches) - simplified to Sudah/Belum/Tidak Perlu
+          // Filter by Status with advanced logic
           if (include && secondaryFilters.status.length > 0) {
-            const hasMatchingStatus = Object.values(data.statuses).some(status => {
-              // Map complex statuses to simple categories
-              if (secondaryFilters.status.includes('Sudah')) {
-                return status.includes('Sudah') || status.includes('sudah') || 
-                       status.includes('Selesai') || status.includes('selesai') ||
-                       status.includes('Ditentukan') || status.includes('ditentukan') ||
-                       status.includes('Sudah ditentukan') || status.includes('sudah ditentukan');
+            let hasMatchingStatus = false;
+            
+            // Check if advanced status filter is enabled
+            if (window.appConfig && window.appConfig.advancedStatusFilter) {
+              // Advanced status filtering logic
+              if (secondaryFilters.status.includes('semua')) {
+                hasMatchingStatus = true; // Show all records
+              } else if (secondaryFilters.status.includes('sudah')) {
+                // Show only records where ALL statuses are "sudah" or "tidak perlu"
+                const allStatuses = Object.values(data.statuses);
+                hasMatchingStatus = allStatuses.every(status => {
+                  return status.includes('Sudah') || status.includes('sudah') || 
+                         status.includes('Selesai') || status.includes('selesai') ||
+                         status.includes('Ditentukan') || status.includes('ditentukan') ||
+                         status.includes('Sudah ditentukan') || status.includes('sudah ditentukan') ||
+                         status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
+                         status.includes('Tidak perlu') || status.includes('tidak Perlu');
+                });
+              } else if (secondaryFilters.status.includes('belum')) {
+                // Show records where at least ONE status is "belum"
+                const allStatuses = Object.values(data.statuses);
+                hasMatchingStatus = allStatuses.some(status => {
+                  return status.includes('Belum') || status.includes('belum') ||
+                         status.includes('Belum ditentukan') || status.includes('belum ditentukan');
+                });
               }
-              if (secondaryFilters.status.includes('Belum')) {
-                return status.includes('Belum') || status.includes('belum') ||
-                       status.includes('Belum ditentukan') || status.includes('belum ditentukan');
-              }
-              if (secondaryFilters.status.includes('Tidak Perlu')) {
-                return status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
-                       status.includes('Tidak perlu') || status.includes('tidak Perlu');
-              }
-              return secondaryFilters.status.includes(status);
-            });
+            } else {
+              // Legacy status filtering logic
+              hasMatchingStatus = Object.values(data.statuses).some(status => {
+                if (secondaryFilters.status.includes('Sudah')) {
+                  return status.includes('Sudah') || status.includes('sudah') || 
+                         status.includes('Selesai') || status.includes('selesai') ||
+                         status.includes('Ditentukan') || status.includes('ditentukan') ||
+                         status.includes('Sudah ditentukan') || status.includes('sudah ditentukan');
+                }
+                if (secondaryFilters.status.includes('Belum')) {
+                  return status.includes('Belum') || status.includes('belum') ||
+                         status.includes('Belum ditentukan') || status.includes('belum ditentukan');
+                }
+                if (secondaryFilters.status.includes('Tidak Perlu')) {
+                  return status.includes('Tidak Perlu') || status.includes('tidak perlu') ||
+                         status.includes('Tidak perlu') || status.includes('tidak Perlu');
+                }
+                return secondaryFilters.status.includes(status);
+              });
+            }
+            
             if (!hasMatchingStatus) {
               include = false;
             }
@@ -3417,11 +3479,11 @@ $user_data = getUserData();
           }
           
           const loadTime = ((Date.now() - startTime) / 1000).toFixed(1);
-          console.log(`✅ Data monitoring berhasil dimuat dalam ${loadTime} detik (${regionsToProcess.length} wilayah)`);
+          debugLog(`✅ Data monitoring berhasil dimuat dalam ${loadTime} detik (${regionsToProcess.length} wilayah)`);
           
           // Show success message in console for performance tracking
           if (regionsToProcess.length > 10) {
-            console.log(`🚀 Optimasi berhasil! Memuat ${Object.keys(activityData).length} aktivitas untuk ${regionsToProcess.length} wilayah hanya dalam ${loadTime} detik`);
+            debugLog(`🚀 Optimasi berhasil! Memuat ${Object.keys(activityData).length} aktivitas untuk ${regionsToProcess.length} wilayah hanya dalam ${loadTime} detik`);
           }
           
           // Show performance info to user
