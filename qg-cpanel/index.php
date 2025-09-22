@@ -645,6 +645,40 @@ try {
     align-items: center;
     gap: 0.5rem;
   }
+  
+  /* Detail button styles */
+  .detail-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    text-decoration: none;
+    cursor: pointer;
+    min-width: 60px;
+    justify-content: center;
+  }
+  
+  .detail-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+  
+  .detail-btn:active {
+    transform: translateY(0);
+  }
+  
+  .detail-btn i {
+    font-size: 0.5rem;
+  }
   </style>
 </head>
 <body>
@@ -765,6 +799,7 @@ try {
                 <th data-sort="start_date">Tanggal Mulai<i class="fas fa-sort sort-icon"></i></th>
                 <th data-sort="end_date">Tanggal Selesai<i class="fas fa-sort sort-icon"></i></th>
                 <th data-sort="status">Status<i class="fas fa-sort sort-icon"></i></th>
+                <th style="width: 80px;">Aksi</th>
               </tr>
             </thead>
             <tbody id="dashboardTableBody">
@@ -780,9 +815,9 @@ try {
         </div>
         
         <div id="initialState" class="empty-state">
-          <i class="fas fa-filter"></i>
-          <h5>Pilih Filter</h5>
-          <p>Silakan pilih filter untuk melihat data project-gate</p>
+          <i class="fas fa-play-circle"></i>
+          <h5>Memuat Kegiatan Aktif</h5>
+          <p>Menampilkan kegiatan dengan status "Sedang Berlangsung" secara otomatis</p>
         </div>
       </div>
     </div>
@@ -803,7 +838,7 @@ try {
           <div class="loading-dot"></div>
         </div>
       </div>
-      <div class="spinner-text">Memuat data dashboard...</div>
+      <div class="spinner-text">Memuat kegiatan aktif...</div>
     </div>
   </div>
 
@@ -1115,22 +1150,29 @@ try {
               dashboardData = JSON.parse(savedData);
               filteredData = [...dashboardData];
               
-              // Terapkan filter yang tersimpan jika tidak ada filter baru
-              if (Object.keys(filters).length === 0) {
-                filters = JSON.parse(savedFilters);
-              }
-              
-              // Apply status filter if present
-              if (filters.filter_status) {
-                filteredData = filteredData.filter(gate => {
-                  const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
-                  return dateStatus.status === filters.filter_status;
-                });
-              }
-              
-              // Tampilkan data tanpa loading spinner
-              displayDashboardData();
-              return;
+            // Terapkan filter yang tersimpan jika tidak ada filter baru
+            if (Object.keys(filters).length === 0) {
+              filters = JSON.parse(savedFilters);
+            }
+            
+            // Apply status filter if present
+            if (filters.filter_status) {
+              filteredData = filteredData.filter(gate => {
+                const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+                return dateStatus.status === filters.filter_status;
+              });
+            }
+            
+            // Apply project filter if present
+            if (filters.filter_project) {
+              filteredData = filteredData.filter(gate => {
+                return gate.project_id == filters.filter_project;
+              });
+            }
+            
+            // Tampilkan data tanpa loading spinner
+            displayDashboardData();
+            return true;
             } catch (e) {
               console.error('❌ [ERROR] Failed to load data from localStorage:', e);
               // Lanjutkan dengan memuat data dari server jika terjadi kesalahan
@@ -1165,6 +1207,13 @@ try {
               filteredData = filteredData.filter(gate => {
                 const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
                 return dateStatus.status === filters.filter_status;
+              });
+            }
+            
+            // Apply project filter if present
+            if (filters.filter_project) {
+              filteredData = filteredData.filter(gate => {
+                return gate.project_id == filters.filter_project;
               });
             }
             
@@ -1264,6 +1313,12 @@ try {
             <td>${formatDate(gate.cor_upload_end)}</td>
             <td>
               <span class="${dateStatus.class}">${dateStatus.text}</span>
+            </td>
+            <td>
+              <button class="detail-btn" onclick="openMonitoringDetail(${gate.project_id}, '${gate.project_name}')">
+                <i class="fas fa-external-link-alt"></i>
+                Detail
+              </button>
             </td>
           </tr>`;
         });
@@ -1379,7 +1434,8 @@ try {
             'Gate',
             'Tanggal Mulai',
             'Tanggal Selesai',
-            'Status'
+            'Status',
+            'Aksi'
           ];
           exportData.push(headerRow);
 
@@ -1392,7 +1448,8 @@ try {
               `GATE${gate.gate_number}: ${gate.gate_name}`,
               gate.prev_insert_start || '-',
               gate.cor_upload_end || '-',
-              dateStatus.text
+              dateStatus.text,
+              'Detail'
             ];
             exportData.push(row);
           });
@@ -1407,7 +1464,8 @@ try {
             { wch: 40 }, // Gate
             { wch: 15 }, // Tanggal Mulai
             { wch: 15 }, // Tanggal Selesai
-            { wch: 20 }  // Status
+            { wch: 20 }, // Status
+            { wch: 10 }  // Aksi
           ];
           ws['!cols'] = colWidths;
 
@@ -1521,6 +1579,42 @@ try {
         exportToExcel();
       });
       
+      // Function to open monitoring detail in new tab
+      window.openMonitoringDetail = function(projectId, projectName) {
+        if (!currentUser) {
+          showError("Data user tidak ditemukan");
+          return;
+        }
+        
+        // Determine region based on user's SSO data
+        let regionParam = '';
+        if (currentUser.prov === "00" && currentUser.kab === "00") {
+          // User pusat - default ke pusat
+          regionParam = '&region=pusat';
+        } else if (currentUser.prov !== "00" && currentUser.kab === "00") {
+          // User provinsi - gunakan kode provinsi
+          regionParam = `&region=${currentUser.prov}00`;
+        } else {
+          // User kabupaten - gunakan kode provinsi + kabupaten
+          regionParam = `&region=${currentUser.prov}${currentUser.kab}`;
+        }
+        
+        // Build monitoring URL with parameters
+        const monitoringUrl = `monitoring.php?year=2025&project=${projectId}${regionParam}`;
+        
+        console.log('🔗 [DEBUG] Opening monitoring detail:', {
+          projectId,
+          projectName,
+          userProv: currentUser.prov,
+          userKab: currentUser.kab,
+          regionParam,
+          url: monitoringUrl
+        });
+        
+        // Open in new tab
+        window.open(monitoringUrl, '_blank');
+      };
+      
       // Status filter change handler
       $(document).on('change', '#filterStatus', function(){
         // Hide dashboard elements immediately when status filter changes
@@ -1555,23 +1649,29 @@ try {
             }
           );
           
+          // Apply saved filters first before loading data
+          if (window.persistenceManager) {
+            window.persistenceManager.applySavedFilters();
+          }
+          
           // Memuat data dari localStorage jika tersedia
           const dataLoaded = loadDataFromLocalStorage();
           
-          // Apply saved filters and activity name on page load
+          // Show saved activity name after data is loaded
           if (window.persistenceManager) {
-            window.persistenceManager.applySavedFilters();
             window.persistenceManager.showSavedActivityName();
           }
           
           // Jika ini adalah load pertama kali dan tidak ada data di localStorage, 
-          // maka tampilkan semua kegiatan secara otomatis
+          // maka tampilkan kegiatan dengan status "sedang berlangsung" secara otomatis
           if (isFirstLoad && !dataLoaded) {
-            console.log('🔄 [DEBUG] First page load detected, loading all activities automatically...');
+            console.log('🔄 [DEBUG] First page load detected, loading active activities automatically...');
             // Tandai bahwa halaman sudah pernah dimuat
             localStorage.setItem('dashboardHasLoaded', 'true');
-            // Muat semua kegiatan (tanpa filter)
-            loadDashboardData({}, true);
+            // Set default status filter to active (sedang berlangsung)
+            $("#filterStatus").val("active");
+            // Muat kegiatan dengan status aktif
+            loadDashboardData({ filter_status: "active" }, true);
           }
           
           console.log('🎯 [DEBUG] Page initialization completed successfully!');

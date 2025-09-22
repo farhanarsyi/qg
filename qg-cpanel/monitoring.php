@@ -539,7 +539,7 @@ $user_data = getUserData();
     /* Animasi kedap-kedip untuk tanggal yang sedang berlangsung */
     @keyframes blink {
       0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0.2; }
+      51%, 100% { opacity: 1; }
     }
     
     .date-in-range {
@@ -3200,6 +3200,18 @@ const calculateDaysUntilDeadline = (endDateStr) => {
         // Update visual feedback
         updateFilterVisualFeedback(filterType, cleanValues);
         
+        // Save to persistence manager
+        if (window.persistenceManager) {
+          const filters = {
+            project: selectedProject,
+            projectName: $('#projectSearch').val(),
+            region: selectedRegion,
+            regionName: $('#regionSearch').val(),
+            secondary: secondaryFilters
+          };
+          window.persistenceManager.saveFilters(filters);
+        }
+        
         applySecondaryFilters();
       });
       
@@ -3365,23 +3377,31 @@ const calculateDaysUntilDeadline = (endDateStr) => {
             debugLog('⚠️ [MONITORING] Daerah data loaded with fallback', 'warn');
           }
           
+          // Apply saved filters first before loading data
+          if (window.persistenceManager) {
+            window.persistenceManager.applySavedFilters();
+          }
+          
           // Setelah data daerah dimuat (atau fallback), coba load dari localStorage
           loadDataFromLocalStorage();
           
-          // Apply saved filters and activity name on page load
+          // Show saved activity name after data is loaded
           if (window.persistenceManager) {
-            window.persistenceManager.applySavedFilters();
             window.persistenceManager.showSavedActivityName();
           }
         }).catch((error) => {
           debugLog('❌ [MONITORING] Failed to load daerah data: ' + error.message, 'error');
           
+          // Apply saved filters first before loading data
+          if (window.persistenceManager) {
+            window.persistenceManager.applySavedFilters();
+          }
+          
           // Even if daerah data fails, try to load from localStorage
           loadDataFromLocalStorage();
           
-          // Apply saved filters and activity name on page load
+          // Show saved activity name after data is loaded
           if (window.persistenceManager) {
-            window.persistenceManager.applySavedFilters();
             window.persistenceManager.showSavedActivityName();
           }
         });
@@ -3541,9 +3561,89 @@ const calculateDaysUntilDeadline = (endDateStr) => {
         }
       });
 
+      // Function to handle URL parameters from dashboard
+      const handleURLParameters = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const yearParam = urlParams.get('year');
+        const projectParam = urlParams.get('project');
+        const regionParam = urlParams.get('region');
+        
+        debugLog('🔗 [URL] Parameters received: ' + JSON.stringify({
+          year: yearParam,
+          project: projectParam,
+          region: regionParam
+        }));
+        
+        // Set year if provided
+        if (yearParam) {
+          year = yearParam;
+          $yearSelect.val(year);
+        }
+        
+        // Set project if provided
+        if (projectParam) {
+          selectedProject = projectParam;
+        }
+        
+        // Set region if provided
+        if (regionParam) {
+          selectedRegion = regionParam;
+        }
+        
+        return {
+          hasYear: !!yearParam,
+          hasProject: !!projectParam,
+          hasRegion: !!regionParam
+        };
+      };
+
+      // Function to handle URL parameters after data is loaded
+      const handleURLParametersAfterLoad = async () => {
+        try {
+          debugLog('🔄 [URL] Handling parameters after data load...');
+          
+          // Set project if provided
+          if (selectedProject) {
+            // Find project name from projectData
+            const project = projectData.find(p => p.value == selectedProject);
+            if (project) {
+              projectDropdown.setValue(selectedProject, project.text);
+              debugLog('✅ [URL] Project set: ' + project.text);
+            }
+          }
+          
+          // Set region if provided and user is pusat
+          if (selectedRegion && currentUser.prov === "00" && currentUser.kab === "00") {
+            // Find region name from regionDropdownData
+            const region = regionDropdownData.find(r => r.value == selectedRegion);
+            if (region) {
+              regionDropdown.setValue(selectedRegion, region.text);
+              debugLog('✅ [URL] Region set: ' + region.text);
+            }
+          }
+          
+          // Auto-load data if both project and region are set
+          if (selectedProject && selectedRegion) {
+            debugLog('🚀 [URL] Auto-loading data with parameters...');
+            // Trigger load data button click
+            $("#loadData").click();
+          } else if (selectedProject && currentUser.prov !== "00" && currentUser.kab !== "00") {
+            // For non-pusat users, auto-load with their region
+            debugLog('🚀 [URL] Auto-loading data for non-pusat user...');
+            $("#loadData").click();
+          }
+          
+        } catch (error) {
+          debugLog('❌ [URL] Error handling parameters: ' + error.message, 'error');
+        }
+      };
+
       // Inisialisasi
       const initializeApp = async () => {
         if (initUser()) {
+          // Handle URL parameters first
+          const urlParams = handleURLParameters();
+          
           // Load daerah data first
           await loadDaerahData();
           
@@ -3599,7 +3699,12 @@ const calculateDaysUntilDeadline = (endDateStr) => {
           
           // Load projects untuk tahun yang sudah terpilih (default 2025)
           if (year) {
-            loadProjects();
+            loadProjects().then(() => {
+              // If URL parameters were provided, auto-select and load data
+              if (urlParams.hasProject || urlParams.hasRegion) {
+                handleURLParametersAfterLoad();
+              }
+            });
           }
         }
       };

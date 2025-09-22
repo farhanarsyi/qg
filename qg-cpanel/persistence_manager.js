@@ -257,6 +257,11 @@ class PersistenceManager {
         if (filters.status) {
             $('#filterStatus').val(filters.status);
         }
+        
+        // Trigger change event to apply the filter immediately
+        if (filters.status) {
+            $('#filterStatus').trigger('change');
+        }
     }
 
     /**
@@ -278,6 +283,14 @@ class PersistenceManager {
                 const $select = $(`#${filterId}`);
                 if ($select.length) {
                     $select.val(filters.secondary[filterId]);
+                    // Apply visual feedback
+                    const $label = $select.prev('label');
+                    if (filters.secondary[filterId].length > 0) {
+                        $select.addClass('filter-active has-selected-options');
+                        $label.addClass('filter-label-active');
+                    }
+                    // Trigger change event to apply the filter
+                    $select.trigger('change');
                 }
             });
         }
