@@ -19,9 +19,18 @@ try {
     // Log setelah cek login
     error_log('SSO login check passed - getting user data');
     
+    // Dapatkan data user
+    $user_data = getUserData();
+    
+    // Cek apakah user adalah superadmin dan belum mengatur parameter
+    if (isSuperAdmin() && (!isset($_SESSION['modified_sso_params']) || !$_SESSION['modified_sso_params']['is_modified'])) {
+        // Redirect ke halaman modifikasi parameter
+        header('Location: superadmin_params.php');
+        exit;
+    }
+    
     // Dapatkan filter wilayah berdasarkan SSO user
     $wilayah_filter = getSSOWilayahFilter();
-    $user_data = getUserData();
     
     // Log user data
     error_log('User data: ' . ($user_data ? json_encode($user_data) : 'NULL'));
@@ -1049,14 +1058,23 @@ try {
         console.log('🔍 [DEBUG] Initializing user...');
         
         // Data user sudah tersedia dari SSO PHP session
+        // Jika ada parameter yang dimodifikasi (untuk superadmin), gunakan parameter tersebut
         currentUser = {
           username: '<?= isset($_SESSION["sso_username"]) ? $_SESSION["sso_username"] : "" ?>',
           name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
           email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
           role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
+          <?php if (isset($_SESSION['modified_sso_params']) && $_SESSION['modified_sso_params']['is_modified'] === true): ?>
+          // Gunakan parameter yang dimodifikasi oleh superadmin
+          prov: '<?= $_SESSION["modified_sso_params"]["kodeprovinsi"] ?>',
+          kab: '<?= $_SESSION["modified_sso_params"]["kodekabupaten"] ?>',
+          unit_kerja: '<?= $_SESSION["modified_sso_params"]["unit_kerja"] ?>',
+          is_modified: true
+          <?php else: ?>
           prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
           kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
           unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
+          <?php endif; ?>
         };
         
         console.log('👤 [DEBUG] Current User Data:', currentUser);
@@ -1601,8 +1619,17 @@ try {
           return;
         }
         
-        // Determine region based on user's SSO data
+        // Determine region based on user's SSO data (original or modified by superadmin)
         let regionParam = '';
+        
+        // Log untuk debugging
+        console.log('🔍 [DEBUG] Determining region with user data:', {
+          prov: currentUser.prov,
+          kab: currentUser.kab,
+          unit_kerja: currentUser.unit_kerja,
+          is_modified: currentUser.is_modified || false
+        });
+        
         if (currentUser.prov === "00" && currentUser.kab === "00") {
           // User pusat - default ke pusat
           regionParam = '&region=pusat';
@@ -1611,6 +1638,7 @@ try {
           regionParam = `&region=${currentUser.prov}00`;
         } else {
           // User kabupaten - gunakan kode provinsi + kabupaten
+          // Format: prov+kab (4 digit)
           regionParam = `&region=${currentUser.prov}${currentUser.kab}`;
         }
         

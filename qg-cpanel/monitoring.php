@@ -3466,6 +3466,18 @@ const calculateDaysUntilDeadline = (endDateStr) => {
                 const prov = selectedStr.substring(0, 2);
                 const kab = selectedStr.substring(2, 4);
                 selectedRegionData = coverageData.find(r => r.prov === prov && r.kab === kab);
+                
+                // Jika tidak ditemukan, coba buat data wilayah baru berdasarkan kode
+                if (!selectedRegionData) {
+                  const daerahName = getDaerahName(selectedStr);
+                  selectedRegionData = {
+                    id: selectedStr,
+                    prov: prov,
+                    kab: kab,
+                    name: daerahName !== `Wilayah ${selectedStr}` ? daerahName : `Kabupaten/Kota ${selectedStr}`
+                  };
+                  debugLog(`🔄 [REGION] Created virtual region data for ${selectedStr}: ${JSON.stringify(selectedRegionData)}`);
+                }
               }
             }
             
