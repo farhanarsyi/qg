@@ -1122,6 +1122,21 @@ try {
             if (window.persistenceManager) {
               window.persistenceManager.applySavedFilters();
               window.persistenceManager.showSavedActivityName();
+              
+              // Apply status filter if present
+              if (filters.filter_status) {
+                filteredData = filteredData.filter(gate => {
+                  const dateStatus = getDateStatus(gate.prev_insert_start, gate.cor_upload_end);
+                  return dateStatus.status === filters.filter_status;
+                });
+              }
+              
+              // Apply project filter if present
+              if (filters.filter_project) {
+                filteredData = filteredData.filter(gate => {
+                  return gate.project_id == filters.filter_project;
+                });
+              }
             }
             
             // Tampilkan data tanpa loading spinner
