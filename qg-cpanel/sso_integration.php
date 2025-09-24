@@ -476,16 +476,20 @@ function renderSuperAdminModal() {
                 provinsiSelect.innerHTML = "<option value=\"\">-- Pilih Provinsi --</option>";
                 kabupatenSelect.innerHTML = "<option value=\"\">-- Pilih Kabupaten/Kota --</option>";
                 
-                // Populate provinsi
-                data.forEach(provinsi => {
+                // Filter dan populate provinsi (kode berakhir dengan 00)
+                const provinsiData = data.filter(item => item.kode.endsWith("00"));
+                provinsiData.forEach(provinsi => {
                     const option = document.createElement("option");
                     option.value = provinsi.kode;
-                    option.textContent = provinsi.nama;
+                    option.textContent = provinsi.daerah;
                     provinsiSelect.appendChild(option);
                 });
+                
+                console.log("Loaded " + provinsiData.length + " provinces");
             })
             .catch(error => {
                 console.error("Error loading daerah data:", error);
+                alert("Gagal memuat data daerah. Silakan refresh halaman.");
             });
     }
     
@@ -517,15 +521,22 @@ function renderSuperAdminModal() {
             fetch("daftar_daerah.php")
                 .then(response => response.json())
                 .then(data => {
-                    const selectedProvinsi = data.find(p => p.kode === provinsiCode);
-                    if (selectedProvinsi && selectedProvinsi.kabupaten) {
-                        selectedProvinsi.kabupaten.forEach(kabupaten => {
-                            const option = document.createElement("option");
-                            option.value = kabupaten.kode;
-                            option.textContent = kabupaten.nama;
-                            kabupatenSelect.appendChild(option);
-                        });
-                    }
+                    // Filter kabupaten berdasarkan kode provinsi (2 digit pertama)
+                    const provinsiPrefix = provinsiCode.substring(0, 2);
+                    const kabupatenData = data.filter(item => 
+                        item.kode.startsWith(provinsiPrefix) && 
+                        !item.kode.endsWith("00") && 
+                        item.kode !== provinsiCode
+                    );
+                    
+                    kabupatenData.forEach(kabupaten => {
+                        const option = document.createElement("option");
+                        option.value = kabupaten.kode;
+                        option.textContent = kabupaten.daerah;
+                        kabupatenSelect.appendChild(option);
+                    });
+                    
+                    console.log("Loaded " + kabupatenData.length + " kabupaten for province " + provinsiCode);
                 })
                 .catch(error => {
                     console.error("Error loading kabupaten data:", error);

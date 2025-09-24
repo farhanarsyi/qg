@@ -647,23 +647,19 @@ if(isset($_POST['action'])){
             $nama_kabupaten = '';
             
             if ($role === 'provinsi' || $role === 'kabupaten') {
-                foreach ($daerah_data as $prov) {
-                    if ($prov['kode'] === $provinsi) {
-                        $nama_provinsi = $prov['nama'];
+                foreach ($daerah_data as $item) {
+                    if ($item['kode'] === $provinsi) {
+                        $nama_provinsi = $item['daerah'];
                         break;
                     }
                 }
             }
             
             if ($role === 'kabupaten') {
-                foreach ($daerah_data as $prov) {
-                    if ($prov['kode'] === $provinsi) {
-                        foreach ($prov['kabupaten'] as $kab) {
-                            if ($kab['kode'] === $kabupaten) {
-                                $nama_kabupaten = $kab['nama'];
-                                break 2;
-                            }
-                        }
+                foreach ($daerah_data as $item) {
+                    if ($item['kode'] === $kabupaten) {
+                        $nama_kabupaten = $item['daerah'];
+                        break;
                     }
                 }
             }
