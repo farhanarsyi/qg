@@ -611,6 +611,103 @@ if(isset($_POST['action'])){
             }
             break;
             
+        case "switch_superadmin_role":
+            // Include sso_integration untuk akses fungsi superadmin
+            require_once 'sso_integration.php';
+            
+            // Cek apakah user adalah superadmin
+            if (!isSuperAdmin()) {
+                echo json_encode(["status" => false, "message" => "Akses ditolak. Hanya superadmin yang dapat menggunakan fitur ini."]);
+                break;
+            }
+            
+            $role = $_POST['role'] ?? '';
+            $provinsi = $_POST['provinsi'] ?? '';
+            $kabupaten = $_POST['kabupaten'] ?? '';
+            
+            // Validasi input
+            if (empty($role)) {
+                echo json_encode(["status" => false, "message" => "Role harus dipilih"]);
+                break;
+            }
+            
+            if ($role === 'provinsi' && empty($provinsi)) {
+                echo json_encode(["status" => false, "message" => "Provinsi harus dipilih untuk role provinsi"]);
+                break;
+            }
+            
+            if ($role === 'kabupaten' && (empty($provinsi) || empty($kabupaten))) {
+                echo json_encode(["status" => false, "message" => "Provinsi dan kabupaten harus dipilih untuk role kabupaten"]);
+                break;
+            }
+            
+            // Load data daerah untuk mendapatkan nama provinsi dan kabupaten
+            $daerah_data = json_decode(file_get_contents('daftar_daerah.json'), true);
+            $nama_provinsi = '';
+            $nama_kabupaten = '';
+            
+            if ($role === 'provinsi' || $role === 'kabupaten') {
+                foreach ($daerah_data as $prov) {
+                    if ($prov['kode'] === $provinsi) {
+                        $nama_provinsi = $prov['nama'];
+                        break;
+                    }
+                }
+            }
+            
+            if ($role === 'kabupaten') {
+                foreach ($daerah_data as $prov) {
+                    if ($prov['kode'] === $provinsi) {
+                        foreach ($prov['kabupaten'] as $kab) {
+                            if ($kab['kode'] === $kabupaten) {
+                                $nama_kabupaten = $kab['nama'];
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Set session imitation data
+            $_SESSION['superadmin_imitation'] = [
+                'unit_kerja' => $role,
+                'kode_provinsi' => $role === 'pusat' ? '00' : $provinsi,
+                'kode_kabupaten' => $role === 'pusat' || $role === 'provinsi' ? '00' : $kabupaten,
+                'nama_provinsi' => $nama_provinsi,
+                'nama_kabupaten' => $nama_kabupaten,
+                'switched_at' => date('Y-m-d H:i:s')
+            ];
+            
+            echo json_encode([
+                "status" => true, 
+                "message" => "Role berhasil diubah",
+                "data" => [
+                    "role" => $role,
+                    "provinsi" => $nama_provinsi,
+                    "kabupaten" => $nama_kabupaten
+                ]
+            ]);
+            break;
+            
+        case "reset_superadmin_role":
+            // Include sso_integration untuk akses fungsi superadmin
+            require_once 'sso_integration.php';
+            
+            // Cek apakah user adalah superadmin
+            if (!isSuperAdmin()) {
+                echo json_encode(["status" => false, "message" => "Akses ditolak. Hanya superadmin yang dapat menggunakan fitur ini."]);
+                break;
+            }
+            
+            // Hapus session imitation
+            unset($_SESSION['superadmin_imitation']);
+            
+            echo json_encode([
+                "status" => true, 
+                "message" => "Role berhasil direset ke mode asli"
+            ]);
+            break;
+            
         case "fetchDashboardData":
             $user_prov = $_POST['user_prov'];
             $user_kab = $_POST['user_kab'];

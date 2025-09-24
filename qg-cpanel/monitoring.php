@@ -1204,6 +1204,8 @@ $user_data = getUserData();
   <?php renderSSONavbar('monitoring'); ?>
 
   <div class="container-fluid">
+    <!-- Wilayah Info Box -->
+    <?php renderWilayahInfoBox(); ?>
     <!-- Input Filters -->
     <div class="card" style="margin-bottom: 0.5rem;">
       <div class="card-body">
@@ -1614,9 +1616,12 @@ $user_data = getUserData();
         };
       };
 
-      // Inisialisasi user dengan data SSO
+      // Inisialisasi user dengan data SSO (mendukung superadmin imitation)
       const initUser = () => {
         debugLog('🔍 [MONITORING] Initializing user...');
+        
+        // Gunakan data dari SSO filter yang sudah mendukung superadmin
+        const ssoFilter = window.ssoWilayahFilter || {};
         
         // Data user sudah tersedia dari SSO PHP session
         currentUser = {
@@ -1624,9 +1629,11 @@ $user_data = getUserData();
           name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
           email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
           role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
-          prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
-          kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
-          unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
+          prov: ssoFilter.kodeProvinsi || '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
+          kab: ssoFilter.kodeKabupaten || '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
+          unit_kerja: ssoFilter.unitKerja || '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>',
+          is_superadmin: ssoFilter.is_superadmin || false,
+          is_imitating: ssoFilter.is_imitating || false
         };
         
         debugLog('👤 [MONITORING] Current User Data: ' + JSON.stringify(currentUser));
@@ -3773,6 +3780,9 @@ const calculateDaysUntilDeadline = (endDateStr) => {
   
   <!-- SSO Wilayah Filter JavaScript -->
   <?php injectWilayahJS(); ?>
+  
+  <!-- Superadmin Modal -->
+  <?php renderSuperAdminModal(); ?>
   
   <!-- Debug Info (hanya muncul jika ada parameter ?debug) -->
   <?php renderDebugWilayahInfo(); ?>

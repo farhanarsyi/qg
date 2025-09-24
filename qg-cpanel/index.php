@@ -686,6 +686,8 @@ try {
   <?php renderSSONavbar('dashboard'); ?>
 
   <div class="container-fluid">
+    <!-- Wilayah Info Box -->
+    <?php renderWilayahInfoBox(); ?>
     <!-- Filters -->
     <div class="card" id="filtersCard" style="margin-bottom: 0.75rem; position: relative; z-index: 1000;">
       <div class="card-body">
@@ -1057,9 +1059,12 @@ try {
         }
       };
       
-      // Inisialisasi user dengan data SSO
+      // Inisialisasi user dengan data SSO (mendukung superadmin imitation)
       const initUser = () => {
         console.log('🔍 [DEBUG] Initializing user...');
+        
+        // Gunakan data dari SSO filter yang sudah mendukung superadmin
+        const ssoFilter = window.ssoWilayahFilter || {};
         
         // Data user sudah tersedia dari SSO PHP session
         currentUser = {
@@ -1067,9 +1072,11 @@ try {
           name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
           email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
           role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
-          prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
-          kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
-          unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
+          prov: ssoFilter.kodeProvinsi || '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
+          kab: ssoFilter.kodeKabupaten || '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
+          unit_kerja: ssoFilter.unitKerja || '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>',
+          is_superadmin: ssoFilter.is_superadmin || false,
+          is_imitating: ssoFilter.is_imitating || false
         };
         
         console.log('👤 [DEBUG] Current User Data:', currentUser);
@@ -1781,6 +1788,9 @@ try {
     }
   }
   ?>
+  
+  <!-- Superadmin Modal -->
+  <?php renderSuperAdminModal(); ?>
   
   <!-- Debug Info (hanya muncul jika ada parameter ?debug) -->
   <?php 

@@ -9,13 +9,54 @@ if (!ob_get_level()) {
 require_once 'vendor/autoload.php';
 require_once 'sso_config.php';
 
-// Fungsi untuk mendapatkan filter wilayah berdasarkan data SSO user
+// Fungsi untuk mengecek apakah user adalah superadmin
+function isSuperAdmin() {
+    if (!isLoggedIn()) {
+        return false;
+    }
+    
+    $user_data = getUserData();
+    $username = $user_data['username'] ?? '';
+    
+    // Username farhan.arsyi adalah superadmin
+    return ($username === 'farhan.arsyi');
+}
+
+// Fungsi untuk mendapatkan filter wilayah berdasarkan data SSO user dengan dukungan superadmin
 function getSSOWilayahFilter() {
     if (!isLoggedIn()) {
         return null;
     }
     
     $user_data = getUserData();
+    $is_superadmin = isSuperAdmin();
+    
+    // Jika superadmin sedang dalam mode imitation, gunakan data dari session
+    if ($is_superadmin && isset($_SESSION['superadmin_imitation'])) {
+        $imitation_data = $_SESSION['superadmin_imitation'];
+        
+        $filter = array(
+            'unit_kerja' => $imitation_data['unit_kerja'],
+            'kode_provinsi' => $imitation_data['kode_provinsi'],
+            'kode_kabupaten' => $imitation_data['kode_kabupaten'],
+            'nama_provinsi' => $imitation_data['nama_provinsi'],
+            'nama_kabupaten' => $imitation_data['nama_kabupaten'],
+            'nama_user' => $user_data['nama'] ?? '',
+            'jabatan' => $user_data['jabatan'] ?? '',
+            'can_access_all_indonesia' => ($imitation_data['unit_kerja'] === 'pusat'),
+            'can_access_province' => ($imitation_data['unit_kerja'] === 'pusat' || $imitation_data['unit_kerja'] === 'provinsi'),
+            'restricted_to_kabupaten' => ($imitation_data['unit_kerja'] === 'kabupaten'),
+            'is_superadmin' => true,
+            'is_imitating' => true,
+            'original_unit_kerja' => $user_data['unit_kerja'] ?? 'kabupaten'
+        );
+        
+        error_log('Superadmin Filter Debug - Imitating: ' . $imitation_data['unit_kerja'] . ' - ' . $imitation_data['nama_provinsi'] . ' - ' . $imitation_data['nama_kabupaten']);
+        
+        return $filter;
+    }
+    
+    // Normal user atau superadmin dalam mode normal
     $unit_kerja = $user_data['unit_kerja'] ?? 'kabupaten';
     
     $filter = array(
@@ -28,14 +69,16 @@ function getSSOWilayahFilter() {
         'jabatan' => $user_data['jabatan'] ?? '',
         'can_access_all_indonesia' => ($unit_kerja === 'pusat'),
         'can_access_province' => ($unit_kerja === 'pusat' || $unit_kerja === 'provinsi'),
-        'restricted_to_kabupaten' => ($unit_kerja === 'kabupaten')
+        'restricted_to_kabupaten' => ($unit_kerja === 'kabupaten'),
+        'is_superadmin' => $is_superadmin,
+        'is_imitating' => false
     );
     
     // Debug log untuk troubleshooting
     error_log('Filter Debug - Unit Kerja: ' . $unit_kerja);
     error_log('Filter Debug - Kode Provinsi: ' . ($user_data['kodeprovinsi'] ?? 'empty'));
     error_log('Filter Debug - Kode Kabupaten: ' . ($user_data['kodekabupaten'] ?? 'empty'));
-    error_log('Filter Debug - User Data Keys: ' . implode(', ', array_keys($user_data)));
+    error_log('Filter Debug - Is Superadmin: ' . ($is_superadmin ? 'Yes' : 'No'));
     
     return $filter;
 }
@@ -147,7 +190,18 @@ function renderSSONavbar($active_page = 'dashboard') {
                     <button class="btn btn-logout dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="fas fa-user-circle"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end">' . 
+                        (isSuperAdmin() ? '
+                        <li><h6 class="dropdown-header">
+                            <i class="fas fa-crown me-2 text-warning"></i>Superadmin
+                        </h6></li>
+                        <li><a class="dropdown-item" href="#" onclick="openSuperAdminModal()">
+                            <i class="fas fa-exchange-alt me-2"></i>Switch Role
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="resetSuperAdminRole()">
+                            <i class="fas fa-undo me-2"></i>Reset to Original
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>' : '') . '
                         <li><a class="dropdown-item text-danger" href="sso_logout.php">
                             <i class="fas fa-sign-out-alt me-2"></i>Logout
                         </a></li>
@@ -166,6 +220,7 @@ function renderWilayahInfoBox() {
     
     $badge_color = '';
     $icon = '';
+    $border_color = 'var(--primary-color)';
     
     switch ($filter['unit_kerja']) {
         case 'pusat':
@@ -183,16 +238,28 @@ function renderWilayahInfoBox() {
             break;
     }
     
-    echo '<div class="alert alert-light border-start border-4 border-primary mb-3" style="border-left-color: var(--primary-color) !important;">
+    // Jika superadmin sedang imitating, ubah warna border dan tambahkan indicator
+    if (isset($filter['is_imitating']) && $filter['is_imitating']) {
+        $border_color = '#ffc107';
+        $superadmin_badge = '<span class="badge bg-warning text-dark ms-2">
+            <i class="fas fa-crown me-1"></i>Superadmin Mode
+        </span>';
+    } else {
+        $superadmin_badge = '';
+    }
+    
+    echo '<div class="alert alert-light border-start border-4 mb-3" style="border-left-color: ' . $border_color . ' !important;">
         <div class="d-flex align-items-center">
             <div class="badge ' . $badge_color . ' me-3" style="padding: 0.5rem;">
                 <i class="' . $icon . '"></i>
             </div>
-            <div>
-                <div class="fw-bold mb-1">Cakupan Data Anda:</div>
+            <div class="flex-grow-1">
+                <div class="fw-bold mb-1">Cakupan Data Anda:' . $superadmin_badge . '</div>
                 <div class="text-muted">' . getWilayahFilterLabel($filter) . '</div>
                 <small class="text-secondary">
-                    Data yang ditampilkan telah disesuaikan dengan wilayah kerja Anda
+                    ' . (isset($filter['is_imitating']) && $filter['is_imitating'] ? 
+                        'Anda sedang mengimitasi akses wilayah ini sebagai superadmin' : 
+                        'Data yang ditampilkan telah disesuaikan dengan wilayah kerja Anda') . '
                 </small>
             </div>
         </div>
@@ -249,6 +316,76 @@ function injectWilayahJS() {
             window.updateFilterUI();
         }
     });
+    
+    // Superadmin functions
+    window.openSuperAdminModal = function() {
+        $("#superAdminModal").modal("show");
+    };
+    
+    window.resetSuperAdminRole = function() {
+        if (confirm("Apakah Anda yakin ingin kembali ke role asli?")) {
+            $.ajax({
+                url: "api.php",
+                method: "POST",
+                data: {
+                    action: "reset_superadmin_role"
+                },
+                success: function(response) {
+                    if (response.status) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function() {
+                    alert("Terjadi kesalahan saat reset role");
+                }
+            });
+        }
+    };
+    
+    window.switchSuperAdminRole = function() {
+        const role = $("#superadminRole").val();
+        const provinsi = $("#superadminProvinsi").val();
+        const kabupaten = $("#superadminKabupaten").val();
+        
+        if (!role) {
+            alert("Pilih role terlebih dahulu");
+            return;
+        }
+        
+        if (role === "provinsi" && !provinsi) {
+            alert("Pilih provinsi terlebih dahulu");
+            return;
+        }
+        
+        if (role === "kabupaten" && (!provinsi || !kabupaten)) {
+            alert("Pilih provinsi dan kabupaten terlebih dahulu");
+            return;
+        }
+        
+        $.ajax({
+            url: "api.php",
+            method: "POST",
+            data: {
+                action: "switch_superadmin_role",
+                role: role,
+                provinsi: provinsi,
+                kabupaten: kabupaten
+            },
+            success: function(response) {
+                if (response.status) {
+                    $("#superAdminModal").modal("hide");
+                    location.reload();
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function() {
+                alert("Terjadi kesalahan saat switch role");
+            }
+        });
+    };
     </script>';
 }
 
@@ -262,6 +399,145 @@ function requireSSOLogin($redirect_page = null) {
         header('Location: ' . $redirect_url);
         exit;
     }
+}
+
+// Fungsi untuk render modal superadmin
+function renderSuperAdminModal() {
+    if (!isSuperAdmin()) return '';
+    
+    echo '
+    <!-- Superadmin Role Switching Modal -->
+    <div class="modal fade" id="superAdminModal" tabindex="-1" aria-labelledby="superAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="superAdminModalLabel">
+                        <i class="fas fa-crown me-2"></i>Superadmin - Switch Role
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Mode Superadmin:</strong> Anda dapat mengimitasi akses wilayah dan privilege seperti user daerah tertentu.
+                    </div>
+                    
+                    <form id="superAdminForm">
+                        <div class="mb-3">
+                            <label for="superadminRole" class="form-label">Pilih Role:</label>
+                            <select class="form-select" id="superadminRole" onchange="handleRoleChange()">
+                                <option value="">-- Pilih Role --</option>
+                                <option value="pusat">Pusat (Akses Seluruh Indonesia)</option>
+                                <option value="provinsi">Provinsi</option>
+                                <option value="kabupaten">Kabupaten/Kota</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="provinsiContainer" style="display: none;">
+                            <label for="superadminProvinsi" class="form-label">Pilih Provinsi:</label>
+                            <select class="form-select" id="superadminProvinsi" onchange="handleProvinsiChange()">
+                                <option value="">-- Pilih Provinsi --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3" id="kabupatenContainer" style="display: none;">
+                            <label for="superadminKabupaten" class="form-label">Pilih Kabupaten/Kota:</label>
+                            <select class="form-select" id="superadminKabupaten">
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Perhatian:</strong> Setelah switch role, Anda akan melihat data dan memiliki akses persis seperti user daerah yang dipilih.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-warning" onclick="switchSuperAdminRole()">
+                        <i class="fas fa-exchange-alt me-2"></i>Switch Role
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    // Load daerah data for superadmin modal
+    function loadDaerahForSuperadmin() {
+        fetch("daftar_daerah.php")
+            .then(response => response.json())
+            .then(data => {
+                const provinsiSelect = document.getElementById("superadminProvinsi");
+                const kabupatenSelect = document.getElementById("superadminKabupaten");
+                
+                // Clear existing options
+                provinsiSelect.innerHTML = "<option value=\"\">-- Pilih Provinsi --</option>";
+                kabupatenSelect.innerHTML = "<option value=\"\">-- Pilih Kabupaten/Kota --</option>";
+                
+                // Populate provinsi
+                data.forEach(provinsi => {
+                    const option = document.createElement("option");
+                    option.value = provinsi.kode;
+                    option.textContent = provinsi.nama;
+                    provinsiSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error("Error loading daerah data:", error);
+            });
+    }
+    
+    function handleRoleChange() {
+        const role = document.getElementById("superadminRole").value;
+        const provinsiContainer = document.getElementById("provinsiContainer");
+        const kabupatenContainer = document.getElementById("kabupatenContainer");
+        
+        if (role === "pusat") {
+            provinsiContainer.style.display = "none";
+            kabupatenContainer.style.display = "none";
+        } else if (role === "provinsi") {
+            provinsiContainer.style.display = "block";
+            kabupatenContainer.style.display = "none";
+        } else if (role === "kabupaten") {
+            provinsiContainer.style.display = "block";
+            kabupatenContainer.style.display = "block";
+        }
+    }
+    
+    function handleProvinsiChange() {
+        const provinsiCode = document.getElementById("superadminProvinsi").value;
+        const kabupatenSelect = document.getElementById("superadminKabupaten");
+        
+        // Clear kabupaten options
+        kabupatenSelect.innerHTML = "<option value=\"\">-- Pilih Kabupaten/Kota --</option>";
+        
+        if (provinsiCode) {
+            fetch("daftar_daerah.php")
+                .then(response => response.json())
+                .then(data => {
+                    const selectedProvinsi = data.find(p => p.kode === provinsiCode);
+                    if (selectedProvinsi && selectedProvinsi.kabupaten) {
+                        selectedProvinsi.kabupaten.forEach(kabupaten => {
+                            const option = document.createElement("option");
+                            option.value = kabupaten.kode;
+                            option.textContent = kabupaten.nama;
+                            kabupatenSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading kabupaten data:", error);
+                });
+        }
+    }
+    
+    // Load daerah data when modal is shown
+    document.getElementById("superAdminModal").addEventListener("shown.bs.modal", function() {
+        loadDaerahForSuperadmin();
+    });
+    </script>';
 }
 
 // Fungsi untuk render debug info (development only)
