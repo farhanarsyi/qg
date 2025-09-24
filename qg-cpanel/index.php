@@ -974,6 +974,19 @@ try {
         });
       };
       
+      // Get daerah name by kode (fallback function)
+      const getNamaDaerah = (kode) => {
+        if (!kode) return 'Wilayah Tidak Diketahui';
+        
+        // Handle special cases first
+        if (kode === 'pusat' || kode === '00' || kode === '0000') {
+          return 'Pusat';
+        }
+        
+        // For now, return a generic name - in production this should load from daftar_daerah.json
+        return `Wilayah ${kode}`;
+      };
+      
       const formatDate = dateStr => {
         if (!dateStr || dateStr === '-') return '-';
         
@@ -1315,7 +1328,7 @@ try {
               <span class="${dateStatus.class}">${dateStatus.text}</span>
             </td>
             <td>
-              <button class="detail-btn" onclick="openMonitoringDetail(${gate.project_id}, '${gate.project_name}')">
+              <button class="detail-btn" onclick="openMonitoringDetail(${gate.project_id}, '${gate.project_name}', event)">
                 <i class="fas fa-external-link-alt"></i>
                 Detail
               </button>
@@ -1580,39 +1593,108 @@ try {
       });
       
       // Function to open monitoring detail in new tab
-      window.openMonitoringDetail = function(projectId, projectName) {
+      window.openMonitoringDetail = async function(projectId, projectName, event) {
         if (!currentUser) {
           showError("Data user tidak ditemukan");
           return;
         }
         
-        // Determine region based on user's SSO data
-        let regionParam = '';
-        if (currentUser.prov === "00" && currentUser.kab === "00") {
-          // User pusat - default ke pusat
-          regionParam = '&region=pusat';
-        } else if (currentUser.prov !== "00" && currentUser.kab === "00") {
-          // User provinsi - gunakan kode provinsi
-          regionParam = `&region=${currentUser.prov}00`;
-        } else {
-          // User kabupaten - gunakan kode provinsi + kabupaten
-          regionParam = `&region=${currentUser.prov}${currentUser.kab}`;
+        try {
+          // Show loading indicator
+          const $btn = event ? event.target.closest('.detail-btn') : null;
+          let originalText = '';
+          if ($btn) {
+            originalText = $btn.innerHTML;
+            $btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            $btn.disabled = true;
+          }
+          
+          // Determine regions based on user's SSO data and project coverage
+          let regionsToProcess = [];
+          
+          if (currentUser.prov === "00" && currentUser.kab === "00") {
+            // User pusat - default ke pusat
+            regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
+          } else if (currentUser.prov !== "00" && currentUser.kab === "00") {
+            // User provinsi - ambil semua kabupaten di provinsi tersebut
+            console.log('🔍 [DEBUG] Fetching coverage data for province user...');
+            
+            const coverageResponse = await makeAjaxRequest(API_URL, {
+              action: "fetchCoverages",
+              id_project: projectId
+            });
+            
+            if (coverageResponse.status && coverageResponse.data) {
+              const prov = currentUser.prov;
+              
+              // Cari data provinsi
+              const provData = coverageResponse.data.find(r => r.prov === prov && r.kab === "00");
+              
+              if (provData) {
+                // Tambahkan provinsi
+                regionsToProcess.push({
+                  id: `${prov}00`,
+                  prov: prov,
+                  kab: "00",
+                  name: provData.name || getNamaDaerah(`${prov}00`)
+                });
+              }
+              
+              // Tambahkan semua kabupaten di provinsi ini
+              const kabupatenList = coverageResponse.data.filter(r => r.prov === prov && r.kab !== "00");
+              kabupatenList.forEach(kab => {
+                regionsToProcess.push({
+                  id: `${kab.prov}${kab.kab}`,
+                  prov: kab.prov,
+                  kab: kab.kab,
+                  name: kab.name || getNamaDaerah(`${kab.prov}${kab.kab}`)
+                });
+              });
+              
+              console.log('✅ [DEBUG] Regions to process:', regionsToProcess);
+            } else {
+              throw new Error("Gagal memuat data coverage");
+            }
+          } else {
+            // User kabupaten - hanya kabupaten yang dipilih
+            regionsToProcess = [{
+              id: `${currentUser.prov}${currentUser.kab}`,
+              prov: currentUser.prov,
+              kab: currentUser.kab,
+              name: getNamaDaerah(`${currentUser.prov}${currentUser.kab}`)
+            }];
+          }
+          
+          // Store regions data in session storage with unique key
+          const sessionKey = `monitoring_regions_${projectId}_${Date.now()}`;
+          sessionStorage.setItem(sessionKey, JSON.stringify(regionsToProcess));
+          
+          // Build clean monitoring URL with session key
+          const monitoringUrl = `monitoring.php?year=2025&project=${projectId}&session_key=${sessionKey}`;
+          
+          console.log('🔗 [DEBUG] Opening monitoring detail:', {
+            projectId,
+            projectName,
+            userProv: currentUser.prov,
+            userKab: currentUser.kab,
+            regionsToProcess,
+            sessionKey,
+            url: monitoringUrl
+          });
+          
+          // Open in new tab
+          window.open(monitoringUrl, '_blank');
+          
+        } catch (error) {
+          console.error('❌ [ERROR] Failed to open monitoring detail:', error);
+          showError("Gagal membuka detail monitoring: " + error.message);
+        } finally {
+          // Restore button state
+          if ($btn && originalText) {
+            $btn.innerHTML = originalText;
+            $btn.disabled = false;
+          }
         }
-        
-        // Build monitoring URL with parameters
-        const monitoringUrl = `monitoring.php?year=2025&project=${projectId}${regionParam}`;
-        
-        console.log('🔗 [DEBUG] Opening monitoring detail:', {
-          projectId,
-          projectName,
-          userProv: currentUser.prov,
-          userKab: currentUser.kab,
-          regionParam,
-          url: monitoringUrl
-        });
-        
-        // Open in new tab
-        window.open(monitoringUrl, '_blank');
       };
       
       // Status filter change handler
