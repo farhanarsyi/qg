@@ -214,6 +214,8 @@ function renderSSONavbar($active_page = 'dashboard') {
 
 // Fungsi untuk render info box wilayah kerja
 function renderWilayahInfoBox() {
+    // Hanya tampilkan untuk superadmin (sesuai permintaan)
+    if (!isSuperAdmin()) return '';
     $filter = getSSOWilayahFilter();
     
     if (!$filter) return '';
@@ -327,14 +329,17 @@ function injectWilayahJS() {
             $.ajax({
                 url: "api.php",
                 method: "POST",
+                dataType: "json",
                 data: {
                     action: "reset_superadmin_role"
                 },
-                success: function(response) {
+                success: function(resp) {
+                    const response = (typeof resp === "string") ? (function(){ try { return JSON.parse(resp); } catch(e) { return { status:false, message:"Invalid server response" }; } })() : resp;
                     if (response.status) {
-                        location.reload();
+                        // Force hard reload to apply new session filter immediately
+                        window.location.replace(window.location.href);
                     } else {
-                        alert("Error: " + response.message);
+                        alert("Error: " + (response.message || "Unknown error"));
                     }
                 },
                 error: function() {
@@ -367,18 +372,21 @@ function injectWilayahJS() {
         $.ajax({
             url: "api.php",
             method: "POST",
+            dataType: "json",
             data: {
                 action: "switch_superadmin_role",
                 role: role,
                 provinsi: provinsi,
                 kabupaten: kabupaten
             },
-            success: function(response) {
+            success: function(resp) {
+                const response = (typeof resp === "string") ? (function(){ try { return JSON.parse(resp); } catch(e) { return { status:false, message:"Invalid server response" }; } })() : resp;
                 if (response.status) {
                     $("#superAdminModal").modal("hide");
-                    location.reload();
+                    // Force hard reload to ensure all JS picks up new session filter
+                    window.location.replace(window.location.href);
                 } else {
-                    alert("Error: " + response.message);
+                    alert("Error: " + (response.message || "Unknown error"));
                 }
             },
             error: function() {

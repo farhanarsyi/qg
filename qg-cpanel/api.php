@@ -664,11 +664,23 @@ if(isset($_POST['action'])){
                 }
             }
             
-            // Set session imitation data
+            // Normalisasi kode ke format 2 digit (sesuai yang digunakan aplikasi: prov="11", kab="01")
+            $kode_prov_2 = '00';
+            $kode_kab_2 = '00';
+            if ($role === 'provinsi' || $role === 'kabupaten') {
+                // Ambil 2 digit pertama untuk provinsi dari kode 4 digit JSON (contoh: 1100 -> 11)
+                $kode_prov_2 = substr($provinsi, 0, 2);
+            }
+            if ($role === 'kabupaten') {
+                // Ambil 2 digit terakhir untuk kabupaten dari kode 4 digit JSON (contoh: 1101 -> 01)
+                $kode_kab_2 = substr($kabupaten, 2, 2);
+            }
+
+            // Set session imitation data (menggunakan kode 2 digit)
             $_SESSION['superadmin_imitation'] = [
                 'unit_kerja' => $role,
-                'kode_provinsi' => $role === 'pusat' ? '00' : $provinsi,
-                'kode_kabupaten' => $role === 'pusat' || $role === 'provinsi' ? '00' : $kabupaten,
+                'kode_provinsi' => $kode_prov_2,
+                'kode_kabupaten' => $kode_kab_2,
                 'nama_provinsi' => $nama_provinsi,
                 'nama_kabupaten' => $nama_kabupaten,
                 'switched_at' => date('Y-m-d H:i:s')

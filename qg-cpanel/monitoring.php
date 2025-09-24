@@ -7,7 +7,7 @@ require_once 'app_config.php';
 requireSSOLogin('monitoring.php');
 
 // Dapatkan filter wilayah berdasarkan SSO user
-$wilayah_superadminilter = getSSOWilayahFilter();
+$wilayah_filter = getSSOWilayahFilter();
 $user_data = getUserData();
 ?>
 <!DOCTYPE html>
