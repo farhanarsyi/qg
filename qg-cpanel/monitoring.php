@@ -3639,7 +3639,7 @@ const calculateDaysUntilDeadline = (endDateStr) => {
             debugLog('🚀 [URL] Auto-loading data with parameters...');
             // Trigger load data button click
             $("#loadData").click();
-          } else if (selectedProject && currentUser.prov !== "00" && currentUser.kab !== "00") {
+          } else if (selectedProject && currentUser.prov !== "00") {
             // For non-pusat users, auto-load with their region
             debugLog('🚀 [URL] Auto-loading data for non-pusat user...');
             $("#loadData").click();
