@@ -1204,6 +1204,8 @@ $user_data = getUserData();
   <?php renderSSONavbar('monitoring'); ?>
 
   <div class="container-fluid">
+    <!-- Wilayah Info Box -->
+    <?php renderWilayahInfoBox(); ?>
     <!-- Input Filters -->
     <div class="card" style="margin-bottom: 0.5rem;">
       <div class="card-body">
@@ -1614,9 +1616,12 @@ $user_data = getUserData();
         };
       };
 
-      // Inisialisasi user dengan data SSO
+      // Inisialisasi user dengan data SSO (mendukung superadmin imitation)
       const initUser = () => {
         debugLog('🔍 [MONITORING] Initializing user...');
+        
+        // Gunakan data dari SSO filter yang sudah mendukung superadmin
+        const ssoFilter = window.ssoWilayahFilter || {};
         
         // Data user sudah tersedia dari SSO PHP session
         currentUser = {
@@ -1624,9 +1629,11 @@ $user_data = getUserData();
           name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
           email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
           role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
-          prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
-          kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
-          unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
+          prov: ssoFilter.kodeProvinsi || '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
+          kab: ssoFilter.kodeKabupaten || '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
+          unit_kerja: ssoFilter.unitKerja || '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>',
+          is_superadmin: ssoFilter.is_superadmin || false,
+          is_imitating: ssoFilter.is_imitating || false
         };
         
         debugLog('👤 [MONITORING] Current User Data: ' + JSON.stringify(currentUser));
@@ -3438,7 +3445,13 @@ const calculateDaysUntilDeadline = (endDateStr) => {
           // Tentukan daftar wilayah yang akan diproses
           let regionsToProcess = [];
           
-          if (selectedRegion === "pusat") {
+          // Check if regions data was provided via URL (from dashboard)
+          if (window.urlRegionsData && window.urlRegionsData.length > 0) {
+            debugLog('🗺️ [URL] Using regions data from URL parameter');
+            regionsToProcess = window.urlRegionsData;
+            // Clear the stored data after use
+            window.urlRegionsData = null;
+          } else if (selectedRegion === "pusat") {
             // Level Pusat - Hanya kolom pusat
             regionsToProcess = [{ id: "pusat", prov: "00", kab: "00", name: "Pusat" }];
           } else {
@@ -3579,11 +3592,15 @@ const calculateDaysUntilDeadline = (endDateStr) => {
         const yearParam = urlParams.get('year');
         const projectParam = urlParams.get('project');
         const regionParam = urlParams.get('region');
+        const regionsParam = urlParams.get('regions'); // Legacy parameter for regions array
+        const sessionKeyParam = urlParams.get('session_key'); // New parameter for session key
         
         debugLog('🔗 [URL] Parameters received: ' + JSON.stringify({
           year: yearParam,
           project: projectParam,
-          region: regionParam
+          region: regionParam,
+          regions: regionsParam,
+          session_key: sessionKeyParam
         }));
         
         // Set year if provided
@@ -3597,15 +3614,58 @@ const calculateDaysUntilDeadline = (endDateStr) => {
           selectedProject = projectParam;
         }
         
-        // Set region if provided
+        // Set region if provided (legacy parameter)
         if (regionParam) {
           selectedRegion = regionParam;
+        }
+        
+        // Handle session key parameter (new optimized format from dashboard)
+        if (sessionKeyParam) {
+          try {
+            const regionsData = JSON.parse(sessionStorage.getItem(sessionKeyParam) || '[]');
+            debugLog('🗺️ [SESSION] Loaded regions data from session:', regionsData);
+            
+            if (regionsData.length > 0) {
+              // Store regions data for direct processing
+              window.urlRegionsData = regionsData;
+              
+              // Set selectedRegion to the first region for compatibility
+              selectedRegion = regionsData[0].id;
+              
+              // Clean up session storage after use
+              sessionStorage.removeItem(sessionKeyParam);
+            } else {
+              debugLog('⚠️ [SESSION] No regions data found for session key: ' + sessionKeyParam, 'warn');
+            }
+          } catch (error) {
+            debugLog('❌ [SESSION] Failed to load regions from session: ' + error.message, 'error');
+          }
+        }
+        
+        // Handle regions parameter (legacy format - still supported for backward compatibility)
+        if (regionsParam && !sessionKeyParam) {
+          try {
+            const regionsData = JSON.parse(decodeURIComponent(regionsParam));
+            debugLog('🗺️ [URL] Parsed regions data (legacy):', regionsData);
+            
+            // Store regions data for direct processing
+            window.urlRegionsData = regionsData;
+            
+            // Set selectedRegion to the first region for compatibility
+            if (regionsData.length > 0) {
+              selectedRegion = regionsData[0].id;
+            }
+          } catch (error) {
+            debugLog('❌ [URL] Failed to parse regions parameter: ' + error.message, 'error');
+          }
         }
         
         return {
           hasYear: !!yearParam,
           hasProject: !!projectParam,
-          hasRegion: !!regionParam
+          hasRegion: !!regionParam,
+          hasRegions: !!regionsParam,
+          hasSessionKey: !!sessionKeyParam
         };
       };
 
@@ -3634,8 +3694,8 @@ const calculateDaysUntilDeadline = (endDateStr) => {
             }
           }
           
-          // Auto-load data if both project and region are set
-          if (selectedProject && selectedRegion) {
+          // Auto-load data if both project and region are set, or if regions data is available
+          if (selectedProject && (selectedRegion || window.urlRegionsData)) {
             debugLog('🚀 [URL] Auto-loading data with parameters...');
             // Trigger load data button click
             $("#loadData").click();
@@ -3732,6 +3792,9 @@ const calculateDaysUntilDeadline = (endDateStr) => {
   
   <!-- SSO Wilayah Filter JavaScript -->
   <?php injectWilayahJS(); ?>
+  
+  <!-- Superadmin Modal -->
+  <?php renderSuperAdminModal(); ?>
   
   <!-- Debug Info (hanya muncul jika ada parameter ?debug) -->
   <?php renderDebugWilayahInfo(); ?>
