@@ -9,16 +9,6 @@ if (!ob_get_level()) {
 require_once 'vendor/autoload.php';
 require_once 'sso_config.php';
 
-<<<<<<< HEAD
-// Fungsi untuk cek apakah user adalah superadmin
-function isSuperAdmin() {
-    $user_data = getUserData();
-    $username = $user_data['username'] ?? '';
-    return ($username === 'farhan.arsyi');
-}
-
-// Fungsi untuk mendapatkan filter wilayah berdasarkan data SSO user
-=======
 // Fungsi untuk mengecek apakah user adalah superadmin
 function isSuperAdmin() {
     if (!isLoggedIn()) {
@@ -33,63 +23,12 @@ function isSuperAdmin() {
 }
 
 // Fungsi untuk mendapatkan filter wilayah berdasarkan data SSO user dengan dukungan superadmin
->>>>>>> 7bc5d909697c867bcda2093639b0792677df33c3
 function getSSOWilayahFilter() {
     if (!isLoggedIn()) {
         return null;
     }
     
     $user_data = getUserData();
-<<<<<<< HEAD
-    
-    // Cek apakah ada parameter yang dimodifikasi di session (untuk superadmin)
-    if (isset($_SESSION['modified_sso_params']) && $_SESSION['modified_sso_params']['is_modified'] === true) {
-        $modified_params = $_SESSION['modified_sso_params'];
-        $unit_kerja = $modified_params['unit_kerja'] ?? 'kabupaten';
-        
-        // Update session SSO untuk memastikan konsistensi di seluruh aplikasi
-        $_SESSION['sso_unit_kerja'] = $unit_kerja;
-        $_SESSION['sso_prov'] = $modified_params['kodeprovinsi'] ?? '';
-        $_SESSION['sso_kab'] = $modified_params['kodekabupaten'] ?? '';
-        
-        if (isset($modified_params['provinsi'])) {
-            $_SESSION['sso_provinsi'] = $modified_params['provinsi'];
-        }
-        
-        if (isset($modified_params['kabupaten'])) {
-            $_SESSION['sso_kabupaten'] = $modified_params['kabupaten'];
-        }
-        
-        $filter = array(
-            'unit_kerja' => $unit_kerja,
-            'kode_provinsi' => $modified_params['kodeprovinsi'] ?? '',
-            'kode_kabupaten' => $modified_params['kodekabupaten'] ?? '',
-            'nama_provinsi' => $modified_params['provinsi'] ?? '',
-            'nama_kabupaten' => $modified_params['kabupaten'] ?? '',
-            'nama_user' => $user_data['nama'] ?? '',
-            'jabatan' => $user_data['jabatan'] ?? '',
-            'can_access_all_indonesia' => ($unit_kerja === 'pusat'),
-            'can_access_province' => ($unit_kerja === 'pusat' || $unit_kerja === 'provinsi'),
-            'restricted_to_kabupaten' => ($unit_kerja === 'kabupaten'),
-            'is_modified' => true
-        );
-    } else {
-        $unit_kerja = $user_data['unit_kerja'] ?? 'kabupaten';
-        
-        $filter = array(
-            'unit_kerja' => $unit_kerja,
-            'kode_provinsi' => $user_data['kodeprovinsi'] ?? '',
-            'kode_kabupaten' => $user_data['kodekabupaten'] ?? '',
-            'nama_provinsi' => $user_data['provinsi'] ?? '',
-            'nama_kabupaten' => $user_data['kabupaten'] ?? '',
-            'nama_user' => $user_data['nama'] ?? '',
-            'jabatan' => $user_data['jabatan'] ?? '',
-            'can_access_all_indonesia' => ($unit_kerja === 'pusat'),
-            'can_access_province' => ($unit_kerja === 'pusat' || $unit_kerja === 'provinsi'),
-            'restricted_to_kabupaten' => ($unit_kerja === 'kabupaten')
-        );
-    }
-=======
     $is_superadmin = isSuperAdmin();
     
     // Jika superadmin sedang dalam mode imitation, gunakan data dari session
@@ -134,7 +73,6 @@ function getSSOWilayahFilter() {
         'is_superadmin' => $is_superadmin,
         'is_imitating' => false
     );
->>>>>>> 7bc5d909697c867bcda2093639b0792677df33c3
     
     // Debug log untuk troubleshooting
     error_log('Filter Debug - Unit Kerja: ' . $unit_kerja);
