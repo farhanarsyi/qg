@@ -1082,25 +1082,12 @@ try {
           name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
           email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
           role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
-<<<<<<< HEAD
-          <?php if (isset($_SESSION['modified_sso_params']) && $_SESSION['modified_sso_params']['is_modified'] === true): ?>
-          // Gunakan parameter yang dimodifikasi oleh superadmin
-          prov: '<?= $_SESSION["modified_sso_params"]["kodeprovinsi"] ?>',
-          kab: '<?= $_SESSION["modified_sso_params"]["kodekabupaten"] ?>',
-          unit_kerja: '<?= $_SESSION["modified_sso_params"]["unit_kerja"] ?>',
-          is_modified: true
-          <?php else: ?>
-          prov: '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
-          kab: '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
-          unit_kerja: '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>'
-          <?php endif; ?>
-=======
           prov: ssoFilter.kodeProvinsi || '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
           kab: ssoFilter.kodeKabupaten || '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
           unit_kerja: ssoFilter.unitKerja || '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>',
           is_superadmin: ssoFilter.is_superadmin || false,
           is_imitating: ssoFilter.is_imitating || false
->>>>>>> 7bc5d909697c867bcda2093639b0792677df33c3
+        
         };
         
         console.log('👤 [DEBUG] Current User Data:', currentUser);
@@ -1645,29 +1632,6 @@ try {
           return;
         }
         
-<<<<<<< HEAD
-        // Determine region based on user's SSO data (original or modified by superadmin)
-        let regionParam = '';
-        
-        // Log untuk debugging
-        console.log('🔍 [DEBUG] Determining region with user data:', {
-          prov: currentUser.prov,
-          kab: currentUser.kab,
-          unit_kerja: currentUser.unit_kerja,
-          is_modified: currentUser.is_modified || false
-        });
-        
-        if (currentUser.prov === "00" && currentUser.kab === "00") {
-          // User pusat - default ke pusat
-          regionParam = '&region=pusat';
-        } else if (currentUser.prov !== "00" && currentUser.kab === "00") {
-          // User provinsi - gunakan kode provinsi
-          regionParam = `&region=${currentUser.prov}00`;
-        } else {
-          // User kabupaten - gunakan kode provinsi + kabupaten
-          // Format: prov+kab (4 digit)
-          regionParam = `&region=${currentUser.prov}${currentUser.kab}`;
-=======
         try {
           // Show loading indicator
           const $btn = event ? event.target.closest('.detail-btn') : null;
@@ -1763,7 +1727,6 @@ try {
             $btn.innerHTML = originalText;
             $btn.disabled = false;
           }
->>>>>>> 7bc5d909697c867bcda2093639b0792677df33c3
         }
       };
       

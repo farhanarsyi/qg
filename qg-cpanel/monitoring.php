@@ -3323,12 +3323,29 @@ const calculateDaysUntilDeadline = (endDateStr) => {
       // Fungsi untuk memuat data dari localStorage jika tersedia
       const loadDataFromLocalStorage = () => {
         try {
+          // Skip restoring if page is a reload
+          if (window.persistenceManager && window.persistenceManager.isReload) {
+            debugLog('⏭️ [MONITORING] Skipping restore due to page reload');
+            return false;
+          }
           // Cek apakah ada data monitoring tersimpan
-          const savedMonitoringData = localStorage.getItem('monitoringData');
-          const savedRegions = localStorage.getItem('monitoringRegions');
-          const savedFilters = localStorage.getItem('monitoringFilters');
+          const savedMonitoringData = sessionStorage.getItem('monitoringData');
+          const savedRegions = sessionStorage.getItem('monitoringRegions');
+          const savedFilters = sessionStorage.getItem('monitoringFilters');
+          const savedAt = parseInt(sessionStorage.getItem('monitoringSavedAt') || '0', 10);
           
-          debugLog('🔍 [MONITORING] Checking localStorage: hasMonitoringData=' + !!savedMonitoringData + ', hasRegions=' + !!savedRegions + ', hasFilters=' + !!savedFilters);
+          debugLog('🔍 [MONITORING] Checking sessionStorage: hasMonitoringData=' + !!savedMonitoringData + ', hasRegions=' + !!savedRegions + ', hasFilters=' + !!savedFilters);
+
+          // Expire after 10 minutes
+          const EXPIRE_MS = 10 * 60 * 1000;
+          if (savedAt && (Date.now() - savedAt) > EXPIRE_MS) {
+            debugLog('⌛ [MONITORING] Saved data expired, clearing');
+            sessionStorage.removeItem('monitoringData');
+            sessionStorage.removeItem('monitoringRegions');
+            sessionStorage.removeItem('monitoringFilters');
+            sessionStorage.removeItem('monitoringSavedAt');
+            return false;
+          }
           
           if (savedMonitoringData && savedRegions) {
             // Data tersimpan ditemukan, lanjutkan loading
@@ -3416,9 +3433,10 @@ const calculateDaysUntilDeadline = (endDateStr) => {
 
       $("#loadData").on('click', async function(){
         // Hapus data tersimpan saat tombol "Tampilkan Data" diklik
-        localStorage.removeItem('monitoringData');
-        localStorage.removeItem('monitoringRegions');
-        localStorage.removeItem('monitoringFilters');
+        sessionStorage.removeItem('monitoringData');
+        sessionStorage.removeItem('monitoringRegions');
+        sessionStorage.removeItem('monitoringFilters');
+        sessionStorage.removeItem('monitoringSavedAt');
         
         // Hide activity name when filter is applied
         $(".activity-name-display").remove();
@@ -3533,9 +3551,10 @@ const calculateDaysUntilDeadline = (endDateStr) => {
           
           // Simpan data ke localStorage untuk digunakan saat berpindah halaman
           try {
-            localStorage.setItem('monitoringData', JSON.stringify(activityData));
-            localStorage.setItem('monitoringRegions', JSON.stringify(regionsToProcess));
-            localStorage.setItem('monitoringFilters', JSON.stringify(secondaryFilters));
+            sessionStorage.setItem('monitoringData', JSON.stringify(activityData));
+            sessionStorage.setItem('monitoringRegions', JSON.stringify(regionsToProcess));
+            sessionStorage.setItem('monitoringFilters', JSON.stringify(secondaryFilters));
+            sessionStorage.setItem('monitoringSavedAt', String(Date.now()));
             
             // Save filters and activity name using persistence manager
             if (window.persistenceManager) {
@@ -3733,6 +3752,23 @@ const calculateDaysUntilDeadline = (endDateStr) => {
               
               // Hide table and stats when project changes
               hideTableAndStats();
+
+              // Clear advanced filter selections and highlights when changing project
+              try {
+                $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline').val([]);
+                $('#filterGate, #filterUK, #filterLevel, #filterActivity, #filterStatus, #filterDeadline')
+                  .removeClass('filter-active has-selected-options')
+                  .each(function(){
+                    const $label = $(this).prev('label');
+                    $label.removeClass('filter-label-active');
+                  });
+                // Reset in-memory secondary filters as well
+                if (typeof secondaryFilters !== 'undefined') {
+                  Object.keys(secondaryFilters).forEach(k => secondaryFilters[k] = []);
+                }
+                // Clear saved monitoring filters for this tab
+                sessionStorage.removeItem('monitoringFilters');
+              } catch (_) {}
               
               // Reset toggle filter lanjutan to show state
               const $toggleBtn = $('#toggleAdvancedFilters');

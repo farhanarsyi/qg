@@ -6,7 +6,9 @@
 class PersistenceManager {
     constructor() {
         this.storageKey = 'qg_persistence';
+        this.EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
         this.currentPage = this.detectCurrentPage();
+        this.isReload = this.detectReload();
         this.init();
     }
 
@@ -37,7 +39,7 @@ class PersistenceManager {
      */
     loadPersistedData() {
         try {
-            const persistedData = localStorage.getItem(this.storageKey);
+            const persistedData = sessionStorage.getItem(this.storageKey);
             if (persistedData) {
                 const data = JSON.parse(persistedData);
                 console.log('📂 [Persistence] Loaded data:', data);
@@ -64,7 +66,7 @@ class PersistenceManager {
                 }
             };
             
-            localStorage.setItem(this.storageKey, JSON.stringify(updatedData));
+            sessionStorage.setItem(this.storageKey, JSON.stringify(updatedData));
             console.log('💾 [Persistence] Data saved:', updatedData);
         } catch (error) {
             console.error('❌ [Persistence] Error saving data:', error);
@@ -75,8 +77,24 @@ class PersistenceManager {
      * Get persisted data for current page
      */
     getPersistedData() {
-        const data = this.loadPersistedData();
-        return data ? data[this.currentPage] : null;
+        const allData = this.loadPersistedData();
+        if (!allData) return null;
+        const pageData = allData[this.currentPage];
+        if (!pageData) return null;
+        // Expiry check
+        const ts = pageData.timestamp || 0;
+        if (Date.now() - ts > this.EXPIRY_MS) {
+            // Expired: clear only this page's data
+            try {
+                delete allData[this.currentPage];
+                sessionStorage.setItem(this.storageKey, JSON.stringify(allData));
+                console.log('⌛ [Persistence] Data expired and cleared for page:', this.currentPage);
+            } catch (e) {
+                console.warn('⚠️ [Persistence] Failed to clear expired data:', e.message);
+            }
+            return null;
+        }
+        return pageData;
     }
 
     /**
@@ -122,7 +140,7 @@ class PersistenceManager {
      */
     clearAllData() {
         try {
-            localStorage.removeItem(this.storageKey);
+            sessionStorage.removeItem(this.storageKey);
             console.log('🗑️ [Persistence] All data cleared');
         } catch (error) {
             console.error('❌ [Persistence] Error clearing data:', error);
@@ -137,11 +155,28 @@ class PersistenceManager {
             const data = this.loadPersistedData();
             if (data) {
                 delete data[this.currentPage];
-                localStorage.setItem(this.storageKey, JSON.stringify(data));
+                sessionStorage.setItem(this.storageKey, JSON.stringify(data));
                 console.log('🗑️ [Persistence] Current page data cleared');
             }
         } catch (error) {
             console.error('❌ [Persistence] Error clearing current page data:', error);
+        }
+    }
+
+    /**
+     * Detect if the current navigation is a reload
+     */
+    detectReload() {
+        try {
+            const nav = performance.getEntriesByType && performance.getEntriesByType('navigation');
+            if (nav && nav.length > 0) {
+                return nav[0].type === 'reload';
+            }
+        } catch (_) {}
+        try {
+            return (performance && performance.navigation && performance.navigation.type === 1);
+        } catch (_) {
+            return false;
         }
     }
 
@@ -231,6 +266,11 @@ class PersistenceManager {
      * Apply saved filters to the page
      */
     applySavedFilters() {
+        // Skip applying on browser refresh
+        if (this.isReload) {
+            console.log('⏭️ [Persistence] Skipping filter restore due to page reload');
+            return false;
+        }
         const savedFilters = this.getSavedFilters();
         if (!savedFilters) return false;
 
@@ -258,10 +298,17 @@ class PersistenceManager {
             $('#filterStatus').val(filters.status);
         }
         
-        // Trigger change event to apply the filter immediately
+        // Trigger change events to ensure table respects the filters
+        if (filters.project) {
+            $('#filterProject').trigger('change');
+        }
         if (filters.status) {
             $('#filterStatus').trigger('change');
         }
+        // Fire a custom event for pages to hook into if needed
+        setTimeout(() => {
+            $(document).trigger('pm:restore-filters', [{ page: 'dashboard', filters }]);
+        }, 10);
     }
 
     /**
@@ -294,6 +341,11 @@ class PersistenceManager {
                 }
             });
         }
+
+        // Fire a custom event for pages to hook into if needed
+        setTimeout(() => {
+            $(document).trigger('pm:restore-filters', [{ page: 'monitoring', filters }]);
+        }, 10);
     }
 
     /**
@@ -330,6 +382,11 @@ class PersistenceManager {
      * Show saved activity name on page load
      */
     showSavedActivityName() {
+        if (this.isReload) {
+            // On reload, do not show stale activity name
+            $('.activity-name-display').remove();
+            return false;
+        }
         const activityInfo = this.getSavedActivityInfo();
         if (activityInfo && activityInfo.hasActivity && activityInfo.activityName) {
             this.displayActivityName(activityInfo.activityName);
