@@ -1786,7 +1786,8 @@ const calculateDaysUntilDeadline = (endDateStr) => {
         if (progressMatch) {
           const uploaded = parseInt(progressMatch[1]);
           const total = parseInt(progressMatch[2]);
-          const percentage = Math.round((uploaded / total) * 100);
+          // Pastikan total tidak nol untuk menghindari infinity%
+          const percentage = total > 0 ? Math.round((uploaded / total) * 100) : 100;
           progressInfo = ` (${percentage}% selesai)`;
           tooltipText = status + progressInfo;
         }
@@ -2617,7 +2618,6 @@ const calculateDaysUntilDeadline = (endDateStr) => {
             if (!isApproved) return "Belum disetujui";
             if (assessmentValue === "3" || assessmentValue === 3) return "Tidak perlu";
             if (correctiveCount === 0) return "Belum ditentukan";
-            if (totalCorrectiveCount === 0) return "Tidak ada aksi korektif";
             
             // Bandingkan jumlah yang diupload dengan total yang seharusnya
             if (docCorrectiveCount >= totalCorrectiveCount) {
