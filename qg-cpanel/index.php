@@ -1068,10 +1068,10 @@ try {
         
         // Data user sudah tersedia dari SSO PHP session
         currentUser = {
-          username: '<?= isset($_SESSION["sso_username"]) ? $_SESSION["sso_username"] : "" ?>',
-          name: '<?= isset($_SESSION["sso_nama"]) ? $_SESSION["sso_nama"] : "" ?>',
-          email: '<?= isset($_SESSION["sso_email"]) ? $_SESSION["sso_email"] : "" ?>',
-          role_name: '<?= isset($_SESSION["sso_jabatan"]) ? $_SESSION["sso_jabatan"] : "User" ?>',
+          username: '<?= isset($_SESSION["sso_username"]) ? addslashes($_SESSION["sso_username"]) : "" ?>',
+          name: '<?= isset($_SESSION["sso_nama"]) ? addslashes($_SESSION["sso_nama"]) : "" ?>',
+          email: '<?= isset($_SESSION["sso_email"]) ? addslashes($_SESSION["sso_email"]) : "" ?>',
+          role_name: '<?= isset($_SESSION["sso_jabatan"]) ? addslashes($_SESSION["sso_jabatan"]) : "User" ?>',
           prov: ssoFilter.kodeProvinsi || '<?= isset($_SESSION["sso_prov"]) ? $_SESSION["sso_prov"] : "00" ?>',
           kab: ssoFilter.kodeKabupaten || '<?= isset($_SESSION["sso_kab"]) ? $_SESSION["sso_kab"] : "00" ?>',
           unit_kerja: ssoFilter.unitKerja || '<?= isset($_SESSION["sso_unit_kerja"]) ? $_SESSION["sso_unit_kerja"] : "kabupaten" ?>',
