@@ -106,6 +106,39 @@ class PersistenceManager {
     }
 
     /**
+     * Save table state (e.g., sort and scroll positions)
+     */
+    saveTableState(state) {
+        if (!state || typeof state !== 'object') return;
+        this.saveData({ tableState: { ...(this.getSavedTableState() || {}), ...state } });
+    }
+
+    /**
+     * Get saved table state
+     */
+    getSavedTableState() {
+        const data = this.getPersistedData();
+        return data ? data.tableState : null;
+    }
+
+    /**
+     * Apply saved scroll position to a container
+     */
+    applySavedScroll(containerSelector = '.table-wrapper') {
+        const saved = this.getSavedTableState();
+        if (!saved || typeof saved.scrollTop !== 'number') return false;
+        const $container = $(containerSelector);
+        if ($container && $container.length) {
+            // Use setTimeout to ensure DOM is rendered
+            setTimeout(() => {
+                try { $container.scrollTop(saved.scrollTop); } catch (_) {}
+            }, 0);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Get saved activity info
      */
     getSavedActivityInfo() {
@@ -159,6 +192,12 @@ class PersistenceManager {
         // Listen for page unload to save current state
         $(window).on('beforeunload', () => {
             this.autoSaveFilters();
+        });
+
+        // Persist scroll position of primary table wrapper
+        $(document).on('scroll', '.table-wrapper', (e) => {
+            const scrollTop = e.currentTarget.scrollTop;
+            this.saveTableState({ scrollTop });
         });
     }
 

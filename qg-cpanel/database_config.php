@@ -3,9 +3,9 @@
 
 // Konfigurasi Database
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'qg');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_NAME', 'dashboar_qg');
+define('DB_USER', 'dashboar_qg');
+define('DB_PASS', 'gaTHsn123321poi!');
 define('DB_CHARSET', 'utf8mb4');
 
 // Fungsi untuk membuat koneksi database
