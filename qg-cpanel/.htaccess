@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Set PHP timezone to avoid UTC+7 warnings
+php_value date.timezone "Asia/Jakarta"
+
 # Security headers
 Header always set X-Content-Type-Options nosniff
 Header always set X-Frame-Options DENY

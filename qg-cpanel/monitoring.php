@@ -1359,9 +1359,10 @@ $user_data = getUserData();
             <label for="filterDeadline" class="form-label" style="font-size: 0.65rem; margin-bottom: 0.1rem;">Deadline</label>
             <select id="filterDeadline" class="form-select" multiple style="font-size: 0.65rem; padding: 0.15rem 0.3rem;">
               <option value="">Semua Deadline</option>
-              <option value="3days">3 hari</option>
-              <option value="week">Minggu ini</option>
-              <option value="month">Bulan ini</option>
+              <option value="3days">3 hari (H-3 s/d H-0)</option>
+              <option value="week">Minggu ini (H-7 s/d H-0)</option>
+              <option value="month">Bulan ini (H-30 s/d H-0)</option>
+              <option value="overdue">Deadline Sudah Lewat (H+1 dst)</option>
             </select>
           </div>
         </div>
@@ -1743,17 +1744,17 @@ const calculateDaysUntilDeadline = (endDateStr) => {
   if (parts.length !== 3) return '-';
   
   const endDate = new Date(parts[0], parts[1] - 1, parts[2]);
-  endDate.setHours(23, 59, 59, 999); // Set to end of day
+  endDate.setHours(0, 0, 0, 0); // Set to start of day for accurate calculation
   
   const diffTime = endDate - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays > 0) {
-    return `-${diffDays}`; // Deadline not yet passed (negative number)
+    return `H-${diffDays}`; // Deadline not yet passed (hari sebelum deadline)
   } else if (diffDays === 0) {
-    return '0'; // Today
+    return 'H-0'; // Today is deadline
   } else {
-    return `+${Math.abs(diffDays)}`; // Deadline already passed (positive number)
+    return `H+${Math.abs(diffDays)}`; // Deadline already passed (hari setelah deadline)
   }
 };
 
@@ -2069,7 +2070,7 @@ const calculateDaysUntilDeadline = (endDateStr) => {
             <td><span class="activity-number">${activityNumber}</span><span class="activity-text">${data.activity}</span></td>
             <td class="date-column ${startDateClass}">${formatDate(startDate)}</td>
             <td class="date-column ${endDateClass}">${formatDate(endDate)}</td>
-            <td class="date-column">H${calculateDaysUntilDeadline(endDate)}</td>
+            <td class="date-column">${calculateDaysUntilDeadline(endDate)}</td>
           `;
           
           // Tambahkan status untuk setiap wilayah
@@ -2895,26 +2896,36 @@ const calculateDaysUntilDeadline = (endDateStr) => {
           // Filter by Deadline
           if (include && secondaryFilters.deadline.length > 0) {
             const deadline = calculateDaysUntilDeadline(data.end);
-            let deadlineCategory = '';
+            let matchesDeadlineFilter = false;
             
             if (deadline === '-') {
-              deadlineCategory = 'all';
+              matchesDeadlineFilter = secondaryFilters.deadline.includes('all');
             } else {
-              const days = parseInt(deadline.replace('+', '')) || 0;
-              if (days < 0) {
-                deadlineCategory = 'overdue';
-              } else if (days <= 3) {
-                deadlineCategory = '3days';
-              } else if (days <= 7) {
-                deadlineCategory = 'week';
-              } else if (days <= 30) {
-                deadlineCategory = 'month';
-              } else {
-                deadlineCategory = 'all';
+              // Parse the deadline string (format: H-X or H+X)
+              const match = deadline.match(/H([+-])(\d+)/);
+              if (match) {
+                const sign = match[1];
+                const days = parseInt(match[2]);
+                
+                if (sign === '+') {
+                  // Deadline sudah lewat
+                  matchesDeadlineFilter = secondaryFilters.deadline.includes('overdue');
+                } else if (sign === '-') {
+                  // Deadline belum lewat - cek semua kategori yang sesuai
+                  if (days <= 3 && secondaryFilters.deadline.includes('3days')) {
+                    matchesDeadlineFilter = true;
+                  }
+                  if (days <= 7 && secondaryFilters.deadline.includes('week')) {
+                    matchesDeadlineFilter = true;
+                  }
+                  if (days <= 30 && secondaryFilters.deadline.includes('month')) {
+                    matchesDeadlineFilter = true;
+                  }
+                }
               }
             }
             
-            if (!secondaryFilters.deadline.includes(deadlineCategory)) {
+            if (!matchesDeadlineFilter) {
               include = false;
             }
           }
@@ -2992,7 +3003,14 @@ const calculateDaysUntilDeadline = (endDateStr) => {
           case 'deadline':
             const deadline = calculateDaysUntilDeadline(data.end);
             if (deadline === '-') return 999999;
-            return parseInt(deadline.replace('+', '')) || 0;
+            // Parse H-X or H+X format
+            const match = deadline.match(/H([+-])(\d+)/);
+            if (match) {
+              const sign = match[1];
+              const days = parseInt(match[2]);
+              return sign === '+' ? days : -days; // Positive for overdue, negative for remaining days
+            }
+            return 0;
           default:
             return '';
         }

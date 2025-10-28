@@ -1,6 +1,12 @@
 <?php
 // index.php - Dashboard per wilayah untuk Quality Gates (Home Page)
 
+// Include timezone configuration FIRST
+require_once 'timezone_config.php';
+
+// Set proper timezone to avoid UTC+7 warnings
+date_default_timezone_set('Asia/Jakarta');
+
 // Enable error reporting untuk debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

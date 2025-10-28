@@ -1,6 +1,12 @@
 <?php
 // sso_integration.php - Integrasi SSO untuk Dashboard dan Monitoring dengan Filtering Wilayah
 
+// Include timezone configuration FIRST
+require_once 'timezone_config.php';
+
+// Set proper timezone to avoid UTC+7 warnings
+date_default_timezone_set('Asia/Jakarta');
+
 // Start output buffering to prevent header issues
 if (!ob_get_level()) {
     ob_start();

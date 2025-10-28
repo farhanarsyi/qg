@@ -1,6 +1,9 @@
 <?php
 // app_config.php - Konfigurasi Aplikasi untuk QG Cpanel
 
+// Set proper timezone to avoid UTC+7 warnings
+date_default_timezone_set('Asia/Jakarta');
+
 // ========================================
 // KONFIGURASI CARD DISPLAY
 // ========================================
